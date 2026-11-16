@@ -1357,7 +1357,7 @@ def _summarise(obj, limit=90):
                 if key in obj and isinstance(obj[key], str):
                     s = obj[key]
                     # A file is named by its basename in a one-line summary;
-                    # the full path (often with spaces, e.g. "Atech Atelier")
+                    # the full path (often with spaces, e.g. "Prompt2Product")
                     # truncates to noise.
                     if key in ("file_path", "path"):
                         s = os.path.basename(s.rstrip("/")) or s

@@ -11,7 +11,7 @@ Both are taken from studio.atech.dev rather than invented:
                 1) over 300 ms. Label weight never changes with the choice
                 (Studio's rule: the fill is the signal, bold is not a second
                 one).
-  ProjectPicker Studio's project switcher, as Atelier has projects: one per
+  ProjectPicker Studio's project switcher, as Prompt2Product has projects: one per
                 document (each document already has its own chat, keyed by
                 its Uid in sessions.json), so choosing a project activates
                 its document and the chat follows. The menu lists the open

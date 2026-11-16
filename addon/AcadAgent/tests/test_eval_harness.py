@@ -1238,7 +1238,7 @@ class EditTurn(unittest.TestCase):
         r = self.run_item()
         self.assertEqual(len(self.messages), 3)
         self.assertTrue(self.messages[2][0].startswith(
-            "The script failed when Atech Atelier ran it:\nboom\nFix model.py"))
+            "The script failed when Prompt2Product ran it:\nboom\nFix model.py"))
         self.assertEqual(r["outcome"], "edit_built")
         self.assertEqual(r["fix_rounds"], 1)
         self.assertEqual([j["expect"] for j in self.jobs],

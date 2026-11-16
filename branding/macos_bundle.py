@@ -5,8 +5,8 @@
     macos_bundle.py icns  <icon.svg> <out.icns>          (run with a python
                                                           that has PySide6)
 
-plist rewrites FreeCAD's Info.plist in place so the bundle is Atech
-Atelier's, not FreeCAD's:
+plist rewrites FreeCAD's Info.plist in place so the bundle is
+Prompt2Product's, not FreeCAD's:
 
   - CFBundleIdentifier, CFBundleName, CFBundleDisplayName: the product
     (APP_ID and PRODUCT below; the gate, verify_tree.py, carries its own copy);
@@ -17,7 +17,7 @@ Atelier's, not FreeCAD's:
     copyright banner and licence;
   - document types stay (the app opens .FCStd and friends) but at
     LSHandlerRank Alternate and without LSIsAppleDefaultForType, so
-    installing Atech Atelier never takes .FCStd from an installed FreeCAD;
+    installing Prompt2Product never takes .FCStd from an installed FreeCAD;
   - FreeCAD's exported UTI (org.freecad.fcstd) becomes an IMPORTED
     declaration: the type is FreeCAD's to define, not ours.
 
@@ -35,9 +35,9 @@ import subprocess
 import sys
 import tempfile
 
-PRODUCT = "Atech Atelier"
-APP_ID = "dev.atech.Atelier"
-COPYRIGHT = ("© 2026 Atech. %s, powered by FreeCAD. FreeCAD: (C) 2001-2026 "
+PRODUCT = "Prompt2Product"
+APP_ID = "dev.atech.Prompt2Product"
+COPYRIGHT = ("© 2026 Atech. %s, made by Atech.dev, powered by FreeCAD. FreeCAD: (C) 2001-2026 "
              "FreeCAD contributors, LGPL2+. Not endorsed by or affiliated "
              "with the FreeCAD project or the FreeCAD Project Association."
              % PRODUCT)
@@ -50,7 +50,7 @@ def stamp_plist(pl, version, icon):
     pl["CFBundleShortVersionString"] = version
     pl["CFBundleVersion"] = version
     pl["CFBundleIconFile"] = icon
-    pl["CFBundleGetInfoString"] = "%s %s, powered by FreeCAD" % (PRODUCT, version)
+    pl["CFBundleGetInfoString"] = "%s %s, made by Atech.dev, powered by FreeCAD" % (PRODUCT, version)
     pl["CFBundleLongVersionString"] = version
     pl["NSHumanReadableCopyright"] = COPYRIGHT
     for d in pl.get("CFBundleDocumentTypes") or []:

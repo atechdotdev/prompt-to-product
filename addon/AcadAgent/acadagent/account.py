@@ -1,12 +1,12 @@
-"""R860 sign in to Atech Atelier with the atech.dev account.
+"""R860 sign in to Prompt2Product with the atech.dev account.
 
-The browser signs in, never Atelier: Sign in opens
+The browser signs in, never Prompt2Product: Sign in opens
 
     <SITE>/connect/atelier?challenge=..&port=..&state=..&device=..
 
 and listens on http://127.0.0.1:<port>/callback. On that page (signed in to
 atech.dev as usual, password or Google) the user presses Connect; the site
-hands a one-time code back to this listener, and Atelier trades it, with the
+hands a one-time code back to this listener, and Prompt2Product trades it, with the
 secret only it holds (PKCE: `challenge` is its fingerprint), for a session of
 its own at /api/auth/app/token. Backend side: studio backend/p2p/server.py
 "app sign-in".
@@ -37,7 +37,9 @@ import urllib.request
 
 from . import shop
 
-SERVICE = "dev.atech.Atelier"          # the Keychain item: service + account
+#: The Keychain item: service + account. Kept from the name before
+#: "Prompt2Product" (Atech Atelier) so a rename never signs anyone out.
+SERVICE = "dev.atech.Atelier"
 ACCOUNT = "atech-account"
 CLIENT = "atelier"
 WAIT_S = 300                            # how long Sign in waits for the browser
@@ -110,13 +112,13 @@ class Vault:
             if kind == "keychain":
                 # `security -i` reads its command from stdin: the token is not
                 # in argv. -U replaces an older item.
-                cmd = 'add-generic-password -U -s "%s" -a "%s" -l "Atech Atelier" -w "%s"\n' % (
+                cmd = 'add-generic-password -U -s "%s" -a "%s" -l "Prompt2Product" -w "%s"\n' % (
                     self.service, self.account, secret.replace('"', ""))
                 r = subprocess.run(["security", "-i"], input=cmd, capture_output=True, text=True,
                                    timeout=TIMEOUT_S)
                 return r.returncode == 0 and self.get() == secret.replace('"', "")
             if kind == "secret-tool":
-                r = subprocess.run(["secret-tool", "store", "--label=Atech Atelier", "service",
+                r = subprocess.run(["secret-tool", "store", "--label=Prompt2Product", "service",
                                     self.service, "account", self.account], input=secret,
                                    capture_output=True, text=True, timeout=TIMEOUT_S)
                 return r.returncode == 0
@@ -152,7 +154,7 @@ class Vault:
 def _post(path, body, token=None, opener=None, timeout=TIMEOUT_S):
     """(status, json) from POST SITE+path; status 0 = no answer."""
     headers = {"Content-Type": "application/json", "Accept": "application/json",
-               "User-Agent": "AtechAtelier"}
+               "User-Agent": "Prompt2Product"}
     if token:
         headers["Authorization"] = "Bearer " + token
     return _call(urllib.request.Request(shop.SITE + path, data=json.dumps(body).encode("utf-8"),
@@ -252,7 +254,7 @@ class Account:
             tok = self.token(force=attempt == 1)
             if not tok:
                 return 401, {}
-            headers = {"Accept": "application/json", "User-Agent": "AtechAtelier",
+            headers = {"Accept": "application/json", "User-Agent": "Prompt2Product",
                        "Authorization": "Bearer " + tok}
             data = None
             if body is not None:
@@ -367,8 +369,8 @@ def device_name():
     return (name or platform.node() or "this computer")[:60]
 
 
-#: The Atelier icon (brand/assets/atech_icon-light.svg, generated there).
-_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.00 64.00" width="64" height="64" class="icon" role="img" aria-label="Atech Atelier"> <rect x="1" y="1" width="62" height="62" rx="14" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/> <path d="M32,11 32,42.73 31.89,43.52 31.63,44.19 31.27,44.72 30.41,45.55 29.34,46.2 28.15,46.75 26.16,47.42 23.11,48.21 21.11,48.66 19.12,49.17 17.26,49.7 16.07,50.1 14.34,50.78 13.28,51.31 12.62,51.7 11.82,52.23 10.89,53 10.84,52.95 10.96,52.68 16.81,41 18.78,37.15 23.88,26.93 25.92,22.95 31.82,11.13 32,11ZM25.76,33.97 25.72,34.36 25.59,34.89 25.53,35.56 25.28,36.49 25.12,36.89 24.89,37.28 24.7,37.55 24.43,37.81 24.03,38.14 23.24,38.52 22.71,38.66 21.91,38.79 20.85,38.88 22.71,39.12 23.24,39.25 24.03,39.62 24.57,40.04 24.9,40.47 25.14,40.87 25.29,41.27 25.55,42.33 25.61,42.99 25.76,43.78 25.85,42.46 25.99,41.66 26.13,41.13 26.42,40.5 26.82,39.97 27.22,39.62 28.02,39.23 28.55,39.1 30.27,38.88 29.08,38.79 28.28,38.65 27.88,38.52 27.35,38.27 26.82,37.86 26.41,37.28 26.11,36.62 25.87,35.42 25.76,33.97ZM38.77,34.36 38.85,35.42 38.99,36.22 39.26,37.02 39.64,37.68 40.1,38.13 40.76,38.5 41.16,38.64 41.82,38.78 42.76,38.88 41.42,39.11 40.63,39.36 40.23,39.6 39.7,40.07 39.27,40.73 39.01,41.53 38.86,42.33 38.77,43.39 38.62,42.73 38.56,42.19 38.42,41.53 38.28,41.13 37.85,40.34 37.57,40 36.91,39.51 36.25,39.23 35.72,39.1 34.25,38.88 35.32,38.76 36.25,38.54 36.91,38.26 37.44,37.87 37.74,37.55 38.02,37.15 38.26,36.62 38.53,35.69 38.64,34.89 38.7,34.76 38.77,34.36Z" fill="#111827" fill-rule="evenodd"/> </svg>'
+#: The Prompt2Product icon (brand/assets/atech_icon-light.svg, generated there).
+_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.00 64.00" width="64" height="64" class="icon" role="img" aria-label="Prompt2Product"> <rect x="1" y="1" width="62" height="62" rx="14" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/> <path d="M32,11 32,42.73 31.89,43.52 31.63,44.19 31.27,44.72 30.41,45.55 29.34,46.2 28.15,46.75 26.16,47.42 23.11,48.21 21.11,48.66 19.12,49.17 17.26,49.7 16.07,50.1 14.34,50.78 13.28,51.31 12.62,51.7 11.82,52.23 10.89,53 10.84,52.95 10.96,52.68 16.81,41 18.78,37.15 23.88,26.93 25.92,22.95 31.82,11.13 32,11ZM25.76,33.97 25.72,34.36 25.59,34.89 25.53,35.56 25.28,36.49 25.12,36.89 24.89,37.28 24.7,37.55 24.43,37.81 24.03,38.14 23.24,38.52 22.71,38.66 21.91,38.79 20.85,38.88 22.71,39.12 23.24,39.25 24.03,39.62 24.57,40.04 24.9,40.47 25.14,40.87 25.29,41.27 25.55,42.33 25.61,42.99 25.76,43.78 25.85,42.46 25.99,41.66 26.13,41.13 26.42,40.5 26.82,39.97 27.22,39.62 28.02,39.23 28.55,39.1 30.27,38.88 29.08,38.79 28.28,38.65 27.88,38.52 27.35,38.27 26.82,37.86 26.41,37.28 26.11,36.62 25.87,35.42 25.76,33.97ZM38.77,34.36 38.85,35.42 38.99,36.22 39.26,37.02 39.64,37.68 40.1,38.13 40.76,38.5 41.16,38.64 41.82,38.78 42.76,38.88 41.42,39.11 40.63,39.36 40.23,39.6 39.7,40.07 39.27,40.73 39.01,41.53 38.86,42.33 38.77,43.39 38.62,42.73 38.56,42.19 38.42,41.53 38.28,41.13 37.85,40.34 37.57,40 36.91,39.51 36.25,39.23 35.72,39.1 34.25,38.88 35.32,38.76 36.25,38.54 36.91,38.26 37.44,37.87 37.74,37.55 38.02,37.15 38.26,36.62 38.53,35.69 38.64,34.89 38.7,34.76 38.77,34.36Z" fill="#111827" fill-rule="evenodd"/> </svg>'
 
 _OK = ('<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="3" '
        'stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')
@@ -378,7 +380,7 @@ _NO = ('<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff
 #: The page the browser lands on at the end (served by the listener): the
 #: Connect page's look (atech.dev /connect/atelier), not a bare line of text.
 _PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Atech Atelier</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Prompt2Product</title>
 <style>
 :root{--bg:#f4f4f5;--card:#fff;--line:#e5e7eb;--text:#0b0b0c;--muted:#5b5f66}
 @media(prefers-color-scheme:dark){:root{--bg:#0b0b0c;--card:#17171a;--line:#2a2a2f;--text:#f4f4f5;--muted:#a1a1aa}}
@@ -425,15 +427,15 @@ class SignIn:
                 q = dict(urllib.parse.parse_qsl(u.query))
                 if u.path != "/callback" or not secrets.compare_digest(
                         q.get("state", ""), flow.state) or flow._finished.is_set():
-                    return self._page(404, "Nothing here", "Start Sign in from Atech Atelier.")
+                    return self._page(404, "Nothing here", "Start Sign in from Prompt2Product.")
                 if q.get("error"):
                     flow._finish({"ok": False, "cancelled": True, "message": "Sign in was cancelled."})
-                    return self._page(200, "Not signed in", "Atech Atelier was not signed in.")
+                    return self._page(200, "Not signed in", "Prompt2Product was not signed in.")
                 result = flow.account.redeem(q.get("code", ""), flow.verifier)
                 flow._finish(dict(result, cancelled=False))
                 if result["ok"]:
                     who = flow.account.label()
-                    return self._page(200, "Atech Atelier is signed in",
+                    return self._page(200, "Prompt2Product is signed in",
                                       "As %s. Go back to the app: it is ready." % who, ok=True)
                 return self._page(200, "Not signed in", result["message"])
 

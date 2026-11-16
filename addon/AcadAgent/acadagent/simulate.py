@@ -66,7 +66,7 @@ def _product():
         from . import style
         return style.PRODUCT
     except Exception:                                     # noqa: BLE001
-        return "Atech Atelier"
+        return "Prompt2Product"
 
 
 def _log(msg):
@@ -897,9 +897,9 @@ def python_exe():
 
 
 def mujoco_dir():
-    """Where MuJoCo is installed for the app ($ATELIER_MUJOCO_DIR overrides),
+    """Where MuJoCo is installed for the app ($P2P_MUJOCO_DIR overrides),
     beside usd-core in <user data>/pylibs."""
-    env = (os.environ.get("ATELIER_MUJOCO_DIR") or "").strip()
+    env = (os.environ.get("P2P_MUJOCO_DIR") or "").strip()
     if env:
         return os.path.abspath(os.path.expanduser(env))
     try:
@@ -939,7 +939,7 @@ def ensure_mujoco(progress=None, python=None):
         return d
     if progress:
         progress("Installing MuJoCo (once, about 30 MB)…")
-    tmp = tempfile.mkdtemp(prefix="atelier_mujoco_")
+    tmp = tempfile.mkdtemp(prefix="p2p_mujoco_")
     try:
         req = os.path.join(tmp, "requirements.txt")
         with open(req, "w") as fh:

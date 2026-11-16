@@ -159,7 +159,7 @@ def clean_env(env=None):
 # drive while the header said the terminal was ready.
 ZSH_STARTUP = (".zshenv", ".zprofile", ".zshrc", ".zlogin")
 ZSH_FALLBACK_RC = (
-    "# Written by Atech Atelier for its Terminal dock: you have no zsh\n"
+    "# Written by Prompt2Product for its Terminal dock: you have no zsh\n"
     "# startup files, and zsh would otherwise open its first-run menu\n"
     "# (zsh-newuser-install), which the dock cannot draw. Your own ~/.zshrc,\n"
     "# once it exists, is used instead of this file.\n"
@@ -170,7 +170,7 @@ def _zsh_fallback_dir():
     """A private directory holding the fallback .zshrc (0700, per user, in
     the temp dir - never the user's home). None when it cannot be made."""
     d = os.path.join(tempfile.gettempdir(),
-                     "atech-atelier-zsh-%d" % os.getuid())
+                     "prompt2product-zsh-%d" % os.getuid())
     try:
         os.makedirs(d, mode=0o700, exist_ok=True)
         st = os.lstat(d)

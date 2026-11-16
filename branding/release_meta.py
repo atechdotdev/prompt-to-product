@@ -4,7 +4,7 @@
 VERSION at the repository root is the single source (ADR-006: 0.1.0 is the
 first public preview). build_appimage.sh stamps it into:
 
-    the output file name          AtechAtelier-<version>-x86_64.AppImage
+    the output file name          Prompt2Product-<version>-x86_64.AppImage
     both .desktop files           X-AppImage-Version=<version>
     the AppStream metainfo        <releases><release version= date=/></releases>
     ATECH_CHANGES.txt             "Version <version>"
@@ -30,8 +30,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VERSION_FILE = os.path.join(os.path.dirname(HERE), "VERSION")
 MARKER = "<!--RELEASES-->"
 SCREENSHOTS_MARKER = "<!--SCREENSHOTS-->"
-PRODUCT = "Atech Atelier"
-FILE_STEM = "AtechAtelier"
+PRODUCT = "Prompt2Product"
+FILE_STEM = "Prompt2Product"
 
 # Semantic-version shape; AppStream and AppImage both take free text, but a
 # version that sorts is the only kind an updater can compare.
@@ -54,7 +54,7 @@ def out_name(version, arch="x86_64"):
 
 
 def dmg_name(version, arch):
-    """The macOS disk image: AtechAtelier-<version>-macOS-<arch>.dmg."""
+    """The macOS disk image: Prompt2Product-<version>-macOS-<arch>.dmg."""
     if arch not in ("arm64", "x86_64"):
         raise ValueError("macOS arch must be arm64 or x86_64, got %r" % arch)
     return "%s-%s-macOS-%s.dmg" % (FILE_STEM, version, arch)

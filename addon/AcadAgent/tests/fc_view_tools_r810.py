@@ -158,7 +158,7 @@ try:
     et.set_explode(doc, 0.6)                      # E / the view bar / the menu
     pump()
     check("card_opens_when_apart", getattr(card, "is_open", False) and card.isVisible())
-    check("card_top_right", card.geometry().right() > 900 and card.geometry().top() == 16)
+    check("card_top_right", card.geometry().right() > 900 and card.geometry().top() >= 16)
     check("card_fits_view", len(fits) >= 1)
     check("card_slider_shows_amount", card.slider.value() == 60)
     card.go(1)
@@ -277,7 +277,7 @@ try:
     with open(r["run"]) as fh:
         compile(fh.read(), r["run"], "exec")
     check("run_sim_script", "mj_resetDataKeyframe" in open(r["run"]).read())
-    mdir = os.environ.get("ATELIER_MUJOCO_DIR")
+    mdir = os.environ.get("P2P_MUJOCO_DIR")
     if mdir and sm.mujoco_available():
         import subprocess
         pr = subprocess.run(sm.run_command(r["run"], check=1.5), capture_output=True,

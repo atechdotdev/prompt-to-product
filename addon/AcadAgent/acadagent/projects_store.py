@@ -1580,7 +1580,7 @@ def cleanup_transient_dirs(root=None, prefix=None, keep=()):
             exe = fc.ConfigGet("ExeName") if fc is not None else ""
         except Exception:                              # noqa: BLE001
             pass
-        prefix = (exe or "Atech Atelier") + "_Doc_"
+        prefix = (exe or "Prompt2Product") + "_Doc_"
     keep = {_real(k) for k in keep}
     for d in _open_docs():
         try:

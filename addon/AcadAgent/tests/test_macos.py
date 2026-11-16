@@ -6,12 +6,12 @@ no Qt). The real-world parts run only on macOS:
 
   - TestOrphanGuardLive: a process group really is killed when its parent
     is SIGKILLed, and the guard really exits when the group ends first;
-  - TestSeatbeltLive: with ATECH_FREECADCMD pointing at a FreeCAD (or Atech
-    Atelier) bundle's freecadcmd, a model.py that tries to list the home
+  - TestSeatbeltLive: with ATECH_FREECADCMD pointing at a FreeCAD (or
+    Prompt2Product) bundle's freecadcmd, a model.py that tries to list the home
     folder, reach the network and rewrite ./check is stopped, and the model
     still builds - through sandbox.run() AND through the generated ./check.
 
-    ATECH_FREECADCMD=".../Atech Atelier.app/Contents/Resources/bin/freecadcmd" \\
+    ATECH_FREECADCMD=".../Prompt2Product.app/Contents/Resources/bin/freecadcmd" \\
         python -m unittest -v test_macos
 """
 import importlib
@@ -72,19 +72,19 @@ class TestDataRoot(unittest.TestCase):
         with mock.patch.dict(os.environ, {"HOME": "/h"}):
             with mock.patch.object(sys, "platform", "darwin"):
                 self.assertEqual(acadagent.fallback_data_root(),
-                                 "/h/Library/Application Support/Atech Atelier")
+                                 "/h/Library/Application Support/Prompt2Product")
             with mock.patch.object(sys, "platform", "linux"):
                 self.assertEqual(acadagent.fallback_data_root(),
-                                 "/h/.local/share/Atech Atelier")
+                                 "/h/.local/share/Prompt2Product")
 
 
 class TestStripBundlePaths(unittest.TestCase):
     def test_only_bundle_entries_go(self):
-        top = "/Applications/Atech Atelier.app"
+        top = "/Applications/Prompt2Product.app"
         env = {"PATH": "%s/Contents/Resources/bin:%s/Contents/Resources/Mod/Draft:"
                        "/Users/u/.local/bin:/usr/bin" % (top, top),
                "OTHER": top + "/Contents/Resources/lib",
-               "KEEP": "/Applications/Atech Atelier.apple/x"}
+               "KEEP": "/Applications/Prompt2Product.apple/x"}
         out = acadagent.strip_bundle_paths(dict(env), top)
         self.assertEqual(out["PATH"], "/Users/u/.local/bin:/usr/bin")
         self.assertNotIn("OTHER", out)          # nothing left: removed
@@ -189,9 +189,9 @@ class TestBundleIdentity(unittest.TestCase):
                                          "CFBundleTypeRole": "Editor"}],
               "UTExportedTypeDeclarations": [{"UTTypeIdentifier": "org.freecad.fcstd"}]}
         out = self.mb.stamp_plist(pl, "1.2.3", "atech.icns")
-        self.assertEqual(out["CFBundleIdentifier"], "dev.atech.Atelier")
-        self.assertEqual(out["CFBundleName"], "Atech Atelier")
-        self.assertEqual(out["CFBundleDisplayName"], "Atech Atelier")
+        self.assertEqual(out["CFBundleIdentifier"], "dev.atech.Prompt2Product")
+        self.assertEqual(out["CFBundleName"], "Prompt2Product")
+        self.assertEqual(out["CFBundleDisplayName"], "Prompt2Product")
         self.assertEqual(out["CFBundleExecutable"], "FreeCAD")   # untouched
         self.assertEqual(out["CFBundleShortVersionString"], "1.2.3")
         self.assertEqual(out["CFBundleIconFile"], "atech.icns")
@@ -217,8 +217,8 @@ class TestBundleIdentity(unittest.TestCase):
 
     def test_release_names(self):
         rm = _load(os.path.join(BRANDING, "release_meta.py"), "release_meta")
-        self.assertEqual(rm.dmg_name("1.2.3", "arm64"), "AtechAtelier-1.2.3-macOS-arm64.dmg")
-        self.assertEqual(rm.dmg_name("1.2.3", "x86_64"), "AtechAtelier-1.2.3-macOS-x86_64.dmg")
+        self.assertEqual(rm.dmg_name("1.2.3", "arm64"), "Prompt2Product-1.2.3-macOS-arm64.dmg")
+        self.assertEqual(rm.dmg_name("1.2.3", "x86_64"), "Prompt2Product-1.2.3-macOS-x86_64.dmg")
         with self.assertRaises(ValueError):
             rm.dmg_name("1.2.3", "ppc")
 

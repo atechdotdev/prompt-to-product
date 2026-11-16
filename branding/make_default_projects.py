@@ -1,4 +1,4 @@
-"""make_default_projects - build the default projects Atech Atelier ships
+"""make_default_projects - build the default projects Prompt2Product ships
 with (R450), from the showcase examples in agent_kit/examples/.
 
 Runs INSIDE freecadcmd (FreeCAD's own Python), never system python:
@@ -95,6 +95,17 @@ CURATED = (
     ('arm_dock', 'Robot arm dock'),
     ('balance_bot', 'Balance bot'),
     ('sesame_atech', 'Sesame walker'),
+    # R940: ten viral products (2026-11-10)
+    ('coffee_scale', 'Coffee scale'),
+    ('plant_pal', 'Plant pal'),
+    ('focus_cube', 'Focus cube'),
+    ('tiny_tv', 'Tiny TV'),
+    ('retro_camera', 'Pixel camera'),
+    ('photo_turntable', 'Photo turntable'),
+    ('debug_duck', 'Debug duck'),
+    ('follower_counter', 'Follower counter'),
+    ('bird_cam', 'Bird feeder cam'),
+    ('hype_button', 'Hype button'),
 )
 #: R820: the starter projects - small, simple starting points (Home's
 #: "Start simple" row), built and checked like the products above but never
@@ -185,6 +196,26 @@ BLURBS = {
         ['Make the moon bigger and the pebble rounder', 'Add a speaker grille for a soft chime']),
     'arm_dock': ('A heavy desk dock for an SO-101 robot arm: a sloped control deck with a joint-angle screen, REC / PLAY keys and a jog dial, and a raised podium with a brushed bolt-on arm plate, its servo cable leaving through a rubber grommet.',
         ['Make the arm podium longer', 'Make the podium taller']),
+    'coffee_scale': ('A slim matte-black pour-over scale: a brushed platform with a silicone heat pad floating on a load cell, a smoked display and copper TARE and TIMER keys.',
+        ['Make the platform bigger for a carafe', 'Give the keys a brass finish']),
+    'plant_pal': ('A planter with a face: screen eyes behind a smoked visor and pink blush cheeks that look happy when the soil is moist and thirsty when it is dry, a soil probe in the pot and a pat key in its leaf ear.',
+        ['Make the pot rounder', 'Give it bigger leaf ears']),
+    'focus_cube': ('A soft flip timer: roll the tomato-red block so 5, 15, 25 or 50 is on top and it counts down on a screen inside a frosted halo, then glows and chimes.',
+        ['Make it a true cube', 'Add a fifth face for a 90 minute timer']),
+    'tiny_tv': ('A palm-sized 1960s walnut TV: a domed screen in a chrome bezel that loops your GIFs, a channel dial in a frosted ring, rabbit-ear antennas and splayed legs.',
+        ['Make the legs longer', 'Give the cabinet a cream finish']),
+    'retro_camera': ('A chunky toy camera that takes pixel-art photos: a knurled lens barrel round the camera module, a red shutter on top, a flash window, a preview screen on the back and a rainbow stripe.',
+        ['Make the lens barrel bigger', 'Add a wrist strap loop']),
+    'photo_turntable': ('A motorised 360 turntable for product videos: a 188 mm white platter with a grip ring and angle ticks, turned by an N20 motor through a real gear train, with a speed key and a status light.',
+        ['Make the platter bigger', 'Hide the gear rim behind a skirt']),
+    'debug_duck': ('A rubber duck debugger: a big desk duck that listens to your bug through a chest grille, quacks back through a speaker, and lights its eyes; press its head to start.',
+        ['Make the duck chubbier', 'Give it a tiny hat']),
+    'follower_counter': ("A creator's desk trophy: live follower digits on a big screen behind smoked glass in a brushed plaque, and a frosted heart that pulses for every new follower, on a weighted plinth.",
+        ['Make the plaque taller', 'Swap the heart for a star']),
+    'bird_cam': ('A cottage bird feeder that photographs every visitor: a glass seed hopper under a shingled roof, a perch, and a camera with a motion sensor in a pod under the porch roof.',
+        ['Make the roof steeper', 'Make the seed hopper bigger']),
+    'hype_button': ('A giant red sound button: an 86 mm domed cap in a chrome collar on a hazard-striped pedestal, a glowing ring round it, and a speaker that fires an airhorn every time you slap it.',
+        ['Make the cap even bigger', 'Add a volume knob']),
     'sesame_atech': ('Sesame, the open-source walking robot, refitted for Atech: its own frame, legs and eight servos unchanged, and a new deck and lid that carry the Atech board over the legs, with the screen as its face, an IMU for heading and USB-C at the back.',
         ['Make the lid taller with a carry handle', 'Give the face a smoked visor and a bezel']),
     "starter_board": ("The Atech board lying flat in a printed tray, nothing "
@@ -231,6 +262,16 @@ SUMMARIES = {
     'motion_light': 'A wall pebble night light with a frosted moon and PIR eye.',
     'arm_dock': 'A robot arm dock with a control deck and arm plate.',
     'balance_bot': 'A balance bot with a screen face on two big wheels.',
+    'coffee_scale': 'A pour-over scale with a floating platform and a timer.',
+    'plant_pal': 'A planter with a face that pouts when it is thirsty.',
+    'focus_cube': 'A flip timer: the number on top sets the minutes.',
+    'tiny_tv': 'A tiny walnut TV with rabbit ears that plays GIFs.',
+    'retro_camera': 'A toy camera that takes pixel-art photos.',
+    'photo_turntable': 'A geared 360 turntable for product videos.',
+    'debug_duck': 'A rubber duck that listens to your bugs and quacks.',
+    'follower_counter': 'A desk trophy with your live follower count.',
+    'bird_cam': 'A bird feeder that photographs every visitor.',
+    'hype_button': 'A giant red button that plays airhorns.',
     'sesame_atech': 'The Sesame walking robot with an Atech board and screen.',
     "starter_board": "The Atech board in a tray, ready for your modules.",
     "starter_case": "The board in a screwed case, a button and a light.",

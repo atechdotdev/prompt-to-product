@@ -301,7 +301,7 @@ class TestS51UndeclaredCaps(twp.Round3):
         self.viewport()
         st = self.turn_state(key="uid-mods", doc=self._doc())
         r = _atech_result(SLIDE_FAIL)
-        r.intent_problems = ["overall size: you intended 60 mm, Atelier "
+        r.intent_problems = ["overall size: you intended 60 mm, Prompt2Product "
                              "measured 50 mm"]
         self.p._settle(st, r, True, "h1")
         body = self.p._build_card.body.text()

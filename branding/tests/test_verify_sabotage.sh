@@ -26,7 +26,7 @@ mkdir -p "$H/gate"; cp "$HERE/verify_tree.py" "$H/gate/verify_tree.py"
 # absence is then a FAIL the sabotage below must see); a --dev-unlicensed
 # tree is judged as one.
 DEV_FLAG=ATECH_VERIFY_DEV_UNLICENSED=1
-[[ -f "$ROOT/usr/share/doc/atech-atelier/LICENSE" ]] && DEV_FLAG=ATECH_VERIFY_DEV_UNLICENSED=0
+[[ -f "$ROOT/usr/share/doc/prompt2product/LICENSE" ]] && DEV_FLAG=ATECH_VERIFY_DEV_UNLICENSED=0
 echo "  licence files: $([[ $DEV_FLAG == *=0 ]] && echo 'present, judged as a release' || echo 'absent, judged as a dev build')"
 
 verify() {
@@ -103,24 +103,24 @@ sabotage "default projects missing (R450)" usr/Mod/AcadAgent/default_projects 'd
 sabotage "default projects manifest missing" usr/Mod/AcadAgent/default_projects/manifest.json 'default-projects'
 mutate "default project sha256 wrong" usr/Mod/AcadAgent/default_projects/manifest.json '0,/"sha256": "[0-9a-f]/s/"sha256": "[0-9a-f]/"sha256": "x/' 'default-projects'
 sabotage "FreeCADMCP licence missing" usr/Mod/FreeCADMCP/LICENSE        'mcp-licence'
-sabotage "third-party notice missing" usr/share/doc/atech-atelier/third_party/NOTICE.third_party 'doc:third_party/NOTICE.third_party'
-sabotage "credits missing"            usr/share/doc/atech-atelier/CREDITS.md 'doc:CREDITS.md|credits-dialog'
+sabotage "third-party notice missing" usr/share/doc/prompt2product/third_party/NOTICE.third_party 'doc:third_party/NOTICE.third_party'
+sabotage "credits missing"            usr/share/doc/prompt2product/CREDITS.md 'doc:CREDITS.md|credits-dialog'
 sabotage "overlay sheet missing (R88)" "usr/share/Gui/Stylesheets/overlay/Atech Overlay.qss" 'template:overlay-file'
-sabotage "desktop entry missing"      usr/share/applications/dev.atech.Atelier.desktop 'desktop:share/applications/dev.atech.Atelier.desktop|desktop:name:share'
-sabotage "metainfo missing"           usr/share/metainfo/dev.atech.Atelier.metainfo.xml 'desktop:share/metainfo/dev.atech.Atelier.metainfo.xml|metainfo.*'
-sabotage "top-level icon missing"     dev.atech.Atelier.svg 'desktop:icon|desktop:diricon'
-sabotage "light theme missing"        "usr/share/Gui/Stylesheets/parameters/Atech Atelier Light.yaml" 'share/Gui/Stylesheets/parameters/Atech Atelier Light.yaml|theme-refs:Light'
+sabotage "desktop entry missing"      usr/share/applications/dev.atech.Prompt2Product.desktop 'desktop:share/applications/dev.atech.Prompt2Product.desktop|desktop:name:share'
+sabotage "metainfo missing"           usr/share/metainfo/dev.atech.Prompt2Product.metainfo.xml 'desktop:share/metainfo/dev.atech.Prompt2Product.metainfo.xml|metainfo.*'
+sabotage "top-level icon missing"     dev.atech.Prompt2Product.svg 'desktop:icon|desktop:diricon'
+sabotage "light theme missing"        "usr/share/Gui/Stylesheets/parameters/Prompt2Product Light.yaml" 'share/Gui/Stylesheets/parameters/Prompt2Product Light.yaml|theme-refs:Light'
 if [[ "$DEV_FLAG" == *=0 ]]; then
-  sabotage "code licence missing"     usr/share/doc/atech-atelier/LICENSE 'doc:LICENSE'
+  sabotage "code licence missing"     usr/share/doc/prompt2product/LICENSE 'doc:LICENSE'
   sabotage "models licence missing next to the models" usr/Mod/AcadAgent/data/models/LICENSE-models.md 'models:LICENSE-models.md'
 fi
 # Content sabotage: a file that is PRESENT but wrong. mv-based sabotage cannot
 # express these, so each swaps the file for a doctored copy and restores it.
-mutate "previous name in desktop"     dev.atech.Atelier.desktop 's/^Name=Atech Atelier$/Name=Atech Studio/' 'desktop:name:root|old-name'
-mutate "licence expression dropped"   usr/share/metainfo/dev.atech.Atelier.metainfo.xml 's/ AND CC-BY-NC-4.0//' 'metainfo:project_license'
+mutate "previous name in desktop"     dev.atech.Prompt2Product.desktop 's/^Name=Prompt2Product$/Name=Atech Studio/' 'desktop:name:root|old-name'
+mutate "licence expression dropped"   usr/share/metainfo/dev.atech.Prompt2Product.metainfo.xml 's/ AND CC-BY-NC-4.0//' 'metainfo:project_license'
 mutate "AppRun loses migration"       AppRun 's/^atech_migrate_tree() {/atech_migrate_treeX() {/' 'apprun-migration'
-mutate "draft NOTICE shipped"         usr/share/doc/atech-atelier/NOTICE '1i PROPOSED root NOTICE for Atech Atelier, written by the packaging workstream.' 'licence:notice-draft'
-mutate "builder home path in a doc"   usr/share/doc/atech-atelier/ATECH_CHANGES.txt 's|^Module library .*|Module library   /home/someone/dev/atech-artifacts @ 0|' 'personal-data'
+mutate "draft NOTICE shipped"         usr/share/doc/prompt2product/NOTICE '1i PROPOSED root NOTICE for Prompt2Product, written by the packaging workstream.' 'licence:notice-draft'
+mutate "builder home path in a doc"   usr/share/doc/prompt2product/ATECH_CHANGES.txt 's|^Module library .*|Module library   /home/someone/dev/atech-artifacts @ 0|' 'personal-data'
 control  "pristine tree passes (after restore)"
 
 echo "SABOTAGE_PASSED=$pass SABOTAGE_FAILED=$fail"

@@ -1,7 +1,7 @@
 """theme — panel styling.
 
 Scoped to the dock so FreeCAD's own dialogs stay legible, and so this can
-never fight the token system in branding/assets/theme/Atech Atelier Dark.yaml.
+never fight the token system in branding/assets/theme/Prompt2Product Dark.yaml.
 App chrome lives in that YAML; panel chrome lives here. They do not merge.
 
 PALETTE — Atech, cool blue-grey. The previous values came from

@@ -1,0 +1,3127 @@
+{
+ "count": 122,
+ "licence": "CC BY-SA 4.0",
+ "parts": {
+  "barrel_jack": {
+   "agent_notes": "At the board edge; open the wall around the plug (about 9 mm round).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 143186,
+   "category": "power",
+   "colours": 2,
+   "description": "DC power jack for a 5.5 mm barrel plug with a 2.0 mm pin.",
+   "display_name": "DC barrel jack 2.0 mm (CUI PJ-063AH)",
+   "electrical": {
+    "connectors": "5.5/2.0 mm barrel",
+    "interface": "power"
+   },
+   "git_oid": "e4d28fff3c6cd46f6c083fae69b5defdeae87fc9",
+   "group": "connectors",
+   "path": "Connector_BarrelJack.3dshapes/BarrelJack_CUI_PJ-063AH_Horizontal.step",
+   "picture": "kicad3d_pictures/barrel_jack.png",
+   "size_mm": [
+    10.0,
+    13.0,
+    12.0
+   ],
+   "triangles": 1204
+  },
+  "barrel_jack_21": {
+   "agent_notes": "At the board edge; open the wall around the plug.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 89304,
+   "category": "power",
+   "colours": 1,
+   "description": "DC power jack for a 5.5 mm barrel plug with a 2.5 mm pin.",
+   "display_name": "DC barrel jack 2.5 mm (CUI PJ-079BH)",
+   "electrical": {
+    "connectors": "5.5/2.5 mm barrel",
+    "interface": "power"
+   },
+   "git_oid": "98c64ad13b33f01f27975b6322edb678e8ecf383",
+   "group": "connectors",
+   "path": "Connector_BarrelJack.3dshapes/BarrelJack_CUI_PJ-079BH_Horizontal.step",
+   "picture": "kicad3d_pictures/barrel_jack_21.png",
+   "size_mm": [
+    10.1,
+    11.6,
+    9.9
+   ],
+   "triangles": 4044
+  },
+  "buzzer_12mm": {
+   "agent_notes": "Give it a small hole in the wall to be heard.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 20394,
+   "category": "electronics",
+   "colours": 3,
+   "description": "12 mm through-hole buzzer.",
+   "display_name": "Buzzer 12 mm",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "2 pins, + marked"
+   },
+   "git_oid": "f58e63edceb9176e423a0d0616c45acfff1c7f8e",
+   "group": "sensors",
+   "path": "Buzzer_Beeper.3dshapes/Buzzer_12x9.5RM7.6.step",
+   "picture": "kicad3d_pictures/buzzer_12mm.png",
+   "size_mm": [
+    12.0,
+    11.97,
+    12.53
+   ],
+   "triangles": 4364
+  },
+  "buzzer_piezo": {
+   "agent_notes": "Give it a small hole in the wall to be heard.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 20263,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Flat 12 mm piezo sounder.",
+   "display_name": "Piezo buzzer 12 mm (TDK PS1240)",
+   "electrical": {
+    "interface": "pwm",
+    "wiring": "2 pins, driven with a tone"
+   },
+   "git_oid": "daa41d8e4ef1891aa7e2cedf6bb1623688ea2e30",
+   "group": "sensors",
+   "path": "Buzzer_Beeper.3dshapes/Buzzer_TDK_PS1240P02BT_D12.2mm_H6.5mm.step",
+   "picture": "kicad3d_pictures/buzzer_piezo.png",
+   "size_mm": [
+    12.0,
+    11.97,
+    21.53
+   ],
+   "triangles": 4364
+  },
+  "cap_disc": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 35469,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Ceramic disc capacitor (100 nF and the like).",
+   "display_name": "Ceramic disc capacitor Ø5 mm",
+   "git_oid": "e02a2e54faaa1cd98e9f68c36e8e40387864a3b9",
+   "group": "passives",
+   "path": "Capacitor_THT.3dshapes/C_Disc_D5.0mm_W2.5mm_P5.00mm.step",
+   "picture": "kicad3d_pictures/cap_disc.png",
+   "size_mm": [
+    5.5,
+    2.5,
+    7.1
+   ],
+   "triangles": 1358
+  },
+  "cap_elec_10": {
+   "agent_notes": "Its height depends on the value; check the datasheet's height.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 141407,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Radial electrolytic capacitor, 10 mm across (e.g. 1000 µF / 16 V).",
+   "display_name": "Electrolytic capacitor Ø10 mm",
+   "git_oid": "6d9388fd519c859094bd1a7aac1bc0611254d590",
+   "group": "passives",
+   "path": "Capacitor_THT.3dshapes/CP_Radial_D10.0mm_P5.00mm.step",
+   "picture": "kicad3d_pictures/cap_elec_10.png",
+   "size_mm": [
+    10.0,
+    10.0,
+    12.0
+   ],
+   "triangles": 4042
+  },
+  "cap_elec_5": {
+   "agent_notes": "Its height depends on the value; check the datasheet's height.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 139943,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Radial electrolytic capacitor, 5 mm across (small values).",
+   "display_name": "Electrolytic capacitor Ø5 mm",
+   "git_oid": "af2187efe6aa0b2a3b868d764b1375b150fc4990",
+   "group": "passives",
+   "path": "Capacitor_THT.3dshapes/CP_Radial_D5.0mm_P2.00mm.step",
+   "picture": "kicad3d_pictures/cap_elec_5.png",
+   "size_mm": [
+    5.0,
+    5.0,
+    7.0
+   ],
+   "triangles": 4360
+  },
+  "cap_elec_8": {
+   "agent_notes": "Its height depends on the value; check the datasheet's height.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 171217,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Radial electrolytic capacitor, 8 mm across.",
+   "display_name": "Electrolytic capacitor Ø8 mm",
+   "git_oid": "75b5699a716afa623ba60e6ac784f7df4b369a43",
+   "group": "passives",
+   "path": "Capacitor_THT.3dshapes/CP_Radial_D8.0mm_P3.50mm.step",
+   "picture": "kicad3d_pictures/cap_elec_8.png",
+   "size_mm": [
+    7.99,
+    8.0,
+    10.0
+   ],
+   "triangles": 5042
+  },
+  "cny70": {
+   "agent_notes": "Face it at the surface, 0.5 to 5 mm away.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 372146,
+   "category": "electronics",
+   "colours": 5,
+   "description": "Small reflective optical sensor.",
+   "display_name": "CNY70 reflective IR sensor",
+   "electrical": {
+    "interface": "analog",
+    "wiring": "IR LED + phototransistor"
+   },
+   "git_oid": "ab7a25a9db90b82b1ff70f77335a0ea9db9676a0",
+   "group": "sensors",
+   "path": "OptoDevice.3dshapes/Vishay_CNY70.step",
+   "picture": "kicad3d_pictures/cny70.png",
+   "size_mm": [
+    7.01,
+    7.0,
+    12.0
+   ],
+   "triangles": 7766
+  },
+  "crystal_hc49": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 41010,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Quartz crystal in the tall HC-49/U can (16 MHz and the like).",
+   "display_name": "Crystal HC-49/U",
+   "git_oid": "0d51c17c069938f70246020e1cc74ce3e9e8451d",
+   "group": "passives",
+   "path": "Crystal.3dshapes/Crystal_HC49-U_Vertical.step",
+   "picture": "kicad3d_pictures/crystal_hc49.png",
+   "size_mm": [
+    10.9,
+    4.65,
+    16.0
+   ],
+   "triangles": 1804
+  },
+  "crystal_hc49s": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 40954,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Quartz crystal in the low HC-49/S can.",
+   "display_name": "Crystal HC-49/S (low)",
+   "git_oid": "5c27643c522fa7c9cbe864a3c52b7dc27bcb69b2",
+   "group": "passives",
+   "path": "Crystal.3dshapes/Crystal_HC49-4H_Vertical.step",
+   "picture": "kicad3d_pictures/crystal_hc49s.png",
+   "size_mm": [
+    11.05,
+    4.65,
+    7.0
+   ],
+   "triangles": 1804
+  },
+  "crystal_watch": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 22879,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Cylindrical 2 × 6 mm watch crystal, for a real-time clock.",
+   "display_name": "Watch crystal 32.768 kHz (C26)",
+   "git_oid": "f32f7bff57a72fd2fd2a02a0e4165a98adb1f998",
+   "group": "passives",
+   "path": "Crystal.3dshapes/Crystal_C26-LF_D2.1mm_L6.5mm_Vertical.step",
+   "picture": "kicad3d_pictures/crystal_watch.png",
+   "size_mm": [
+    2.2,
+    2.09,
+    11.05
+   ],
+   "triangles": 2808
+  },
+  "dcdc_oki78": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 820136,
+   "category": "power",
+   "colours": 7,
+   "description": "1.5 A switching regulator in a 7805-style package.",
+   "display_name": "DC-DC regulator (Murata OKI-78SR)",
+   "electrical": {
+    "interface": "power",
+    "wiring": "3 pins: in, ground, out"
+   },
+   "git_oid": "736b64c1f2e933034bed5e51a48f21a88a00b1be",
+   "group": "power",
+   "path": "Converter_DCDC.3dshapes/Converter_DCDC_Murata_OKI-78SR_Vertical.step",
+   "picture": "kicad3d_pictures/dcdc_oki78.png",
+   "size_mm": [
+    10.41,
+    8.6,
+    19.83
+   ],
+   "triangles": 9664
+  },
+  "dcdc_r78": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 41909,
+   "category": "power",
+   "colours": 2,
+   "description": "Switching regulator in a 7805 footprint, much less heat than a 7805.",
+   "display_name": "DC-DC regulator module (RECOM R-78E, 7805 size)",
+   "electrical": {
+    "interface": "power",
+    "wiring": "3 pins: in, ground, out"
+   },
+   "git_oid": "a158be115d6aec5fae8b35daf5e62db529a309c0",
+   "group": "power",
+   "path": "Converter_DCDC.3dshapes/Converter_DCDC_RECOM_R-78E-0.5_THT.step",
+   "picture": "kicad3d_pictures/dcdc_r78.png",
+   "size_mm": [
+    11.6,
+    8.5,
+    14.5
+   ],
+   "triangles": 4494
+  },
+  "dht11": {
+   "agent_notes": "It must feel the room's air: vent the case next to it and keep it away from warm parts.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 449268,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Aosong DHT11 temperature and humidity sensor.",
+   "display_name": "DHT11 temperature & humidity sensor",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "VCC, data, NC, GND (2.54 mm)"
+   },
+   "git_oid": "5926eed9f16fd87f3a64eadb0decee4ba1b7c5a7",
+   "group": "sensors",
+   "path": "Sensor.3dshapes/Aosong_DHT11_5.5x12.0_P2.54mm.step",
+   "picture": "kicad3d_pictures/dht11.png",
+   "size_mm": [
+    5.5,
+    12.0,
+    23.5
+   ],
+   "triangles": 1448
+  },
+  "diode_do201": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 21204,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Large power diode in a DO-201AD body.",
+   "display_name": "Diode DO-201AD (1N5408 / SB540 size)",
+   "git_oid": "43b0ad8943b3e2dabc479491a1ad929a3a576432",
+   "group": "passives",
+   "path": "Diode_THT.3dshapes/D_DO-201AD_P15.24mm_Horizontal.step",
+   "picture": "kicad3d_pictures/diode_do201.png",
+   "size_mm": [
+    16.54,
+    5.21,
+    8.21
+   ],
+   "triangles": 2852
+  },
+  "diode_do35": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 21712,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Small-signal glass diode (1N4148).",
+   "display_name": "Diode DO-35 (1N4148 size)",
+   "git_oid": "f6e0652b5cdd8a5742ac67a9f98f39b859352fa1",
+   "group": "passives",
+   "path": "Diode_THT.3dshapes/D_DO-35_SOD27_P7.62mm_Horizontal.step",
+   "picture": "kicad3d_pictures/diode_do35.png",
+   "size_mm": [
+    8.12,
+    2.01,
+    5.01
+   ],
+   "triangles": 4528
+  },
+  "diode_do41": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 21194,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Rectifier diode in a DO-41 body, lying flat (1N400x).",
+   "display_name": "Diode DO-41 (1N4007 size)",
+   "git_oid": "53dce80244f8478e28777d89b1fa933467d4a55a",
+   "group": "passives",
+   "path": "Diode_THT.3dshapes/D_DO-41_SOD81_P10.16mm_Horizontal.step",
+   "picture": "kicad3d_pictures/diode_do41.png",
+   "size_mm": [
+    10.96,
+    2.71,
+    5.71
+   ],
+   "triangles": 2852
+  },
+  "dip_14": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 454766,
+   "category": "electronics",
+   "colours": 2,
+   "description": "14-pin through-hole chip package.",
+   "display_name": "DIP-14 chip (74HC logic)",
+   "git_oid": "ec1d91c130d01a6840ce249c0fc00a4437baa10b",
+   "group": "chips",
+   "path": "Package_DIP.3dshapes/DIP-14_W7.62mm.step",
+   "picture": "kicad3d_pictures/dip_14.png",
+   "size_mm": [
+    7.87,
+    19.05,
+    6.98
+   ],
+   "triangles": 2052
+  },
+  "dip_16": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 517043,
+   "category": "electronics",
+   "colours": 2,
+   "description": "16-pin through-hole chip package.",
+   "display_name": "DIP-16 chip (74HC595, L293D)",
+   "git_oid": "03c0c490a360a1b6e3c2b3f405cfbd8062bb3fae",
+   "group": "chips",
+   "path": "Package_DIP.3dshapes/DIP-16_W7.62mm.step",
+   "picture": "kicad3d_pictures/dip_16.png",
+   "size_mm": [
+    7.87,
+    19.18,
+    6.98
+   ],
+   "triangles": 2332
+  },
+  "dip_28_narrow": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 885081,
+   "category": "electronics",
+   "colours": 2,
+   "description": "28-pin through-hole chip, 0.3 in wide: the Arduino Uno's chip.",
+   "display_name": "DIP-28 narrow chip (ATmega328P)",
+   "git_oid": "d9f34038c391166fffa2e5214ea4a6eb396827c1",
+   "group": "chips",
+   "path": "Package_DIP.3dshapes/DIP-28_W7.62mm.step",
+   "picture": "kicad3d_pictures/dip_28_narrow.png",
+   "size_mm": [
+    7.87,
+    35.56,
+    6.98
+   ],
+   "triangles": 4012
+  },
+  "dip_40": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 1249318,
+   "category": "electronics",
+   "colours": 2,
+   "description": "40-pin through-hole chip package, 0.6 in wide.",
+   "display_name": "DIP-40 chip (wide)",
+   "git_oid": "f8f2e606330afdef06013ba2d1f6de90be3742c0",
+   "group": "chips",
+   "path": "Package_DIP.3dshapes/DIP-40_W15.24mm.step",
+   "picture": "kicad3d_pictures/dip_40.png",
+   "size_mm": [
+    15.49,
+    50.8,
+    6.98
+   ],
+   "triangles": 5692
+  },
+  "dip_8": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 277577,
+   "category": "electronics",
+   "colours": 2,
+   "description": "8-pin through-hole chip package, 0.3 in wide.",
+   "display_name": "DIP-8 chip (NE555, ATtiny85)",
+   "git_oid": "fa3992eee2ab09535c50e9181e8e5edc066c6fa1",
+   "group": "chips",
+   "path": "Package_DIP.3dshapes/DIP-8_W7.62mm.step",
+   "picture": "kicad3d_pictures/dip_8.png",
+   "size_mm": [
+    7.87,
+    9.27,
+    6.98
+   ],
+   "triangles": 1212
+  },
+  "dip_switch_4": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "Terje Io",
+    "https://github.com/terjeio"
+   ],
+   "bytes": 222175,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Four-way DIP switch for settings.",
+   "display_name": "DIP switch, 4 positions",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "4 independent switches"
+   },
+   "git_oid": "691d743185efdc19d127863db575d5ba7faeada7",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm.step",
+   "picture": "kicad3d_pictures/dip_switch_4.png",
+   "size_mm": [
+    12.34,
+    9.9,
+    9.95
+   ],
+   "triangles": 778
+  },
+  "dip_switch_8": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "Terje Io",
+    "https://github.com/terjeio"
+   ],
+   "bytes": 414077,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Eight-way DIP switch for settings.",
+   "display_name": "DIP switch, 8 positions",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "8 independent switches"
+   },
+   "git_oid": "72c26d31097b7b1facdf1fe197848bcfd238a436",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_DIP_SPSTx08_Slide_9.78x22.5mm_W7.62mm_P2.54mm.step",
+   "picture": "kicad3d_pictures/dip_switch_8.png",
+   "size_mm": [
+    22.5,
+    9.9,
+    9.95
+   ],
+   "triangles": 1482
+  },
+  "esp32_c3_wroom_02": {
+   "agent_notes": "Keep metal away from the antenna end. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 505281,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Espressif ESP32-C3-WROOM-02 Wi-Fi/Bluetooth module.",
+   "display_name": "ESP32-C3-WROOM-02 module",
+   "electrical": {
+    "voltage_v": 3.3,
+    "wiring": "ESP32-C3 with Wi-Fi and Bluetooth LE; 3.3 V"
+   },
+   "git_oid": "bc5ed8f2bbde7286e9d49718dc99b91d04f8e6b7",
+   "group": "modules",
+   "path": "RF_Module.3dshapes/ESP32-C3-WROOM-02.step",
+   "picture": "kicad3d_pictures/esp32_c3_wroom_02.png",
+   "size_mm": [
+    18.0,
+    20.0,
+    3.24
+   ],
+   "triangles": 3264
+  },
+  "esp32_s3_wroom_1": {
+   "agent_notes": "Keep metal away from the antenna end. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 1906878,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Espressif ESP32-S3-WROOM-1 Wi-Fi/Bluetooth module.",
+   "display_name": "ESP32-S3-WROOM-1 module",
+   "electrical": {
+    "voltage_v": 3.3,
+    "wiring": "ESP32-S3 with Wi-Fi and Bluetooth LE; 3.3 V"
+   },
+   "git_oid": "af3b56b6ffb17dfe6e3223cf27054442647c3217",
+   "group": "modules",
+   "path": "RF_Module.3dshapes/ESP32-S3-WROOM-1.step",
+   "picture": "kicad3d_pictures/esp32_s3_wroom_1.png",
+   "size_mm": [
+    18.0,
+    25.5,
+    3.1
+   ],
+   "triangles": 7560
+  },
+  "esp32_wroom_32e": {
+   "agent_notes": "Keep metal and ground copper away from the antenna end. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 737210,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Espressif ESP32-WROOM-32E Wi-Fi/Bluetooth module (the chip on most ESP32 boards).",
+   "display_name": "ESP32-WROOM-32E module",
+   "electrical": {
+    "voltage_v": 3.3,
+    "wiring": "ESP32 with Wi-Fi and Bluetooth; 3.3 V"
+   },
+   "git_oid": "4efb8dac949121db5f13df709dd26b7f2ca3176b",
+   "group": "modules",
+   "path": "RF_Module.3dshapes/ESP32-WROOM-32E.step",
+   "picture": "kicad3d_pictures/esp32_wroom_32e.png",
+   "size_mm": [
+    18.0,
+    25.5,
+    3.1
+   ],
+   "triangles": 5796
+  },
+  "esp_12e": {
+   "agent_notes": "Keep metal away from the antenna. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 732318,
+   "category": "electronics",
+   "colours": 5,
+   "description": "ESP-12E Wi-Fi module with the ESP8266.",
+   "display_name": "ESP-12E (ESP8266) module",
+   "electrical": {
+    "voltage_v": 3.3,
+    "wiring": "ESP8266 with Wi-Fi; 3.3 V"
+   },
+   "git_oid": "55e836dc3a72182753cee2da9e713466b9d3fcf0",
+   "group": "modules",
+   "path": "RF_Module.3dshapes/ESP-12E.step",
+   "picture": "kicad3d_pictures/esp_12e.png",
+   "size_mm": [
+    16.0,
+    24.0,
+    3.2
+   ],
+   "triangles": 15004
+  },
+  "ffc_15": {
+   "agent_notes": "The flat cable enters from the side: leave a slot for it.",
+   "authors": [
+    "KiCad library contributors"
+   ],
+   "bytes": 307885,
+   "category": "electronics",
+   "colours": 1,
+   "description": "Flat flex cable connector, 15 contacts at 0.5 mm.",
+   "display_name": "FFC connector 15-pin, 0.5 mm (Hirose FH12)",
+   "electrical": {
+    "connectors": "15 contacts, 0.5 mm pitch flat cable"
+   },
+   "git_oid": "e20ae9177aca6d1b9f78e18d4bc163e8749bbbcf",
+   "group": "connectors",
+   "path": "Connector_FFC-FPC.3dshapes/Hirose_FH12-15S-0.5SH_1x15-1MP_P0.50mm_Horizontal.step",
+   "picture": "kicad3d_pictures/ffc_15.png",
+   "size_mm": [
+    11.6,
+    6.4,
+    2.0
+   ],
+   "triangles": 1856
+  },
+  "fuse_holder_5x20": {
+   "agent_notes": "Keep fingers off it at mains voltage: close the case around it.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 207372,
+   "category": "power",
+   "colours": 2,
+   "description": "Open board-mount clip holder for a 5 × 20 mm glass fuse.",
+   "display_name": "Fuse holder 5 × 20 mm (Schurter OGN)",
+   "electrical": {
+    "interface": "power"
+   },
+   "git_oid": "0170bb741fe7eb3a871f3c1eabea8d5211d5c4cc",
+   "group": "power",
+   "path": "Fuse.3dshapes/Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open.step",
+   "picture": "kicad3d_pictures/fuse_holder_5x20.png",
+   "size_mm": [
+    22.8,
+    9.6,
+    15.5
+   ],
+   "triangles": 1662
+  },
+  "fuse_holder_blade": {
+   "agent_notes": "Leave room to pull the fuse out.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 247684,
+   "category": "power",
+   "colours": 2,
+   "description": "Board-mount holder for a mini blade (car) fuse.",
+   "display_name": "Mini blade fuse holder (Keystone 3568)",
+   "electrical": {
+    "interface": "power"
+   },
+   "git_oid": "971bf748327308c7711ad2b4efd7707f1787969e",
+   "group": "power",
+   "path": "Fuse.3dshapes/Fuseholder_Blade_Mini_Keystone_3568.step",
+   "picture": "kicad3d_pictures/fuse_holder_blade.png",
+   "size_mm": [
+    16.0,
+    6.73,
+    10.16
+   ],
+   "triangles": 2474
+  },
+  "heatsink_aavid": {
+   "agent_notes": "Leave air round the fins; vent the case above it.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 151481,
+   "category": "mechanical",
+   "colours": 2,
+   "description": "Extruded board-mount heatsink for TO-220 parts.",
+   "display_name": "Heatsink AAVID 531002 (25 mm tall)",
+   "git_oid": "b4aa3abb1f498bc22a5445c12ee434c46605bedb",
+   "group": "relays",
+   "path": "Heatsink.3dshapes/Heatsink_AAVID_Extruded_531002B02500G_34.9x12.7mm_H25.4mm.step",
+   "picture": "kicad3d_pictures/heatsink_aavid.png",
+   "size_mm": [
+    34.92,
+    12.7,
+    29.36
+   ],
+   "triangles": 3204
+  },
+  "heatsink_to220": {
+   "agent_notes": "Leave air round the fins; vent the case above it.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 108900,
+   "category": "mechanical",
+   "colours": 1,
+   "description": "Board-mount finned heatsink for a TO-220 part.",
+   "display_name": "Heatsink for TO-220 (32 × 14 mm)",
+   "git_oid": "50a4590e611cf7a8c8008e691b7a2cc44b3f4bbb",
+   "group": "relays",
+   "path": "Heatsink.3dshapes/Heatsink_Stonecold_HS-132_32x14mm_2xFixation1.5mm.step",
+   "picture": "kicad3d_pictures/heatsink_to220.png",
+   "size_mm": [
+    32.0,
+    14.0,
+    28.4
+   ],
+   "triangles": 1404
+  },
+  "holder_18650": {
+   "agent_notes": "Leave room to lift the cell out (about 70 mm long).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 133175,
+   "category": "power",
+   "colours": 2,
+   "description": "Board-mount holder for one 18650 lithium-ion cell.",
+   "display_name": "18650 cell holder (Keystone 1042)",
+   "electrical": {
+    "interface": "power",
+    "voltage_v": 3.7,
+    "wiring": "one Li-ion 18650 cell"
+   },
+   "git_oid": "e0fd4f0a73a18811ed82b9da12e7d07a78da4bd4",
+   "group": "power",
+   "path": "Battery.3dshapes/BatteryHolder_Keystone_1042_1x18650.step",
+   "picture": "kicad3d_pictures/holder_18650.png",
+   "size_mm": [
+    86.41,
+    20.65,
+    19.83
+   ],
+   "triangles": 3314
+  },
+  "holder_2xaa": {
+   "agent_notes": "Give the cells a door or a lid to change them.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 164649,
+   "category": "power",
+   "colours": 2,
+   "description": "Board-mount holder for two AA cells.",
+   "display_name": "2×AA battery holder (Keystone 2462)",
+   "electrical": {
+    "interface": "power",
+    "voltage_v": 3.0,
+    "wiring": "two AA cells in series"
+   },
+   "git_oid": "b0f311ecd1f759df81d734d34a726f1a84232692",
+   "group": "power",
+   "path": "Battery.3dshapes/BatteryHolder_Keystone_2462_2xAA.step",
+   "picture": "kicad3d_pictures/holder_2xaa.png",
+   "size_mm": [
+    59.51,
+    32.92,
+    20.0
+   ],
+   "triangles": 5550
+  },
+  "holder_3xaaa": {
+   "agent_notes": "Give the cells a door to change them.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 192250,
+   "category": "power",
+   "colours": 2,
+   "description": "Board-mount holder for three AAA cells.",
+   "display_name": "3×AAA battery holder (Keystone 2479)",
+   "electrical": {
+    "interface": "power",
+    "voltage_v": 4.5,
+    "wiring": "three AAA cells in series"
+   },
+   "git_oid": "4ede335b0352ef8ff5a8d321664ae34154181b4c",
+   "group": "power",
+   "path": "Battery.3dshapes/BatteryHolder_Keystone_2479_3xAAA.step",
+   "picture": "kicad3d_pictures/holder_3xaaa.png",
+   "size_mm": [
+    52.63,
+    37.49,
+    15.0
+   ],
+   "triangles": 7216
+  },
+  "holder_cr2032": {
+   "agent_notes": "Leave room to slide the coin cell out.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 213965,
+   "category": "power",
+   "colours": 1,
+   "description": "Surface-mount holder for a 20 mm coin cell (CR2032).",
+   "display_name": "CR2032 coin-cell holder (Keystone 3034)",
+   "electrical": {
+    "interface": "power",
+    "voltage_v": 3.0,
+    "wiring": "one CR2032 coin cell"
+   },
+   "git_oid": "b2027977e74dcccf5659deab6aa5fcf272bc6457",
+   "group": "power",
+   "path": "Battery.3dshapes/BatteryHolder_Keystone_3034_1x20mm.step",
+   "picture": "kicad3d_pictures/holder_cr2032.png",
+   "size_mm": [
+    23.24,
+    16.41,
+    4.0
+   ],
+   "triangles": 2068
+  },
+  "holder_cr2032_tht": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 162098,
+   "category": "power",
+   "colours": 2,
+   "description": "Through-hole holder for a CR2032 coin cell.",
+   "display_name": "CR2032 coin-cell holder, through-hole (Keystone 1060)",
+   "electrical": {
+    "interface": "power",
+    "voltage_v": 3.0,
+    "wiring": "one CR2032 coin cell"
+   },
+   "git_oid": "431e8a32aa59bebaeb13d77a4c157d2977624544",
+   "group": "power",
+   "path": "Battery.3dshapes/BatteryHolder_Keystone_1060_1x2032.step",
+   "picture": "kicad3d_pictures/holder_cr2032_tht.png",
+   "size_mm": [
+    31.86,
+    16.0,
+    5.08
+   ],
+   "triangles": 2090
+  },
+  "idc_2x05": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 320579,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Shrouded, keyed 10-pin header for a ribbon cable.",
+   "display_name": "Box header 2×5 (IDC, 10-pin)",
+   "electrical": {
+    "connectors": "10 pins, 2.54 mm pitch, keyed"
+   },
+   "git_oid": "2f5a6af87f217e242c4c83363d792cd9ec9af800",
+   "group": "connectors",
+   "path": "Connector_IDC.3dshapes/IDC-Header_2x05_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/idc_2x05.png",
+   "size_mm": [
+    9.1,
+    20.36,
+    12.1
+   ],
+   "triangles": 1776
+  },
+  "idc_2x20": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 1112518,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Shrouded, keyed 40-pin header for a ribbon cable.",
+   "display_name": "Box header 2×20 (IDC, 40-pin)",
+   "electrical": {
+    "connectors": "40 pins, 2.54 mm pitch, keyed"
+   },
+   "git_oid": "0e7cbf795a6734a0521c19730646dbc9f180dd59",
+   "group": "connectors",
+   "path": "Connector_IDC.3dshapes/IDC-Header_2x20_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/idc_2x20.png",
+   "size_mm": [
+    9.1,
+    58.46,
+    12.1
+   ],
+   "triangles": 3216
+  },
+  "inductor_radial": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 39153,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Radial power inductor, 10 mm across.",
+   "display_name": "Inductor, radial Ø10 mm",
+   "git_oid": "0fa4e0b340b29ce3f9c61630cc40e4c0b4253a15",
+   "group": "passives",
+   "path": "Inductor_THT.3dshapes/L_Radial_D10.0mm_P5.00mm_Fastron_07M.step",
+   "picture": "kicad3d_pictures/inductor_radial.png",
+   "size_mm": [
+    10.0,
+    9.97,
+    15.75
+   ],
+   "triangles": 10580
+  },
+  "itr9608": {
+   "agent_notes": "Leave the slot open for the flag that passes through.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 186928,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Fork-shaped light barrier: something in the slot breaks the beam (end stops, encoders).",
+   "display_name": "Slotted opto switch (Everlight ITR9608)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "IR LED across a slot"
+   },
+   "git_oid": "5f8b3d2a32f91b434e25a0f131351f9b6501d5d2",
+   "group": "sensors",
+   "path": "OptoDevice.3dshapes/Everlight_ITR9608-F.step",
+   "picture": "kicad3d_pictures/itr9608.png",
+   "size_mm": [
+    13.0,
+    6.0,
+    15.6
+   ],
+   "triangles": 542
+  },
+  "jack_35mm": {
+   "agent_notes": "At the board edge, with a 6 mm hole in the wall.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 66529,
+   "category": "electronics",
+   "colours": 3,
+   "description": "3.5 mm stereo headphone jack, through-hole.",
+   "display_name": "3.5 mm audio jack, stereo (CUI SJ1-3523N)",
+   "electrical": {
+    "connectors": "3.5 mm TRS"
+   },
+   "git_oid": "2c288ba59c8b4f4de12e1ae31aed31f30fceaa22",
+   "group": "connectors",
+   "path": "Connector_Audio.3dshapes/Jack_3.5mm_CUI_SJ1-3523N_Horizontal.step",
+   "picture": "kicad3d_pictures/jack_35mm.png",
+   "size_mm": [
+    12.0,
+    14.3,
+    8.8
+   ],
+   "triangles": 1516
+  },
+  "jst_ph_2": {
+   "agent_notes": "Leave room to pull the plug straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 151559,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST PH board connector (B2B-PH-K), 2 pins at 2.00 mm: the usual LiPo cell plug.",
+   "display_name": "JST PH 2-pin, 2.00 mm, vertical",
+   "electrical": {
+    "connectors": "JST PH, 2 pins, 2.00 mm pitch"
+   },
+   "git_oid": "6618e86a2821524c790633684b60cad780da7bf5",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_ph_2.png",
+   "size_mm": [
+    5.9,
+    4.55,
+    9.4
+   ],
+   "triangles": 500
+  },
+  "jst_ph_3": {
+   "agent_notes": "Leave room to pull the plug straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 194344,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST PH board connector (B3B-PH-K), 3 pins at 2.00 mm: the usual LiPo cell plug.",
+   "display_name": "JST PH 3-pin, 2.00 mm, vertical",
+   "electrical": {
+    "connectors": "JST PH, 3 pins, 2.00 mm pitch"
+   },
+   "git_oid": "81670503363aff08e713a37e66013056a38da811",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_ph_3.png",
+   "size_mm": [
+    7.9,
+    4.55,
+    9.4
+   ],
+   "triangles": 588
+  },
+  "jst_ph_4": {
+   "agent_notes": "Leave room to pull the plug straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 236448,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST PH board connector (B4B-PH-K), 4 pins at 2.00 mm: the usual LiPo cell plug.",
+   "display_name": "JST PH 4-pin, 2.00 mm, vertical",
+   "electrical": {
+    "connectors": "JST PH, 4 pins, 2.00 mm pitch"
+   },
+   "git_oid": "c42f7989d39cf6cbe7c569c2962990811be9d44d",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_ph_4.png",
+   "size_mm": [
+    9.9,
+    4.55,
+    9.4
+   ],
+   "triangles": 676
+  },
+  "jst_ph_6": {
+   "agent_notes": "Leave room to pull the plug straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 321539,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST PH board connector (B6B-PH-K), 6 pins at 2.00 mm: the usual LiPo cell plug.",
+   "display_name": "JST PH 6-pin, 2.00 mm, vertical",
+   "electrical": {
+    "connectors": "JST PH, 6 pins, 2.00 mm pitch"
+   },
+   "git_oid": "a7dbe2b2d07f1a00a4bc8fa5e20bc759af8684fc",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_PH_B6B-PH-K_1x06_P2.00mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_ph_6.png",
+   "size_mm": [
+    13.9,
+    4.55,
+    9.4
+   ],
+   "triangles": 852
+  },
+  "jst_sh_2": {
+   "agent_notes": "The cable enters from the side, at the board edge: leave the side open.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 54957,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST SH surface-mount connector, 2 pins at 1.00 mm (Qwiic / STEMMA QT use the 4-pin one).",
+   "display_name": "JST SH 2-pin, 1.00 mm, side entry",
+   "electrical": {
+    "connectors": "JST SH, 2 pins, 1.00 mm pitch"
+   },
+   "git_oid": "0afd4fbfd30a9964fe8727e6bca78cb3356b9759",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal.step",
+   "picture": "kicad3d_pictures/jst_sh_2.png",
+   "size_mm": [
+    4.0,
+    4.95,
+    2.96
+   ],
+   "triangles": 244
+  },
+  "jst_sh_3": {
+   "agent_notes": "The cable enters from the side, at the board edge: leave the side open.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 63507,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST SH surface-mount connector, 3 pins at 1.00 mm (Qwiic / STEMMA QT use the 4-pin one).",
+   "display_name": "JST SH 3-pin, 1.00 mm, side entry",
+   "electrical": {
+    "connectors": "JST SH, 3 pins, 1.00 mm pitch"
+   },
+   "git_oid": "4079a2bfba476b7738855e3b9e3e41f16c955eeb",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal.step",
+   "picture": "kicad3d_pictures/jst_sh_3.png",
+   "size_mm": [
+    5.0,
+    4.95,
+    2.96
+   ],
+   "triangles": 284
+  },
+  "jst_sh_4": {
+   "agent_notes": "The cable enters from the side, at the board edge: leave the side open.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 72004,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST SH surface-mount connector, 4 pins at 1.00 mm (Qwiic / STEMMA QT use the 4-pin one).",
+   "display_name": "JST SH 4-pin, 1.00 mm, side entry",
+   "electrical": {
+    "connectors": "JST SH, 4 pins, 1.00 mm pitch"
+   },
+   "git_oid": "9db08a42ff2c5da9e89b20e42fa4c5f0aa8f1bf4",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal.step",
+   "picture": "kicad3d_pictures/jst_sh_4.png",
+   "size_mm": [
+    6.0,
+    4.95,
+    2.96
+   ],
+   "triangles": 324
+  },
+  "jst_sh_6": {
+   "agent_notes": "The cable enters from the side, at the board edge: leave the side open.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 89055,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST SH surface-mount connector, 6 pins at 1.00 mm (Qwiic / STEMMA QT use the 4-pin one).",
+   "display_name": "JST SH 6-pin, 1.00 mm, side entry",
+   "electrical": {
+    "connectors": "JST SH, 6 pins, 1.00 mm pitch"
+   },
+   "git_oid": "5d021c07996cdaf7020adaa8db885f7cedb32aa5",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal.step",
+   "picture": "kicad3d_pictures/jst_sh_6.png",
+   "size_mm": [
+    8.0,
+    4.95,
+    2.96
+   ],
+   "triangles": 404
+  },
+  "jst_xh_2": {
+   "agent_notes": "The mating plug stands about 10 mm above the board; leave room to pull it straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 144517,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST XH board connector (B2B-XH-A), 2 pins at 2.50 mm: battery balance leads, fans, sensors.",
+   "display_name": "JST XH 2-pin, 2.50 mm, vertical",
+   "electrical": {
+    "connectors": "JST XH, 2 pins, 2.50 mm pitch"
+   },
+   "git_oid": "8a72074af26cdf51a9788b0c6a063d06b696f813",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_xh_2.png",
+   "size_mm": [
+    7.4,
+    5.75,
+    10.4
+   ],
+   "triangles": 468
+  },
+  "jst_xh_3": {
+   "agent_notes": "The mating plug stands about 10 mm above the board; leave room to pull it straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 187051,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST XH board connector (B3B-XH-A), 3 pins at 2.50 mm: battery balance leads, fans, sensors.",
+   "display_name": "JST XH 3-pin, 2.50 mm, vertical",
+   "electrical": {
+    "connectors": "JST XH, 3 pins, 2.50 mm pitch"
+   },
+   "git_oid": "2ce78f644d7d06205d6178179fd05b467a17bbec",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_xh_3.png",
+   "size_mm": [
+    9.9,
+    5.75,
+    10.4
+   ],
+   "triangles": 556
+  },
+  "jst_xh_4": {
+   "agent_notes": "The mating plug stands about 10 mm above the board; leave room to pull it straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 222777,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST XH board connector (B4B-XH-A), 4 pins at 2.50 mm: battery balance leads, fans, sensors.",
+   "display_name": "JST XH 4-pin, 2.50 mm, vertical",
+   "electrical": {
+    "connectors": "JST XH, 4 pins, 2.50 mm pitch"
+   },
+   "git_oid": "71e209bf8b91d7fd43c82dd4563044ef39d7173b",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_xh_4.png",
+   "size_mm": [
+    12.4,
+    5.75,
+    10.4
+   ],
+   "triangles": 628
+  },
+  "jst_xh_5": {
+   "agent_notes": "The mating plug stands about 10 mm above the board; leave room to pull it straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 259033,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST XH board connector (B5B-XH-A), 5 pins at 2.50 mm: battery balance leads, fans, sensors.",
+   "display_name": "JST XH 5-pin, 2.50 mm, vertical",
+   "electrical": {
+    "connectors": "JST XH, 5 pins, 2.50 mm pitch"
+   },
+   "git_oid": "6836dd8cf4ecfce1ed2c70835869426b06ed1c95",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_xh_5.png",
+   "size_mm": [
+    14.9,
+    5.75,
+    10.4
+   ],
+   "triangles": 700
+  },
+  "jst_xh_6": {
+   "agent_notes": "The mating plug stands about 10 mm above the board; leave room to pull it straight up.",
+   "authors": [
+    "KiCad library contributors",
+    "Rene Poeschl",
+    "poeschlr@gmail.com"
+   ],
+   "bytes": 295109,
+   "category": "electronics",
+   "colours": 2,
+   "description": "JST XH board connector (B6B-XH-A), 6 pins at 2.50 mm: battery balance leads, fans, sensors.",
+   "display_name": "JST XH 6-pin, 2.50 mm, vertical",
+   "electrical": {
+    "connectors": "JST XH, 6 pins, 2.50 mm pitch"
+   },
+   "git_oid": "234f8edef5e58fd04d19245321589b2bdd7cce51",
+   "group": "connectors",
+   "path": "Connector_JST.3dshapes/JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical.step",
+   "picture": "kicad3d_pictures/jst_xh_6.png",
+   "size_mm": [
+    17.4,
+    5.75,
+    10.4
+   ],
+   "triangles": 772
+  },
+  "lcd_1602": {
+   "agent_notes": "Window the wall to the viewing area; mount it by its four corner holes.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 324316,
+   "category": "electronics",
+   "colours": 5,
+   "description": "The classic 16×2 character LCD module with backlight.",
+   "display_name": "LCD 16×2 character display (WC1602A)",
+   "electrical": {
+    "interface": "gpio",
+    "voltage_v": 5,
+    "wiring": "HD44780-style parallel interface, 16 pins"
+   },
+   "git_oid": "51e4860f7dc56dbf5de1ad379ac20c7346931c7d",
+   "group": "lights",
+   "path": "Display.3dshapes/WC1602A.step",
+   "picture": "kicad3d_pictures/lcd_1602.png",
+   "size_mm": [
+    80.0,
+    36.0,
+    15.0
+   ],
+   "triangles": 7880
+  },
+  "lcd_2004": {
+   "agent_notes": "Window the wall to the viewing area.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 1275809,
+   "category": "electronics",
+   "colours": 4,
+   "description": "20×4 character LCD module.",
+   "display_name": "LCD 20×4 character display (Newhaven)",
+   "electrical": {
+    "interface": "gpio",
+    "voltage_v": 5,
+    "wiring": "HD44780-style parallel interface"
+   },
+   "git_oid": "6d25e4e1b0dd4f728024a3c66558289b0191a012",
+   "group": "lights",
+   "path": "Display.3dshapes/NHD-0420H1Z.step",
+   "picture": "kicad3d_pictures/lcd_2004.png",
+   "size_mm": [
+    79.0,
+    36.0,
+    18.7
+   ],
+   "triangles": 9758
+  },
+  "ldr_5mm": {
+   "agent_notes": "It must see the light: a hole or a clear window over it.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 90335,
+   "category": "electronics",
+   "colours": 3,
+   "description": "5 mm photoresistor, the usual light sensor.",
+   "display_name": "Light-dependent resistor 5 mm (LDR)",
+   "electrical": {
+    "interface": "analog",
+    "wiring": "2 legs, resistance falls with light"
+   },
+   "git_oid": "fe76a116589e1cebba001fc7ed3f6ed471e93122",
+   "group": "sensors",
+   "path": "OptoDevice.3dshapes/R_LDR_5.1x4.3mm_P3.4mm_Vertical.step",
+   "picture": "kicad3d_pictures/ldr_5mm.png",
+   "size_mm": [
+    5.1,
+    4.3,
+    7.0
+   ],
+   "triangles": 944
+  },
+  "led_0805": {
+   "agent_notes": "Light it through a light pipe or a thin (0.6 mm) wall.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 78220,
+   "category": "electronics",
+   "colours": 3,
+   "description": "2.0 × 1.25 mm surface-mount LED.",
+   "display_name": "LED 0805 (SMD)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "with a series resistor"
+   },
+   "git_oid": "46b48d90167fe4e6606c5a8a6660499fb0e3d8b7",
+   "group": "lights",
+   "path": "LED_SMD.3dshapes/LED_0805_2012Metric.step",
+   "picture": "kicad3d_pictures/led_0805.png",
+   "size_mm": [
+    2.0,
+    1.25,
+    1.1
+   ],
+   "triangles": 488
+  },
+  "led_3mm": {
+   "agent_notes": "Shine it through a 3.2 mm hole.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 24358,
+   "category": "electronics",
+   "colours": 2,
+   "description": "3 mm round through-hole LED.",
+   "display_name": "LED 3 mm",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "anode (long leg) and cathode, with a series resistor"
+   },
+   "git_oid": "7dd975c16d1b07f274154b6404eae8ab718f7b1d",
+   "group": "lights",
+   "path": "LED_THT.3dshapes/LED_D3.0mm.step",
+   "picture": "kicad3d_pictures/led_3mm.png",
+   "size_mm": [
+    3.4,
+    3.8,
+    10.8
+   ],
+   "triangles": 772
+  },
+  "led_5mm": {
+   "agent_notes": "Shine it through a 5.2 mm hole or a thin wall.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 23819,
+   "category": "electronics",
+   "colours": 2,
+   "description": "5 mm round through-hole LED.",
+   "display_name": "LED 5 mm",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "anode (long leg) and cathode, with a series resistor"
+   },
+   "git_oid": "fa757a490e7bad27ec60e670bc0558d4219c48a7",
+   "group": "lights",
+   "path": "LED_THT.3dshapes/LED_D5.0mm.step",
+   "picture": "kicad3d_pictures/led_5mm.png",
+   "size_mm": [
+    5.39,
+    5.8,
+    14.1
+   ],
+   "triangles": 776
+  },
+  "led_5mm_rgb": {
+   "agent_notes": "Shine it through a 5.2 mm hole.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 38704,
+   "category": "electronics",
+   "colours": 2,
+   "description": "5 mm RGB LED with four legs.",
+   "display_name": "LED 5 mm RGB (4 legs)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "4 legs: red, green, blue and a common leg"
+   },
+   "git_oid": "a56d8c0b2595e257e874160bbb803680f1ef24f3",
+   "group": "lights",
+   "path": "LED_THT.3dshapes/LED_D5.0mm-4_RGB.step",
+   "picture": "kicad3d_pictures/led_5mm_rgb.png",
+   "size_mm": [
+    5.39,
+    5.8,
+    14.1
+   ],
+   "triangles": 808
+  },
+  "mic_mems": {
+   "agent_notes": "The sound hole is under it, through the board: open the case under the hole. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 51244,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Tiny digital MEMS microphone (bottom port).",
+   "display_name": "MEMS microphone I2S (Knowles SPH0645)",
+   "electrical": {
+    "interface": "other",
+    "voltage_v": 3.3,
+    "wiring": "I2S digital audio"
+   },
+   "git_oid": "6dae16373e2ed5495618233fe4f17cbabf18d78d",
+   "group": "sensors",
+   "path": "Sensor_Audio.3dshapes/Knowles_SPH0645LM4H-6_3.5x2.65mm.step",
+   "picture": "kicad3d_pictures/mic_mems.png",
+   "size_mm": [
+    2.65,
+    3.5,
+    0.98
+   ],
+   "triangles": 1324
+  },
+  "microsd": {
+   "agent_notes": "At the board edge, with a slot in the wall to insert the card.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 503357,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Push-push microSD card socket, surface mount.",
+   "display_name": "microSD card socket (Hirose DM3D)",
+   "electrical": {
+    "connectors": "microSD",
+    "interface": "spi",
+    "voltage_v": 3.3
+   },
+   "git_oid": "83624b2a83418bd5e2d9f7a6311350dbe622d1ac",
+   "group": "connectors",
+   "path": "Connector_Card.3dshapes/microSD_HC_Hirose_DM3D-SF.step",
+   "picture": "kicad3d_pictures/microsd.png",
+   "size_mm": [
+    11.95,
+    11.45,
+    1.55
+   ],
+   "triangles": 1836
+  },
+  "molex_kk_2": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "Ray Benitez",
+    "hackscribble@outlook.com"
+   ],
+   "bytes": 95956,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Molex KK 254 friction-lock header, 2 pins at 2.54 mm (fans, PC-style leads).",
+   "display_name": "Molex KK 254, 2-pin, vertical",
+   "electrical": {
+    "connectors": "Molex KK, 2 pins, 2.54 mm pitch"
+   },
+   "git_oid": "cb7876f001fe4d1051f127a500629c3d330a8741",
+   "group": "connectors",
+   "path": "Connector_Molex.3dshapes/Molex_KK-254_AE-6410-02A_1x02_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/molex_kk_2.png",
+   "size_mm": [
+    5.08,
+    5.8,
+    15.26
+   ],
+   "triangles": 244
+  },
+  "molex_kk_4": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "Ray Benitez",
+    "hackscribble@outlook.com"
+   ],
+   "bytes": 171204,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Molex KK 254 friction-lock header, 4 pins at 2.54 mm (fans, PC-style leads).",
+   "display_name": "Molex KK 254, 4-pin, vertical",
+   "electrical": {
+    "connectors": "Molex KK, 4 pins, 2.54 mm pitch"
+   },
+   "git_oid": "bd0fcb79ea273047ace80633eaf8880e17db598a",
+   "group": "connectors",
+   "path": "Connector_Molex.3dshapes/Molex_KK-254_AE-6410-04A_1x04_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/molex_kk_4.png",
+   "size_mm": [
+    10.16,
+    5.8,
+    15.26
+   ],
+   "triangles": 412
+  },
+  "molex_kk_6": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "Ray Benitez",
+    "hackscribble@outlook.com"
+   ],
+   "bytes": 246507,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Molex KK 254 friction-lock header, 6 pins at 2.54 mm (fans, PC-style leads).",
+   "display_name": "Molex KK 254, 6-pin, vertical",
+   "electrical": {
+    "connectors": "Molex KK, 6 pins, 2.54 mm pitch"
+   },
+   "git_oid": "dccd6bbedb815a9d20833ba0c22d343b4c19e52a",
+   "group": "connectors",
+   "path": "Connector_Molex.3dshapes/Molex_KK-254_AE-6410-06A_1x06_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/molex_kk_6.png",
+   "size_mm": [
+    15.24,
+    5.8,
+    15.26
+   ],
+   "triangles": 580
+  },
+  "oled_ssd1306": {
+   "agent_notes": "Show its glass through a window the size of the active area; hold the board by its holes, not the glass.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 155871,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Adafruit's 0.96-inch monochrome OLED breakout (SSD1306).",
+   "display_name": "OLED display 128×64 SSD1306 (Adafruit)",
+   "electrical": {
+    "interface": "i2c",
+    "voltage_v": 3.3,
+    "wiring": "SSD1306 controller"
+   },
+   "git_oid": "5dce1105f438906f07f3546a297a56d99feb25a2",
+   "group": "lights",
+   "path": "Display.3dshapes/Adafruit_SSD1306.step",
+   "picture": "kicad3d_pictures/oled_ssd1306.png",
+   "size_mm": [
+    35.05,
+    35.56,
+    3.0
+   ],
+   "triangles": 6602
+  },
+  "omron_b3f": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 129389,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Omron B3F 6 × 6 mm through-hole tactile switch.",
+   "display_name": "Tactile button Omron B3F",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "closed while pressed"
+   },
+   "git_oid": "4e32d2bcaee9c595727e7d1490cd75d7da8ac0c8",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_TH_Tactile_Omron_B3F-100x.step",
+   "picture": "kicad3d_pictures/omron_b3f.png",
+   "size_mm": [
+    7.67,
+    6.0,
+    7.8
+   ],
+   "triangles": 6584
+  },
+  "pico": {
+   "agent_notes": "Leave the Micro-USB end reachable through a wall opening.",
+   "authors": [
+    "KiCad library contributors",
+    "Peter S. Hollander"
+   ],
+   "bytes": 876847,
+   "category": "electronics",
+   "colours": 12,
+   "description": "Raspberry Pi Pico microcontroller board (RP2040) with a Micro-USB socket.",
+   "display_name": "Raspberry Pi Pico",
+   "electrical": {
+    "connectors": "Micro-USB; castellated 2.54 mm pins",
+    "interface": "usb",
+    "wiring": "RP2040; 3.3 V logic"
+   },
+   "git_oid": "d5566713b01e8d6ec43d3ed9664e3b9dd08b03fe",
+   "group": "modules",
+   "path": "Module.3dshapes/RaspberryPi_Pico.step",
+   "picture": "kicad3d_pictures/pico.png",
+   "size_mm": [
+    21.0,
+    52.3,
+    3.7
+   ],
+   "triangles": 20310
+  },
+  "pico_headers": {
+   "agent_notes": "Leave room under the pins for a socket or breadboard.",
+   "authors": [
+    "KiCad library contributors",
+    "Peter S. Hollander"
+   ],
+   "bytes": 1536025,
+   "category": "electronics",
+   "colours": 13,
+   "description": "The Pico with pin headers soldered on, for a breadboard or socket.",
+   "display_name": "Raspberry Pi Pico with headers",
+   "electrical": {
+    "connectors": "Micro-USB; 2 rows of 20 pins",
+    "interface": "usb",
+    "wiring": "RP2040; 3.3 V logic"
+   },
+   "git_oid": "5a59b4dfd1d5d1d0479beef8bb33f3b8c42af78e",
+   "group": "modules",
+   "path": "Module.3dshapes/RaspberryPi_Pico_AddedHeaders_H2.54mm.step",
+   "picture": "kicad3d_pictures/pico_headers.png",
+   "size_mm": [
+    21.0,
+    52.3,
+    12.59
+   ],
+   "triangles": 23200
+  },
+  "pico_w": {
+   "agent_notes": "Keep the antenna end (away from the USB) clear of metal; leave the Micro-USB reachable.",
+   "authors": [
+    "KiCad library contributors",
+    "Peter S. Hollander"
+   ],
+   "bytes": 871502,
+   "category": "electronics",
+   "colours": 12,
+   "description": "Raspberry Pi Pico W: the Pico with Wi-Fi and Bluetooth.",
+   "display_name": "Raspberry Pi Pico W",
+   "electrical": {
+    "connectors": "Micro-USB",
+    "interface": "usb",
+    "wiring": "RP2040 with Wi-Fi; 3.3 V logic"
+   },
+   "git_oid": "dfe0321acff4a519519c6782fce585569c9cf443",
+   "group": "modules",
+   "path": "Module.3dshapes/RaspberryPi_Pico_W.step",
+   "picture": "kicad3d_pictures/pico_w.png",
+   "size_mm": [
+    21.0,
+    52.3,
+    3.7
+   ],
+   "triangles": 20310
+  },
+  "pin_header_1x02": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 75616,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 2 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×2, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "2 pins, 2.54 mm pitch"
+   },
+   "git_oid": "3e456da8744dcc51eb6374fbb0ad153327bf8d3a",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x02.png",
+   "size_mm": [
+    2.54,
+    5.08,
+    11.54
+   ],
+   "triangles": 148
+  },
+  "pin_header_1x03": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 110633,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 3 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×3, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "3 pins, 2.54 mm pitch"
+   },
+   "git_oid": "a6c73f21c7e11c061330fe7424bb3ff1293344d1",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x03_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x03.png",
+   "size_mm": [
+    2.54,
+    7.62,
+    11.54
+   ],
+   "triangles": 220
+  },
+  "pin_header_1x04": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 145684,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 4 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×4, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "4 pins, 2.54 mm pitch"
+   },
+   "git_oid": "8fc3394e7852e45045613e2e671cccf1ee461924",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x04_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x04.png",
+   "size_mm": [
+    2.54,
+    10.16,
+    11.54
+   ],
+   "triangles": 292
+  },
+  "pin_header_1x05": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 180757,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 5 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×5, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "5 pins, 2.54 mm pitch"
+   },
+   "git_oid": "eac3c8876509778fc837629e61e2faad364d7e6f",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x05.png",
+   "size_mm": [
+    2.54,
+    12.7,
+    11.54
+   ],
+   "triangles": 364
+  },
+  "pin_header_1x06": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 215953,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 6 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×6, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "6 pins, 2.54 mm pitch"
+   },
+   "git_oid": "fbd6c6e37252b326f7a5b46004fd563e5b242036",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x06_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x06.png",
+   "size_mm": [
+    2.54,
+    15.24,
+    11.54
+   ],
+   "triangles": 436
+  },
+  "pin_header_1x08": {
+   "agent_notes": "Leave room above the pins for Dupont plugs (about 15 mm).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 286283,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, one row of 8 pins at 2.54 mm (0.1 in).",
+   "display_name": "Pin header 1×8, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "8 pins, 2.54 mm pitch"
+   },
+   "git_oid": "74ab7a87285299ef11e6c13180384cd69046213f",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x08_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_1x08.png",
+   "size_mm": [
+    2.54,
+    20.32,
+    11.54
+   ],
+   "triangles": 580
+  },
+  "pin_header_2x03": {
+   "agent_notes": "Leave room above the pins for a plug or ribbon cable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 185520,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, two rows of 3 pins at 2.54 mm.",
+   "display_name": "Pin header 2×3, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "6 pins in 2 rows, 2.54 mm pitch"
+   },
+   "git_oid": "ce9f5676d9e6f9bf073eadb52d9c22505a876697",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x03_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_2x03.png",
+   "size_mm": [
+    5.08,
+    7.62,
+    11.54
+   ],
+   "triangles": 364
+  },
+  "pin_header_2x05": {
+   "agent_notes": "Leave room above the pins for a plug or ribbon cable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 305690,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, two rows of 5 pins at 2.54 mm.",
+   "display_name": "Pin header 2×5, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "10 pins in 2 rows, 2.54 mm pitch"
+   },
+   "git_oid": "40f2edb4009b9ce0665c1650dd36790235863274",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x05_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_2x05.png",
+   "size_mm": [
+    5.08,
+    12.7,
+    11.54
+   ],
+   "triangles": 604
+  },
+  "pin_header_2x10": {
+   "agent_notes": "Leave room above the pins for a plug or ribbon cable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 616807,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, two rows of 10 pins at 2.54 mm.",
+   "display_name": "Pin header 2×10, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "20 pins in 2 rows, 2.54 mm pitch"
+   },
+   "git_oid": "19ffe948f1f7ec16f84a4595f88e1c98c950aa5a",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_2x10.png",
+   "size_mm": [
+    5.08,
+    25.4,
+    11.54
+   ],
+   "triangles": 1204
+  },
+  "pin_header_2x20": {
+   "agent_notes": "Leave room above the pins for a plug or ribbon cable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 1251227,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Straight male header, two rows of 20 pins at 2.54 mm.",
+   "display_name": "Pin header 2×20, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "40 pins in 2 rows, 2.54 mm pitch"
+   },
+   "git_oid": "6bf573b20037637398517be2636d2e39a24a96e0",
+   "group": "connectors",
+   "path": "Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x20_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_header_2x20.png",
+   "size_mm": [
+    5.08,
+    50.8,
+    11.54
+   ],
+   "triangles": 2404
+  },
+  "pin_socket_1x02": {
+   "agent_notes": "The module plugged into it sits about 8.5 mm above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 49920,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female header, one row of 2 contacts at 2.54 mm: a module plugs in.",
+   "display_name": "Pin socket 1×2, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "2 contacts, 2.54 mm pitch"
+   },
+   "git_oid": "cbc41224f878f57b1f9b91a988f10e1f3905f94a",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x02_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_1x02.png",
+   "size_mm": [
+    2.54,
+    5.08,
+    11.6
+   ],
+   "triangles": 204
+  },
+  "pin_socket_1x03": {
+   "agent_notes": "The module plugged into it sits about 8.5 mm above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 70155,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female header, one row of 3 contacts at 2.54 mm: a module plugs in.",
+   "display_name": "Pin socket 1×3, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "3 contacts, 2.54 mm pitch"
+   },
+   "git_oid": "6aab170106f36e4dce70095507e1dffee693f99f",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x03_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_1x03.png",
+   "size_mm": [
+    2.54,
+    7.62,
+    11.6
+   ],
+   "triangles": 292
+  },
+  "pin_socket_1x04": {
+   "agent_notes": "The module plugged into it sits about 8.5 mm above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 90163,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female header, one row of 4 contacts at 2.54 mm: a module plugs in.",
+   "display_name": "Pin socket 1×4, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "4 contacts, 2.54 mm pitch"
+   },
+   "git_oid": "77353983be7b0e842595accd340c762616e37a84",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x04_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_1x04.png",
+   "size_mm": [
+    2.54,
+    10.16,
+    11.6
+   ],
+   "triangles": 380
+  },
+  "pin_socket_1x06": {
+   "agent_notes": "The module plugged into it sits about 8.5 mm above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 130279,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female header, one row of 6 contacts at 2.54 mm: a module plugs in.",
+   "display_name": "Pin socket 1×6, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "6 contacts, 2.54 mm pitch"
+   },
+   "git_oid": "7b1cda562758f31d24fe2aeb606c53d10ab1e188",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x06_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_1x06.png",
+   "size_mm": [
+    2.54,
+    15.24,
+    11.6
+   ],
+   "triangles": 556
+  },
+  "pin_socket_1x08": {
+   "agent_notes": "The module plugged into it sits about 8.5 mm above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 170058,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female header, one row of 8 contacts at 2.54 mm: a module plugs in.",
+   "display_name": "Pin socket 1×8, 2.54 mm, straight",
+   "electrical": {
+    "connectors": "8 contacts, 2.54 mm pitch"
+   },
+   "git_oid": "fc2f0bb038616d52e80d428279e657904933866e",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x08_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_1x08.png",
+   "size_mm": [
+    2.54,
+    20.32,
+    11.6
+   ],
+   "triangles": 732
+  },
+  "pin_socket_2x20": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 842942,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Female 2×20 header, the Raspberry Pi GPIO size.",
+   "display_name": "Pin socket 2×20, 2.54 mm (Raspberry Pi HAT)",
+   "electrical": {
+    "connectors": "40 contacts in 2 rows, 2.54 mm pitch"
+   },
+   "git_oid": "7c208420fe2a4ed073114b4818fd804800800ee0",
+   "group": "connectors",
+   "path": "Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x20_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/pin_socket_2x20.png",
+   "size_mm": [
+    5.08,
+    50.8,
+    11.6
+   ],
+   "triangles": 3548
+  },
+  "pot_3386": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 78060,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Single-turn square trimmer.",
+   "display_name": "Trimmer potentiometer (Bourns 3386W)",
+   "electrical": {
+    "interface": "analog",
+    "wiring": "3 pins: ends and wiper"
+   },
+   "git_oid": "5e4c0d37e16a480b998433e152e5f94c19efda0f",
+   "group": "controls",
+   "path": "Potentiometer_THT.3dshapes/Potentiometer_Bourns_3386W_Horizontal.step",
+   "picture": "kicad3d_pictures/pot_3386.png",
+   "size_mm": [
+    9.53,
+    4.83,
+    15.5
+   ],
+   "triangles": 952
+  },
+  "pot_trimmer": {
+   "agent_notes": "Leave the adjusting screw reachable, or a hole above it.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 46171,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Multi-turn trimmer, adjusted with a small screwdriver from the top.",
+   "display_name": "Trimmer potentiometer (Bourns 3296W)",
+   "electrical": {
+    "interface": "analog",
+    "wiring": "3 pins: ends and wiper"
+   },
+   "git_oid": "8ec54fc33f96c1f8d5e8b191e41271cb6fddfa91",
+   "group": "controls",
+   "path": "Potentiometer_THT.3dshapes/Potentiometer_Bourns_3296W_Vertical.step",
+   "picture": "kicad3d_pictures/pot_trimmer.png",
+   "size_mm": [
+    9.53,
+    4.83,
+    17.07
+   ],
+   "triangles": 756
+  },
+  "relay_g5le": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 125686,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Omron G5LE 10 A power relay.",
+   "display_name": "Relay Omron G5LE",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "coil + changeover contact"
+   },
+   "git_oid": "65b4073f40a0ec71a75f67d6fa74cc4de28f537f",
+   "group": "relays",
+   "path": "Relay_THT.3dshapes/Relay_SPDT_Omron-G5LE-1.step",
+   "picture": "kicad3d_pictures/relay_g5le.png",
+   "size_mm": [
+    16.5,
+    22.5,
+    22.5
+   ],
+   "triangles": 1332
+  },
+  "relay_g5v1": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 100092,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Small signal relay, 1 A.",
+   "display_name": "Relay Omron G5V-1 (signal)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "coil + changeover contact"
+   },
+   "git_oid": "bc11861e752da888868c4389a30b361fd6a65137",
+   "group": "relays",
+   "path": "Relay_THT.3dshapes/Relay_SPDT_Omron_G5V-1.step",
+   "picture": "kicad3d_pictures/relay_g5v1.png",
+   "size_mm": [
+    7.3,
+    12.3,
+    13.4
+   ],
+   "triangles": 624
+  },
+  "relay_srd": {
+   "agent_notes": "Mains on its contacts needs a closed case and creepage around the pins.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 113450,
+   "category": "electronics",
+   "colours": 2,
+   "description": "The blue sugar-cube relay of the common relay modules.",
+   "display_name": "Relay SRD (Songle/Sanyou, 10 A)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "coil + changeover contact (COM, NO, NC)"
+   },
+   "git_oid": "4cf49d36111b55f1f727fa43b1bf2c323292021d",
+   "group": "relays",
+   "path": "Relay_THT.3dshapes/Relay_SPDT_SANYOU_SRD_Series_Form_C.step",
+   "picture": "kicad3d_pictures/relay_srd.png",
+   "size_mm": [
+    19.6,
+    15.4,
+    19.0
+   ],
+   "triangles": 1396
+  },
+  "resistor_0204": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 24507,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Small through-hole resistor, 3.6 mm body.",
+   "display_name": "Resistor 1/8 W, axial (DIN0204)",
+   "git_oid": "e511d493388d1ef2c2737d87215d38da87a65006",
+   "group": "passives",
+   "path": "Resistor_THT.3dshapes/R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal.step",
+   "picture": "kicad3d_pictures/resistor_0204.png",
+   "size_mm": [
+    8.12,
+    1.6,
+    4.6
+   ],
+   "triangles": 4632
+  },
+  "resistor_0207": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 24557,
+   "category": "electronics",
+   "colours": 2,
+   "description": "The usual through-hole resistor, 6.3 mm body, lying flat.",
+   "display_name": "Resistor 1/4 W, axial (DIN0207)",
+   "git_oid": "5ce0ecf34df005a5fdee66cba0091c2fddd37213",
+   "group": "passives",
+   "path": "Resistor_THT.3dshapes/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.step",
+   "picture": "kicad3d_pictures/resistor_0207.png",
+   "size_mm": [
+    10.76,
+    2.5,
+    5.5
+   ],
+   "triangles": 4684
+  },
+  "resistor_0207_v": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 24620,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Through-hole resistor standing up, leads 2.54 mm apart.",
+   "display_name": "Resistor 1/4 W, standing",
+   "git_oid": "eb3ff280656e1f7d2d75b7198788cd38b700c187",
+   "group": "passives",
+   "path": "Resistor_THT.3dshapes/R_Axial_DIN0207_L6.3mm_D2.5mm_P2.54mm_Vertical.step",
+   "picture": "kicad3d_pictures/resistor_0207_v.png",
+   "size_mm": [
+    4.09,
+    2.49,
+    12.5
+   ],
+   "triangles": 4684
+  },
+  "rj45": {
+   "agent_notes": "At the board edge, with a wall opening for the plug and its latch.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 267884,
+   "category": "electronics",
+   "colours": 4,
+   "description": "Shielded RJ45 Ethernet jack.",
+   "display_name": "RJ45 Ethernet socket (Amphenol RJHSE538X)",
+   "electrical": {
+    "connectors": "RJ45"
+   },
+   "git_oid": "8c9e4315d2a68c22d7cbb67288441074f88fdbc0",
+   "group": "connectors",
+   "path": "Connector_RJ.3dshapes/RJ45_Amphenol_RJHSE538X.step",
+   "picture": "kicad3d_pictures/rj45.png",
+   "size_mm": [
+    16.51,
+    16.05,
+    18.68
+   ],
+   "triangles": 2900
+  },
+  "seven_seg": {
+   "agent_notes": "Show it through a window in the wall the size of its face.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 341791,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Four-digit 0.56-inch red 7-segment LED display.",
+   "display_name": "7-segment display, 4 digits 0.56 in (Kingbright CA56-12)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "common anode, multiplexed digits"
+   },
+   "git_oid": "c9b723074aa165a102108017b66d401595d12637",
+   "group": "lights",
+   "path": "Display_7Segment.3dshapes/CA56-12EWA.step",
+   "picture": "kicad3d_pictures/seven_seg.png",
+   "size_mm": [
+    19.0,
+    50.3,
+    12.2
+   ],
+   "triangles": 4276
+  },
+  "seven_seg_1": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 395144,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Single 0.3-inch 7-segment LED digit.",
+   "display_name": "7-segment display, 1 digit 0.3 in (MAN71A)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "common anode"
+   },
+   "git_oid": "300ffc25a9de803e697c1f8c71eda190c7e301fe",
+   "group": "lights",
+   "path": "Display_7Segment.3dshapes/MAN71A.step",
+   "picture": "kicad3d_pictures/seven_seg_1.png",
+   "size_mm": [
+    9.8,
+    18.75,
+    9.16
+   ],
+   "triangles": 1092
+  },
+  "sharp_gp2y0a41": {
+   "agent_notes": "Both lenses look out: open the wall in front of them.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 371309,
+   "category": "electronics",
+   "colours": 6,
+   "description": "Sharp infrared distance sensor, 4 to 30 cm.",
+   "display_name": "Sharp GP2Y0A41 IR distance sensor (4-30 cm)",
+   "electrical": {
+    "interface": "analog",
+    "voltage_v": 5,
+    "wiring": "VCC, GND, analog out"
+   },
+   "git_oid": "06bca7ccf612919e33112fbacf3c4cc611c17021",
+   "group": "sensors",
+   "path": "OptoDevice.3dshapes/Sharp_GP2Y0A41SK0F.step",
+   "picture": "kicad3d_pictures/sharp_gp2y0a41.png",
+   "size_mm": [
+    44.48,
+    18.9,
+    13.5
+   ],
+   "triangles": 3368
+  },
+  "sk6812_mini": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors"
+   ],
+   "bytes": 72498,
+   "category": "electronics",
+   "colours": 1,
+   "description": "3.2 × 2.8 mm addressable RGB LED that shines down through a board hole (keyboard backlights).",
+   "display_name": "SK6812 MINI-E addressable LED (reverse mount)",
+   "electrical": {
+    "interface": "gpio",
+    "voltage_v": 5,
+    "wiring": "VDD, GND, DIN, DOUT"
+   },
+   "git_oid": "386d77d5b8ebd6f8e6c798f8de8cddcc51cd1ac0",
+   "group": "lights",
+   "path": "LED_SMD.3dshapes/LED_SK6812MINI-E_3.2x2.8mm_P1.5mm_ReverseMount.step",
+   "picture": "kicad3d_pictures/sk6812_mini.png",
+   "size_mm": [
+    5.88,
+    2.8,
+    1.78
+   ],
+   "triangles": 736
+  },
+  "slide_spdt": {
+   "agent_notes": "Its lever reaches through a slot in the wall; make the slot the travel plus 1 mm.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 324539,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Small slide switch, single pole double throw: an on/off switch.",
+   "display_name": "Slide switch SPDT (C&K OS102011)",
+   "electrical": {
+    "interface": "power",
+    "wiring": "common pin to one of two"
+   },
+   "git_oid": "44fe285adc90f1e27759defac42339587c3378e5",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_Slide_SPDT_Straight_CK_OS102011MS2Q.step",
+   "picture": "kicad3d_pictures/slide_spdt.png",
+   "size_mm": [
+    8.6,
+    4.3,
+    11.5
+   ],
+   "triangles": 1216
+  },
+  "slide_spdt_angled": {
+   "agent_notes": "At the board edge, with a slot in the wall for the lever.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 302605,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Slide switch with its lever out of the board edge.",
+   "display_name": "Slide switch SPDT, right angle",
+   "electrical": {
+    "interface": "power",
+    "wiring": "common pin to one of two"
+   },
+   "git_oid": "3ccd0ab4efcfc9b437e505cf8ea7787707f086d5",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_Slide_SPDT_Angled_CK_OS102011MA1Q.step",
+   "picture": "kicad3d_pictures/slide_spdt_angled.png",
+   "size_mm": [
+    8.6,
+    8.4,
+    7.5
+   ],
+   "triangles": 1260
+  },
+  "tact_12mm": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 114970,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Large 12 × 12 mm push button.",
+   "display_name": "Tactile button 12 × 12 mm (Würth)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "closed while pressed"
+   },
+   "git_oid": "f88720242e104e53ac44c4739e8154657703ade3",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_PUSH-12mm_Wuerth-430476085716.step",
+   "picture": "kicad3d_pictures/tact_12mm.png",
+   "size_mm": [
+    13.94,
+    12.0,
+    12.06
+   ],
+   "triangles": 4088
+  },
+  "tact_6mm": {
+   "agent_notes": "Press it through a hole in the wall with a printed cap, or leave its stem reachable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 179934,
+   "category": "electronics",
+   "colours": 2,
+   "description": "The common 6 × 6 mm through-hole push button.",
+   "display_name": "Tactile button 6 × 6 mm",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "2 contacts, closed while pressed"
+   },
+   "git_oid": "73847d937a4844520f546b1419ffdf41c351c204",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_PUSH_6mm.step",
+   "picture": "kicad3d_pictures/tact_6mm.png",
+   "size_mm": [
+    7.17,
+    6.0,
+    7.8
+   ],
+   "triangles": 2720
+  },
+  "tact_6mm_h13": {
+   "agent_notes": "The stem reaches through a 4 mm hole in a lid above the board.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 179958,
+   "category": "electronics",
+   "colours": 2,
+   "description": "6 × 6 mm push button with a tall stem, to reach through a case wall.",
+   "display_name": "Tactile button 6 × 6 mm, tall (13 mm)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "closed while pressed"
+   },
+   "git_oid": "d1514a86128c27abb4d4c87f21bd5a186586bf80",
+   "group": "controls",
+   "path": "Button_Switch_THT.3dshapes/SW_PUSH_6mm_H13mm.step",
+   "picture": "kicad3d_pictures/tact_6mm_h13.png",
+   "size_mm": [
+    7.17,
+    6.0,
+    16.5
+   ],
+   "triangles": 2720
+  },
+  "tact_smd": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 89647,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Surface-mount 6 × 6 mm push button.",
+   "display_name": "Tactile button 6 × 6 mm, SMD (C&K PTS645)",
+   "electrical": {
+    "interface": "gpio",
+    "wiring": "closed while pressed"
+   },
+   "git_oid": "d4fa321c91ad4a504c0a207b5202b35a1c5375f6",
+   "group": "controls",
+   "path": "Button_Switch_SMD.3dshapes/SW_SPST_PTS645Sx43SMTR92.step",
+   "picture": "kicad3d_pictures/tact_smd.png",
+   "size_mm": [
+    9.0,
+    6.0,
+    4.3
+   ],
+   "triangles": 3832
+  },
+  "tcrt5000": {
+   "agent_notes": "Face it at the surface, a few mm away, with nothing in between.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 521897,
+   "category": "electronics",
+   "colours": 5,
+   "description": "Reflective infrared sensor: line following, near-object detection.",
+   "display_name": "TCRT5000 reflective IR sensor",
+   "electrical": {
+    "interface": "analog",
+    "wiring": "IR LED + phototransistor"
+   },
+   "git_oid": "bae4dde0cebbd45d5a95544b68ca6b89ab402074",
+   "group": "sensors",
+   "path": "OptoDevice.3dshapes/Vishay_TCRT5000.step",
+   "picture": "kicad3d_pictures/tcrt5000.png",
+   "size_mm": [
+    10.21,
+    7.1,
+    10.5
+   ],
+   "triangles": 7860
+  },
+  "terminal_2": {
+   "agent_notes": "Leave the wire entry side and the screw tops reachable.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 70419,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Screw terminal block, 2 ways: wires clamp in with a screwdriver.",
+   "display_name": "Screw terminal 2-way, 5.08 mm (Phoenix MKDS)",
+   "electrical": {
+    "connectors": "2 screw terminals, 5.08 mm pitch"
+   },
+   "git_oid": "be8238d3c104f062c382cffd19d553bc0b1a3912",
+   "group": "connectors",
+   "path": "TerminalBlock_Phoenix.3dshapes/TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal.step",
+   "picture": "kicad3d_pictures/terminal_2.png",
+   "size_mm": [
+    10.9,
+    9.8,
+    17.3
+   ],
+   "triangles": 942
+  },
+  "terminal_3": {
+   "agent_notes": "Leave the wire entry side and the screw tops reachable.",
+   "authors": [
+    "KiCad library contributors",
+    "KiCAD",
+    "kicad"
+   ],
+   "bytes": 97839,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Screw terminal block, 3 ways.",
+   "display_name": "Screw terminal 3-way, 5.08 mm (Phoenix MKDS)",
+   "electrical": {
+    "connectors": "3 screw terminals, 5.08 mm pitch"
+   },
+   "git_oid": "96096375452a7415a9e0c7799eeccfbd377b3dd2",
+   "group": "connectors",
+   "path": "TerminalBlock_Phoenix.3dshapes/TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal.step",
+   "picture": "kicad3d_pictures/terminal_3.png",
+   "size_mm": [
+    15.98,
+    9.8,
+    17.3
+   ],
+   "triangles": 1380
+  },
+  "to220_h": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 134115,
+   "category": "electronics",
+   "colours": 2,
+   "description": "TO-220 power package bent flat on the board.",
+   "display_name": "TO-220, lying flat",
+   "git_oid": "2c0cec0811cbf1f4cd46936fd9238f62ad1be89c",
+   "group": "chips",
+   "path": "Package_TO_SOT_THT.3dshapes/TO-220-3_Horizontal_TabDown.step",
+   "picture": "kicad3d_pictures/to220_h.png",
+   "size_mm": [
+    10.25,
+    19.74,
+    10.78
+   ],
+   "triangles": 548
+  },
+  "to220_v": {
+   "agent_notes": "It gets hot under load: leave air round it or bolt a heatsink to its tab (M3).",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 85145,
+   "category": "electronics",
+   "colours": 2,
+   "description": "TO-220 power package, standing: voltage regulators, MOSFETs, transistors.",
+   "display_name": "TO-220 (7805 regulator, MOSFET)",
+   "git_oid": "c004111e8b0761c383ba0712022e5abe7ead9402",
+   "group": "chips",
+   "path": "Package_TO_SOT_THT.3dshapes/TO-220-3_Vertical.step",
+   "picture": "kicad3d_pictures/to220_v.png",
+   "size_mm": [
+    10.25,
+    4.46,
+    28.52
+   ],
+   "triangles": 348
+  },
+  "to92": {
+   "agent_notes": "",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 27693,
+   "category": "electronics",
+   "colours": 2,
+   "description": "Small three-leg package: transistors, small regulators, the DS18B20 sensor.",
+   "display_name": "TO-92 (2N2222, BC547, DS18B20)",
+   "git_oid": "49dbf564021370cac6e5787c647271f3ed9685a0",
+   "group": "chips",
+   "path": "Package_TO_SOT_THT.3dshapes/TO-92_Inline.step",
+   "picture": "kicad3d_pictures/to92.png",
+   "size_mm": [
+    4.83,
+    3.74,
+    9.8
+   ],
+   "triangles": 164
+  },
+  "usb_a": {
+   "agent_notes": "At the board edge, with a wall opening.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 1260760,
+   "category": "electronics",
+   "colours": 4,
+   "description": "USB-A receptacle, through-hole, horizontal.",
+   "display_name": "USB-A socket (Molex 67643)",
+   "electrical": {
+    "connectors": "USB-A",
+    "interface": "usb"
+   },
+   "git_oid": "95248cb2e41dd6bac0bdd6fb3d208d48f473debd",
+   "group": "connectors",
+   "path": "Connector_USB.3dshapes/USB_A_Molex_67643_Horizontal.step",
+   "picture": "kicad3d_pictures/usb_a.png",
+   "size_mm": [
+    16.1,
+    15.26,
+    11.53
+   ],
+   "triangles": 7060
+  },
+  "usb_c_16p": {
+   "agent_notes": "Put it at the board edge and cut a 9.5 × 3.6 mm (+ clearance) slot in the wall for the plug's overmould.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 1059856,
+   "category": "electronics",
+   "colours": 3,
+   "description": "USB-C receptacle for a board edge, USB 2.0 + power (16 contacts).",
+   "display_name": "USB-C socket, 16-pin (GCT USB4105)",
+   "electrical": {
+    "connectors": "USB-C",
+    "interface": "usb"
+   },
+   "git_oid": "874d38dccc95aaa482eb8a0e9294e28ed47aa971",
+   "group": "connectors",
+   "path": "Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal.step",
+   "picture": "kicad3d_pictures/usb_c_16p.png",
+   "size_mm": [
+    8.94,
+    7.78,
+    4.26
+   ],
+   "triangles": 7312
+  },
+  "usb_c_6p": {
+   "agent_notes": "At the board edge, with a wall slot for the plug.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 891892,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Power-only USB-C receptacle (6 contacts, no data).",
+   "display_name": "USB-C socket, power only (GCT USB4125)",
+   "electrical": {
+    "connectors": "USB-C",
+    "interface": "power",
+    "voltage_v": 5
+   },
+   "git_oid": "19f70054a82ebd04cd48e04991ba4c05b02bf049",
+   "group": "connectors",
+   "path": "Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4125-xx-x_6P_TopMnt_Horizontal.step",
+   "picture": "kicad3d_pictures/usb_c_6p.png",
+   "size_mm": [
+    8.94,
+    6.9,
+    4.26
+   ],
+   "triangles": 5516
+  },
+  "usb_micro_b": {
+   "agent_notes": "At the board edge, with a wall slot.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 2490795,
+   "category": "electronics",
+   "colours": 3,
+   "description": "Micro-USB B receptacle for a board edge.",
+   "display_name": "Micro-USB socket (Molex 47346)",
+   "electrical": {
+    "connectors": "Micro-USB",
+    "interface": "usb"
+   },
+   "git_oid": "a0ee65305119c1566421acc48760b981372b031c",
+   "group": "connectors",
+   "path": "Connector_USB.3dshapes/USB_Micro-B_Molex_47346-0001.step",
+   "picture": "kicad3d_pictures/usb_micro_b.png",
+   "size_mm": [
+    7.98,
+    5.42,
+    2.94
+   ],
+   "triangles": 6990
+  },
+  "vl53l1x": {
+   "agent_notes": "It looks straight out of its top: give it a clear window or hole in the wall in front of it. A board part: it is soldered to a circuit board, so place it on the board you design around, not loose in the case.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 197802,
+   "category": "electronics",
+   "colours": 6,
+   "description": "ST VL53L1X laser distance sensor chip, up to 4 m.",
+   "display_name": "VL53L1X time-of-flight distance sensor (chip)",
+   "electrical": {
+    "interface": "i2c",
+    "voltage_v": 3.3
+   },
+   "git_oid": "cbe4ee5ab2a3e6d7b21c396e58610666ed0e20df",
+   "group": "sensors",
+   "path": "Sensor_Distance.3dshapes/ST_VL53L1x.step",
+   "picture": "kicad3d_pictures/vl53l1x.png",
+   "size_mm": [
+    4.9,
+    2.5,
+    1.57
+   ],
+   "triangles": 1176
+  },
+  "wemos_d1_mini": {
+   "agent_notes": "Leave its USB end reachable.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp"
+   ],
+   "bytes": 84228,
+   "category": "electronics",
+   "colours": 3,
+   "description": "WEMOS D1 mini ESP8266 Wi-Fi board.",
+   "display_name": "WEMOS D1 mini",
+   "electrical": {
+    "interface": "usb",
+    "wiring": "ESP8266 with Wi-Fi"
+   },
+   "git_oid": "a266e97d43a1cc46e08f389dc1930158632e8ad3",
+   "group": "modules",
+   "path": "RF_Module.3dshapes/WEMOS_D1_mini_light.step",
+   "picture": "kicad3d_pictures/wemos_d1_mini.png",
+   "size_mm": [
+    26.0,
+    34.5,
+    7.95
+   ],
+   "triangles": 3060
+  },
+  "ws2812b": {
+   "agent_notes": "Diffuse it with a thin wall or a light pipe.",
+   "authors": [
+    "KiCad library contributors",
+    "kicad StepUp",
+    "ksu"
+   ],
+   "bytes": 123535,
+   "category": "electronics",
+   "colours": 3,
+   "description": "5 × 5 mm addressable RGB LED (NeoPixel).",
+   "display_name": "WS2812B addressable RGB LED (5050)",
+   "electrical": {
+    "interface": "gpio",
+    "voltage_v": 5,
+    "wiring": "VDD, GND, DIN, DOUT: data chained LED to LED"
+   },
+   "git_oid": "48adbf2780ba22baf8132966f5bb79a820f23a25",
+   "group": "lights",
+   "path": "LED_SMD.3dshapes/LED_WS2812B_PLCC4_5.0x5.0mm_P3.2mm.step",
+   "picture": "kicad3d_pictures/ws2812b.png",
+   "size_mm": [
+    5.4,
+    5.0,
+    1.6
+   ],
+   "triangles": 1266
+  }
+ },
+ "revision": "afa6aab16f43a736cd062b8c853863e753653921",
+ "source": "gitlab.com/kicad/libraries/kicad-packages3D"
+}

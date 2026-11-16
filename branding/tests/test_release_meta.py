@@ -24,7 +24,7 @@ sys.path.insert(0, BRANDING)
 
 import release_meta as rm  # noqa: E402
 
-APP_ID = "dev.atech.Atelier"
+APP_ID = "dev.atech.Prompt2Product"
 BUILD = os.path.join(BRANDING, "build_appimage.sh")
 METAINFO = os.path.join(BRANDING, APP_ID + ".metainfo.xml")
 DESKTOP = os.path.join(BRANDING, APP_ID + ".desktop")
@@ -58,7 +58,7 @@ class ReleaseMeta(unittest.TestCase):
                     rm.read_version(p)
 
     def test_out_name_carries_version(self):
-        self.assertEqual(rm.out_name("1.2.3"), "AtechAtelier-1.2.3-x86_64.AppImage")
+        self.assertEqual(rm.out_name("1.2.3"), "Prompt2Product-1.2.3-x86_64.AppImage")
 
     def test_build_release_wiring(self):
         src = _read(BUILD)
@@ -67,9 +67,9 @@ class ReleaseMeta(unittest.TestCase):
         self.assertNotIn("AtechStudio-", src)
         self.assertNotIn('APP_ID="dev.atech.Studio"', src)
         # update info: the decided channel, embedded only when -u is accepted
-        self.assertIn('gh-releases-zsync|$GH_OWNER|$GH_REPO|latest|AtechAtelier-*x86_64.AppImage.zsync', src)
+        self.assertIn('gh-releases-zsync|$GH_OWNER|$GH_REPO|latest|Prompt2Product-*x86_64.AppImage.zsync', src)
         self.assertIn('GH_OWNER="atechdotdev"', src)
-        self.assertIn('GH_REPO="atech-atelier"', src)
+        self.assertIn('GH_REPO="prompt2product"', src)
         self.assertIn('"$HERE/repack.sh" "$ROOT" "$OUT"', src)
         self.assertIn('ATECH_DEFAULT_UPDATE_INFO="$DEFAULT_UPDATE_INFO"', src)
         # appimagetool is never fetched: no URL to it in either script
@@ -78,14 +78,14 @@ class ReleaseMeta(unittest.TestCase):
             self.assertNotRegex(text, r"https?://\S*appimagetool")
         # the branches themselves are exercised by tests/test_repack.sh
         # doc dir renamed; every release licence file is installed
-        self.assertIn('DOC_NAME="atech-atelier"', src)
-        self.assertIn("LICENSE_FILES=(LICENSE LICENSE.GPL-3.0 LICENSE-ATTRIBUTION.md "
+        self.assertIn('DOC_NAME="prompt2product"', src)
+        self.assertIn("LICENSE_FILES=(LICENSE LICENSE-ATTRIBUTION.md "
                       "LICENSE-models.md NOTICE)", src)
         self.assertIn('"$AA/data/models/LICENSE-models.md"', src)
 
     def test_desktop_template(self):
         t = _read(DESKTOP)
-        self.assertIn("\nName=Atech Atelier\n", t)
+        self.assertIn("\nName=Prompt2Product\n", t)
         self.assertIn("\nIcon=%s\n" % APP_ID, t)
         self.assertNotIn("Studio", t)
 
@@ -114,12 +114,12 @@ class ReleaseMeta(unittest.TestCase):
     def test_metainfo_fields(self):
         root = ET.fromstring(_stamped_metainfo())
         self.assertEqual(root.findtext("id"), APP_ID)
-        self.assertEqual(root.findtext("name"), "Atech Atelier")
+        self.assertEqual(root.findtext("name"), "Prompt2Product")
         self.assertEqual(root.findtext("project_license"),
-                         "LGPL-3.0-or-later AND CC-BY-NC-4.0")
+                         "GPL-3.0-or-later AND CC-BY-NC-4.0")
         self.assertEqual(root.findtext("launchable"), APP_ID + ".desktop")
         self.assertEqual(root.find("url[@type='homepage']").text,
-                         "https://github.com/atechdotdev/atech-atelier")
+                         "https://github.com/atechdotdev/prompt2product")
         self.assertIsNotNone(root.find("content_rating[@type='oars-1.1']"))
         rel = root.find("releases/release")
         self.assertEqual(rel.get("version"), rm.read_version())

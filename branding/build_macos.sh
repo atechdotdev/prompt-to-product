@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# build_macos.sh — assemble "Atech Atelier.app" and its disk image from the
+# build_macos.sh — assemble "Prompt2Product.app" and its disk image from the
 # official FreeCAD macOS release plus our branding and our addon. The macOS
 # twin of build_appimage.sh: the same payload, the same gate (verify_tree.py),
 # the same measured ATECH_CHANGES.txt.
@@ -11,7 +11,7 @@
 # the build rewrites Contents/Info.plist (identity, icon, version), adds the
 # Atech icon, and replaces the bundle's code signature (any added file breaks
 # FreeCAD's seal). The exact list is MEASURED at the end
-# (Contents/Resources/share/doc/atech-atelier/ATECH_CHANGES.txt).
+# (Contents/Resources/share/doc/prompt2product/ATECH_CHANGES.txt).
 #
 # Usage (on a Mac):
 #   ./build_macos.sh [--arch arm64|x86_64] [-i FreeCAD.dmg] [-o out.dmg]
@@ -21,12 +21,13 @@
 #   --arch A         arm64 (Apple silicon) or x86_64 (Intel). Default: this Mac's.
 #   -i FILE          the upstream FreeCAD DMG. Default: downloaded from the
 #                    pinned URL in upstream.env into
-#                    ${XDG_CACHE_HOME:-~/.cache}/atech-atelier-build/. Either
+#                    ${XDG_CACHE_HOME:-~/.cache}/prompt2product-build/ (or the
+#                    old atech-atelier-build/ when only that exists). Either
 #                    way its sha256 must match upstream.env, and the
 #                    FreeCAD.app inside must carry the FreeCAD Project
 #                    Association's valid Developer ID signature.
 #   -o FILE          the disk image. Default:
-#                    dist/AtechAtelier-<version>-macOS-<arch>.dmg
+#                    dist/Prompt2Product-<version>-macOS-<arch>.dmg
 #   --app-only       build, verify and sign the .app; no disk image.
 #   --build-dir DIR  where to assemble (default dist/build-macos-<arch>). WIPED.
 #   --artifacts DIR  the Atech module library (as build_appimage.sh).
@@ -73,9 +74,9 @@ CRANE_FROM=""
 APP_ONLY=0
 BRAND_FROM_REPO=0
 DEV_UNLICENSED=0
-APP_ID="dev.atech.Atelier"
-PRODUCT="Atech Atelier"
-DOC_NAME="atech-atelier"
+APP_ID="dev.atech.Prompt2Product"
+PRODUCT="Prompt2Product"
+DOC_NAME="prompt2product"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -118,7 +119,11 @@ SIGN_ID="${ATECH_MAC_SIGN_IDENTITY:-}"
 echo "$PRODUCT $VERSION — macOS $ARCH build"
 
 # ------------------------------------------------------ 0. the pinned upstream
-CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/atech-atelier-build"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/prompt2product-build"
+# The cache under the product's previous name holds the same pinned DMG and
+# its unpacked FreeCAD.app (7.5 min to make): reuse it rather than start over.
+OLD_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/atech-atelier-build"
+[[ ! -d "$CACHE" && -d "$OLD_CACHE" ]] && CACHE="$OLD_CACHE"
 mkdir -p "$CACHE"
 if [[ -z "$UPSTREAM" ]]; then
   UPSTREAM="$CACHE/$(basename "$UPSTREAM_URL")"
@@ -175,14 +180,14 @@ for f in "$PRESETS" "$BOARD_GLB" "$ASSEMBLY_MD" \
          "$REPO/projects/atech_ports.py" "$REPO/projects/atech_modules.py"; do
   [[ -f "$f" ]] || fail "required input missing: $f"
 done
-LICENSE_FILES=(LICENSE LICENSE.GPL-3.0 LICENSE-ATTRIBUTION.md LICENSE-models.md NOTICE)
+LICENSE_FILES=(LICENSE LICENSE-ATTRIBUTION.md LICENSE-models.md NOTICE)
 if [[ "$DEV_UNLICENSED" != 1 ]]; then
   for f in "${LICENSE_FILES[@]}"; do
     [[ -f "$REPO/$f" ]] || fail "root $f is missing. For a local development build pass --dev-unlicensed."
   done
-  grep -q 'GNU LESSER GENERAL PUBLIC LICENSE' "$REPO/LICENSE" \
+  grep -q '^ *GNU GENERAL PUBLIC LICENSE' "$REPO/LICENSE" \
     && grep -q 'Version 3, 29 June 2007' "$REPO/LICENSE" \
-    || fail "root LICENSE is not the LGPL v3 text (R722)"
+    || fail "root LICENSE is not the GPL v3 text"
   grep -q 'section 7(b)' "$REPO/LICENSE-ATTRIBUTION.md" \
     || fail "root LICENSE-ATTRIBUTION.md lacks the credit term (R722)"
   grep -q 'CC BY-NC 4.0' "$REPO/LICENSE-models.md" \
@@ -301,10 +306,14 @@ install -m 0644 "$REPO/projects/atech_ports.py" "$REPO/projects/atech_modules.py
   "$REPO/projects/user_parts.py" "$REPO/projects/simready.py" \
   "$REPO/projects/simready_usd2stl.py" "$REPO/projects/simready_index.json" \
   "$REPO/projects/shelf.py" "$REPO/projects/shelf_step2stl.py" "$REPO/projects/shelf_index.json" \
+  "$REPO/projects/kicad3d.py" "$REPO/projects/kicad3d_index.json" \
   "$AA/projects/"
 # R780: the off-the-shelf parts' pictures (drawn by build_shelf_index.py)
 mkdir -p "$AA/projects/shelf_pictures"
 install -m 0644 "$REPO"/projects/shelf_pictures/*.png "$AA/projects/shelf_pictures/"
+# R980: the KiCad components' pictures (drawn by build_kicad3d_index.py)
+mkdir -p "$AA/projects/kicad3d_pictures"
+install -m 0644 "$REPO"/projects/kicad3d_pictures/*.png "$AA/projects/kicad3d_pictures/"
 install -m 0644 "$PRESETS" "$AA/data/models/presets.yaml"
 if [[ -f "$REPO/LICENSE-models.md" ]]; then
   install -m 0644 "$REPO/LICENSE-models.md" "$AA/data/models/LICENSE-models.md"
@@ -400,7 +409,7 @@ PY_LIB="$(cd "$RES/lib" && ls -d python3.* | head -1)"
 SITE="$RES/lib/$PY_LIB/site-packages"
 [[ -d "$SITE" ]] || fail "no site-packages in the bundle ($SITE)"
 printf '%s\n' \
-  "# Atech Atelier (branding/build_macos.sh): never write bytecode into the signed app bundle." \
+  "# Prompt2Product (branding/build_macos.sh): never write bytecode into the signed app bundle." \
   "import sys; sys.dont_write_bytecode = True" > "$SITE/atech-no-bytecode.pth"
 prune_pyc
 ( cd "$SCRATCH_HOME" && fc_clean "$RUN/python" -I -m compileall -q \
@@ -466,10 +475,10 @@ and licences is in Contents/Resources/share/doc/FreeCAD/, and CREDITS.md
 Source distributed with this release
   The complete corresponding source of the copyleft components is published
   on the release page this disk image is downloaded from:
-    https://github.com/atechdotdev/atech-atelier/releases/tag/v$VERSION
+    https://github.com/atechdotdev/prompt2product/releases/tag/v$VERSION
   including FreeCAD's own source archive (freecad_source_$FREECAD_TAG.tar.gz).
   Atech's own source is the release's "Source code" archive and the
-  repository https://github.com/atechdotdev/atech-atelier at tag v$VERSION.
+  repository https://github.com/atechdotdev/prompt2product at tag v$VERSION.
 
 FreeCAD
   The FreeCAD part of this application is the official macOS release, with
@@ -487,7 +496,7 @@ Bundled libraries
 Atech's additions
   Listed, measured against the upstream bundle, in
   Contents/Resources/share/doc/$DOC_NAME/ATECH_CHANGES.txt. Atech's code is
-  LGPL-3.0-or-later with a credit term (LICENSE, LICENSE-ATTRIBUTION.md);
+  GPL-3.0-or-later with a credit term (LICENSE, LICENSE-ATTRIBUTION.md);
   the Atech module models and presets.yaml are
   CC BY-NC 4.0 (LICENSE-models.md).
 

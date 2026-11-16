@@ -1177,18 +1177,26 @@ def main():
         f = _facts(o)
         if o.Name in view:
             f["view"] = view[o.Name]
+        if o.Label in _IMPORTED:
+            # R930: brought in unchanged (refs/, atech_refs.keep): a broken
+            # mesh from its maker is said, never sent back as the agent's.
+            f["imported"] = True
         if f.get("valid") is False:
             res["warnings"].append("%s: shape is INVALID" % o.Label)
-            problems.append("%s: shape is INVALID" % o.Label)
+            if not f.get("imported"):
+                problems.append("%s: shape is INVALID" % o.Label)
         if f.get("solids") == 0:
             res["warnings"].append("%s: no solid (a surface or wire only)" % o.Label)
-            problems.append("%s: no solid" % o.Label)
+            if not f.get("imported"):
+                # R970: an open mesh from its maker (a scan, a game model)
+                # is kept as the shell it is
+                problems.append("%s: no solid" % o.Label)
         elif (f.get("solids") or 0) > 1:
             res["warnings"].append(
                 "%s: %d separate solids in one object - fine for a pair of "
                 "parts, a bug if it was meant to be one fused body"
                 % (o.Label, f["solids"]))
-            frag = atech_geom.fragments(o.Shape)
+            frag = None if f.get("imported") else atech_geom.fragments(o.Shape)
             if frag:
                 f["fragment"] = frag
                 problems.append(
@@ -1232,6 +1240,12 @@ def main():
         res["warnings"].append(unote)
     res["overlaps"] = hits + uhits
     for h in hits:
+        if h.get("a") in _IMPORTED and h.get("b") in _IMPORTED:
+            # R970: two parts of an imported file touching is how its maker
+            # drew them (a part pressed into another), never the agent's
+            res["warnings"].append("IMPORTED OVERLAP " + atech_geom.overlap_text(h)
+                                   + " - both kept from the imported file")
+            continue
         problems.append("OVERLAP " + atech_geom.overlap_text(h))
     for h in uhits:
         problems.append("OVERLAP " + atech_geom.overlap_text(h) + (
@@ -1625,6 +1639,10 @@ def _fastening(res, ends, code, ws=None):
     res["fastening"] = r
     for row in r["loose"]:
         line = atech_geom.fastening_text(row)
+        if row["part"] in _IMPORTED and all(m in _IMPORTED for m in row["meets"]):
+            # R970: two parts of an imported file: joined as its maker meant
+            res["warnings"].append("IMPORTED " + line)
+            continue
         (res.setdefault("problems", []) if _quality() else res["warnings"]).append(line)
 
 
@@ -1715,7 +1733,7 @@ def _turn_guard(ws, before):
             atech_geom._write_record(path, before)
     except OSError:
         pass
-    return ("%s: model.py %s %s, Atelier's turn file (put back). model.py builds "
+    return ("%s: model.py %s %s, Prompt2Product's turn file (put back). model.py builds "
             "the part; it must not touch intent.json or its records"
             % (atech_geom.INTENT_CHANGED,
                "planted" if before is None else "deleted" if now is None
@@ -2325,7 +2343,7 @@ def _fitted_after(doc, res):
         res["fitted_after_missing"] = missing
         res.setdefault("notes", []).append(
             "intent.json fitted_after names %s: model.py has not built %s yet (the "
-            "parts are: %s). Fine while you are still adding %s; Atelier fails the "
+            "parts are: %s). Fine while you are still adding %s; Prompt2Product fails the "
             "turn if %s still missing at the end" % (
                 ", ".join(missing), "it" if len(missing) == 1 else "them",
                 ", ".join(sorted(set(parts.values()))) or "none",

@@ -60,7 +60,7 @@ class TreeChanges(unittest.TestCase):
     def test_removed_and_relinked(self):
         os.remove(os.path.join(self.root, "org.freecad.FreeCAD.desktop"))
         os.remove(os.path.join(self.root, ".DirIcon"))
-        os.symlink("dev.atech.Atelier.svg", os.path.join(self.root, ".DirIcon"))
+        os.symlink("dev.atech.Prompt2Product.svg", os.path.join(self.root, ".DirIcon"))
         out = self._diff()
         self.assertIn("REMOVED (1 file):\n  org.freecad.FreeCAD.desktop", out)
         self.assertIn("MODIFIED (1 file):\n  .DirIcon", out)

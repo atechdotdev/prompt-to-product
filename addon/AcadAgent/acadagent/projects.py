@@ -1,4 +1,4 @@
-"""projects — build Atech-module projects inside Atech Atelier.
+"""projects — build Atech-module projects inside Prompt2Product.
 
 The builder itself lives in the repo at projects/atech_modules.py so it can be
 run headlessly by the gate. This module is the thin GUI side: locate it, run
@@ -11,7 +11,7 @@ import FreeCAD
 
 
 MISSING_LIBRARY = ("Atech modules are missing from this installation. "
-                   "Reinstall Atech Atelier.")
+                   "Reinstall Prompt2Product.")
 
 
 def _builder_candidates(here=None):

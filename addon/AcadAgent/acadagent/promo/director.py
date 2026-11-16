@@ -63,7 +63,7 @@ def defaults(context, parts):
     if mods:
         tag = "Built around Atech %s" % (", ".join(mods[:3]) + (" and more" if len(mods) > 3 else ""))
     else:
-        tag = "Designed in Atech Atelier"
+        tag = "Designed in Prompt2Product"
     text = " ".join([title, str(context.get("request") or ""), str(context.get("archetype") or "")])
     env = environment_for(text)
     return {"title": title[:40], "tagline": tag[:80], "environment": env,

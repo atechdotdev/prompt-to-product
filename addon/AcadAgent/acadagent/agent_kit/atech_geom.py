@@ -2217,7 +2217,7 @@ def intent_changed(workspace, record=False):
         return None
     how = "was deleted" if cur is None else "was edited"
     if turn is not None:
-        return ("%s: intent.json %s during Atelier's fix turn. A fix turn repairs "
+        return ("%s: intent.json %s during Prompt2Product's fix turn. A fix turn repairs "
                 "model.py against the target the build was judged by (%s): put "
                 "intent.json back to that. Only a value from the user's own "
                 "message may replace it - the user's message wins over "
@@ -2398,7 +2398,7 @@ def _size_misses(want, shapes, labels, tol, source, pairs=False):
                 at("hi"), word[1], hi[k] + 0.0, at("lo"), word[0], lo[k] + 0.0)
         # S44: say WHICH extent it is and where it runs - the round-5 miss
         # (phone stand 75.34 vs 80) was a part reaching z = -4.65
-        line = ("%s: %s %g mm, Atelier measured %g mm (%g mm %s) - the %s extent, "
+        line = ("%s: %s %g mm, Prompt2Product measured %g mm (%g mm %s) - the %s extent, "
                 "%.2f .. %.2f mm%s. Change that extent by %g mm (sizes pair "
                 "with the measured extents largest first: %s)" % (
                     source[0], source[1], w, round(m, 2), round(abs(m - w), 2),
@@ -2567,7 +2567,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
                     if notes is not None:
                         notes.append(
                             "slots: you intended %d x diameter %g mm round channel(s); "
-                            "Atelier found %d round channel(s) and %d open rectangular "
+                            "Prompt2Product found %d round channel(s) and %d open rectangular "
                             "notch(es) %g mm wide (%s) - counted as the intended slots. "
                             "For a rectangular notch say so in intent.json: \"slots\": "
                             "{\"count\": %d, \"w_mm\": %g} (d_mm is a round channel's "
@@ -2575,7 +2575,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
                                           _notch_text(rect), n_sl, d_sl))
                     continue
                 miss("slots", "slots: you intended %d x %s round channel(s) open along "
-                           "their length, Atelier found %d (channels found: %s%s)" % (
+                           "their length, Prompt2Product found %d (channels found: %s%s)" % (
                                n_sl, "diameter %g mm" % d_sl if d_sl else "any diameter",
                                len(mine), _chan_text(chan) or "none",
                                "; open rectangular notches %g mm wide: %s" % (
@@ -2604,7 +2604,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
                 # tapped) - the agent's own choice, a NOTE
                 if notes is not None:
                     notes.append(
-                        "holes: you intended %s; Atelier found %d closed hole(s) of "
+                        "holes: you intended %s; Prompt2Product found %d closed hole(s) of "
                         "diameter %s - the count matches, and %g mm is not a diameter "
                         "the user's message gives (a NOTE, not a failure): keep the "
                         "diameter the part needs (a tapped hole is smaller than a "
@@ -2615,7 +2615,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
                 # never a demand to close them
                 if notes is not None:
                     notes.append(
-                        "holes: you intended %s; Atelier found %d closed hole(s) and "
+                        "holes: you intended %s; Prompt2Product found %d closed hole(s) and "
                         "%d round channel(s) open along their length (%s) - counted "
                         "as the intended holes. If they are meant as slots, say so "
                         "in intent.json (\"slots\": {\"count\": %d, \"d_mm\": %g}); "
@@ -2629,7 +2629,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
                 # as R170's channels: never a demand to drill more
                 if notes is not None:
                     notes.append(
-                        "holes: you intended %s; Atelier found %d hole(s)%s - counted "
+                        "holes: you intended %s; Prompt2Product found %d hole(s)%s - counted "
                         "as the intended holes (a NOTE, not a failure)" % (
                             what, n_got, coaxial_text(
                                 found if d_want is None else
@@ -2638,7 +2638,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
             elif n_got != n_want:
                 counted = found if d_want is None else [
                     b for b in found + cav if near(b["d_mm"], d_want)]
-                miss("holes", "holes: you intended %s, Atelier found %d (all closed hole "
+                miss("holes", "holes: you intended %s, Prompt2Product found %d (all closed hole "
                      "diameters found: %s%s%s)%s" % (
                          what, n_got, fd or "none",
                          "; round channels open along their length (slots), "
@@ -2654,7 +2654,7 @@ def intent_problems(intent, shapes, request=None, labels=None, notes=None):
         n_bodies = len(shapes)
         n_solids = sum(len(s.Solids) for s in shapes)
         if n_bodies != 1 or n_solids != 1:
-            out.append("single body: you intended one solid, Atelier found %d "
+            out.append("single body: you intended one solid, Prompt2Product found %d "
                        "object(s) with %d solid(s)" % (n_bodies, n_solids))
     return out
 
@@ -2881,7 +2881,7 @@ def _rect_slot_line(shapes, n, w, depth=None):
     if len(got) == n:
         return None
     anyw = _rect_notches_all(shapes, w) if depth is not None else got
-    return ("slots: you intended %s; Atelier measured %d (%s%s) - CANNOT DETERMINE "
+    return ("slots: you intended %s; Prompt2Product measured %d (%s%s) - CANNOT DETERMINE "
             "(a NOTE, not a failure): the probe sees notches between two flat, "
             "axis-aligned walls only. If the part has the notches the user asked "
             "for, keep it and say what was measured; if a notch is missing, add it"
@@ -6435,15 +6435,24 @@ def _jsonable(v):
 # number and the fix. Keyed by the user's words in build.ARCHETYPES'
 # categories (test_check_gates_r280 holds the two tables equal).
 ARCHETYPE_GATES = (
-    # R802/R803: the starter examples' rows (build.ARCHETYPES order); no
-    # image gate of their own yet.
+    # build.ARCHETYPES' rows in its order (R802/R803 starter rows and the
+    # R940 products have no image gate of their own yet: None).
+    ('bird feeder camera', ('bird feeder', 'bird cam', 'bird camera', 'birdhouse', 'bird house', 'nest box', 'feeder camera', 'feeder cam'), None),
+    ('flip timer', ('flip timer', 'focus timer', 'focus cube', 'flip cube', 'pomodoro', 'cube timer'), None),
+    ('coffee scale', ('coffee scale', 'pour-over scale', 'pour over scale', 'barista scale', 'espresso scale', 'kitchen scale', 'food scale', 'weighing scale'), None),
+    ('turntable', ('turntable', 'lazy susan', 'product spinner', 'rotating platform', 'spinning platform', 'rotating display'), None),
+    ('retro tv', ('retro tv', 'tiny tv', 'mini tv', 'vintage tv', 'crt', 'television'), None),
+    ('trophy plaque', ('follower counter', 'subscriber counter', 'follower count', 'subscriber count', 'creator trophy', 'desk trophy'), None),
+    ('giant button', ('giant button', 'big red button', 'sound button', 'hype button', 'meme button', 'airhorn', 'panic button', 'buzzer'), None),
+    ('character speaker', ('rubber duck', 'debug duck', 'duck'), None),
     ('balancing robot', ('self-balancing', 'self balancing', 'balancing robot', 'balance bot', 'balancing bot', 'balancebot', 'segway', 'inverted pendulum'), None),
     ('robot arm dock', ('robot arm', 'robotic arm', 'arm dock', 'arm base', 'so-101', 'so101', 'so-arm100'), None),
     ('motion light', ('motion light', 'motion sensor light', 'motion sensor', 'motion-sensing', 'motion sensing', 'motion-activated', 'motion activated', 'pir'), None),
     ('air monitor', ('air monitor', 'air quality', 'air-quality', 'co2', 'carbon dioxide', 'air sensor', 'indoor air'), None),
-    ('planter', ('planter', 'plant pot', 'flower pot', 'flowerpot', 'herb garden', 'cachepot'), None),
+    ('planter', ('planter', 'plant pot', 'pot with a face', 'plant pal', 'plant buddy', 'flower pot', 'flowerpot', 'herb garden', 'cachepot'), None),
     ('feeder', ('feeder', 'pet feeder', 'cat feeder', 'dog feeder', 'kibble', 'treat dispenser'), None),
     ('doorbell', ('doorbell', 'door bell', 'intercom', 'entry phone', 'door camera'), None),
+    ('camera', ('retro camera', 'pixel camera', 'toy camera', 'instant camera', 'kids camera', 'digital camera', 'snapshot camera', 'point-and-shoot', 'point and shoot'), None),
     ('arcade', ('arcade', 'bartop', 'arcade cabinet'), None),
     ('music box', ('music box', 'musicbox', 'jukebox', 'record player'), None),
     ('parking sign', ('parking', 'garage'), None),
@@ -6451,17 +6460,14 @@ ARCHETYPE_GATES = (
     ('frame', ('photo frame', 'picture frame', 'digital frame', 'photoframe', 'frame display'), None),
     ('metronome', ('metronome', 'tempo', 'bpm'), None),
     ('macro pad', ('macro pad', 'macropad', 'stream deck', 'keypad', 'keyboard'), None),
-    ("vehicle", ("car", "truck", "tank", "boat", "vehicle", "rover",
-                 "buggy", "4x4", "bus", "tractor", "train", "kart"), "vehicle"),
-    ("robot or character", ("robot", "character", "pet", "creature",
-                            "mascot", "animal", "droid", "buddy"), "robot"),
-    ("speaker", ("speaker", "radio", "soundbar", "boombox"), "speaker"),
-    ("handheld", ("handheld", "controller", "gamepad", "remote", "console",
-                  "game", "pager", "tamagotchi"), "handheld"),
-    ("lamp", ("lamp", "lantern", "nightlight", "night light", "desk light"), "lamp"),
-    ("clock", ("clock", "alarm", "timer"), "clock"),
-    ("fan", ("fan",), "fan"),
-    ("weather station", ("weather", "thermometer", "barometer", "station"), None),
+    ('vehicle', ('car', 'truck', 'tank', 'boat', 'vehicle', 'rover', 'buggy', '4x4', 'bus', 'tractor', 'train', 'kart'), 'vehicle'),
+    ('robot or character', ('robot', 'character', 'pet', 'creature', 'mascot', 'animal', 'droid', 'buddy'), 'robot'),
+    ('speaker', ('speaker', 'radio', 'soundbar', 'boombox'), 'speaker'),
+    ('handheld', ('handheld', 'controller', 'gamepad', 'remote', 'console', 'game', 'pager', 'tamagotchi'), 'handheld'),
+    ('lamp', ('lamp', 'lantern', 'nightlight', 'night light', 'desk light'), 'lamp'),
+    ('clock', ('clock', 'alarm', 'timer'), 'clock'),
+    ('fan', ('fan',), 'fan'),
+    ('weather station', ('weather', 'thermometer', 'barometer', 'station'), None),
 )
 HANDHELD_SCREEN_MIN = 0.30      # dark screen region / front face, at least
 HANDHELD_THICK_MAX_MM = 32.0    # body thickness where held, under

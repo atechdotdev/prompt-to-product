@@ -2,7 +2,7 @@
 imported from real files into a scratch parts folder and used through the
 same library calls the agent and the Modules page use.
 
-    ATELIER_PARTS=<empty dir> ATECH_ARTIFACTS=<repo>/models \
+    P2P_PARTS=<empty dir> ATECH_ARTIFACTS=<repo>/models \
         QT_QPA_PLATFORM=offscreen freecadcmd fc_user_parts_r750.py
 
 Prints one "CHECK <id> PASS|FAIL <detail>" line per assertion and ends with
@@ -33,7 +33,7 @@ import atech_ports as ap  # noqa: E402
 import user_parts as up  # noqa: E402
 
 FAILS = []
-PARTS = os.environ["ATELIER_PARTS"]
+PARTS = os.environ["P2P_PARTS"]
 SRC = tempfile.mkdtemp(prefix="r750_src_")
 
 

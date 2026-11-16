@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Atech Atelier — FreeCAD branding descriptor.
+  Prompt2Product — FreeCAD branding descriptor.
 
   Read at startup by App::Application (src/App/Application.cpp), applied by
   Gui::StartupPostProcess::setBranding() (src/Gui/StartupProcess.cpp).
@@ -12,11 +12,13 @@
   We modify no FreeCAD source (ADR-003): this is a supported upstream hook.
   Verified live on FreeCAD 1.1.3, 2026-09-24 —
   docs/verification/2026-09-24_atech_studio_branding.md (under the previous
-  name, Atech Studio). Product name Atech Atelier: ADR-005, owner 2026-10-03.
+  name, Atech Studio). Product name Atech Atelier: ADR-005, owner 2026-10-03;
+  Prompt To Product, made by Atech.dev: owner 2026-11-10; Prompt2Product:
+  owner 2026-11-16.
 -->
 <Branding version="1.0">
-  <Application>Atech Atelier</Application>
-  <WindowTitle>Atech Atelier</WindowTitle>
+  <Application>Prompt2Product</Application>
+  <WindowTitle>Prompt2Product</WindowTitle>
 
   <!-- FreeCAD's licence requires that we keep upstream's copyright and
        licence notice intact. Upstream's banner (src/Gui/MainGui.cpp at tag
@@ -28,11 +30,11 @@
        endorsement because of the FPA's registered trademark on the FreeCAD
        logo and its brand guidelines ("only ... to provide credit for
        FreeCAD"). The string is shown in the About box and printed in the
-       version banner, so it also carries the product line "Atech Atelier,
-       powered by FreeCAD". The whitelist (measured with
+       version banner, so it also carries the product line "Prompt2Product,
+       made by Atech.dev, powered by FreeCAD". The whitelist (measured with
        `strings libFreeCADApp.so`, FreeCAD 1.1.3) has no free about-text key:
        CopyrightInfo is the About box's text line. -->
-  <CopyrightInfo>© 2026 Atech. Atech Atelier, powered by FreeCAD. Atech's code: LGPL-3.0-or-later, credit Atech and FreeCAD; Atech module models: CC BY-NC 4.0. FreeCAD: (C) 2001-2026 FreeCAD contributors. FreeCAD is free and open-source software licensed under the terms of LGPL2+ license. Not endorsed by or affiliated with the FreeCAD project or the FreeCAD Project Association. Credits: Help → Credits &amp; Open-Source Licences.</CopyrightInfo>
+  <CopyrightInfo>© 2026 Atech. Prompt2Product, made by Atech.dev, powered by FreeCAD. Atech's code: GPL-3.0-or-later, credit Atech and FreeCAD; Atech module models: CC BY-NC 4.0. FreeCAD: (C) 2001-2026 FreeCAD contributors. FreeCAD is free and open-source software licensed under the terms of LGPL2+ license. Not endorsed by or affiliated with the FreeCAD project or the FreeCAD Project Association. Credits: Help → Credits &amp; Open-Source Licences.</CopyrightInfo>
   <MaintainerUrl>https://atech.dev</MaintainerUrl>
 
   <WindowIcon>bin/atech_icon.svg</WindowIcon>
@@ -69,12 +71,12 @@
        getExecutableName() fills the Start page's "Welcome to %1"
        (Mod/Start/Gui/FirstStartWidget.cpp:92), so a slug here ships a
        "Welcome to atech-studio" greeting. MEASURED 2026-09-24.
-       Second consequence: user data lives in ~/.local/share/Atech Atelier/v1-1/
-       (config: ~/.config/Atech Atelier/v1-1/), so the addon must ship bundled
+       Second consequence: user data lives in ~/.local/share/Prompt2Product/v1-1/
+       (config: ~/.config/Prompt2Product/v1-1/), so the addon must ship bundled
        in usr/Mod/ or it is silently orphaned. Changing this value MOVES every
        user's profile: the previous name's trees are copied across by AppRun
        (branding/apprun_migrate_block.sh, ADR-005). -->
-  <ExeName>Atech Atelier</ExeName>
+  <ExeName>Prompt2Product</ExeName>
   <ExeVendor>Atech</ExeVendor>
 
   <!-- Keeps "Atech" out of the user-data path so an existing FreeCAD profile
@@ -89,5 +91,5 @@
        compositor matches the window to no launcher (or to FreeCAD's). The
        config value is gated by verify_tree.py; the compositor-side effect is
        a GUI observation not yet made. -->
-  <DesktopFileName>dev.atech.Atelier</DesktopFileName>
+  <DesktopFileName>dev.atech.Prompt2Product</DesktopFileName>
 </Branding>

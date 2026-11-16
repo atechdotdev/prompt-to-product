@@ -8,6 +8,9 @@ the design that is open instead, set down beside what is there:
                                            body when the file holds several
     STL / 3MF / OBJ / PLY / OFF / AMF      a mesh (Mesh::Feature); Convert to
                                            solid (part_ops) makes it editable
+    GLB / GLTF                             a mesh per part of its scene, in its
+                                           own colours (R970, gltf.py: glTF is
+                                           metres, read as such)
 
 in the units the file was drawn in (millimetres, inches, ...). Each part
 remembers where it came from - the file, its checksum, the link, the
@@ -25,10 +28,11 @@ import os
 from . import shape_edit as se
 
 SOLID_EXT = (".step", ".stp", ".iges", ".igs", ".brep", ".brp")
-MESH_EXT = (".stl", ".3mf", ".obj", ".ply", ".off", ".amf")
+MESH_EXT = (".stl", ".3mf", ".obj", ".ply", ".off", ".amf", ".glb", ".gltf")
+GLTF_EXT = (".glb", ".gltf")
 ADD_EXT = SOLID_EXT + MESH_EXT
-FILE_FILTER = ("CAD files (*.step *.stp *.iges *.igs *.brep *.brp *.stl *.3mf "
-               "*.obj *.ply *.off *.amf);;All files (*)")
+FILE_FILTER = ("3D files (*.step *.stp *.iges *.igs *.brep *.brp *.stl *.3mf "
+               "*.glb *.gltf *.obj *.ply *.off *.amf);;All files (*)")
 #: (label, scale to mm)
 UNITS = (("Millimetres", 1.0), ("Inches", 25.4), ("Centimetres", 10.0),
          ("Metres", 1000.0))
@@ -160,7 +164,7 @@ def _read_mesh(path, units):
             raise se.EditRefused("%s could not be read: %s"
                                  % (os.path.basename(path), exc))
         except Exception as exc:                       # noqa: BLE001
-            raise se.EditRefused("%s is not a 3MF Atelier can read (%s)."
+            raise se.EditRefused("%s is not a 3MF Prompt2Product can read (%s)."
                                  % (os.path.basename(path), exc))
     if m.CountFacets == 0:
         raise se.EditRefused("%s holds no triangles." % os.path.basename(path))
@@ -169,6 +173,43 @@ def _read_mesh(path, units):
         mat.scale(float(units), float(units), float(units))
         m.transform(mat)
     return m
+
+
+def _read_gltf(path, units):
+    """R970: [(part name, Mesh.Mesh, colour or None)] of a GLB / glTF, one
+    per part of its scene (all merged into one past MAX_BODIES). glTF is
+    metres: gltf.read gives mm, `units` scales on top (1.0: as the file
+    says)."""
+    import FreeCAD
+    from . import gltf
+    try:
+        parts = gltf.read(path)
+    except gltf.GltfError as exc:
+        raise se.EditRefused(str(exc))
+    if len(parts) > MAX_BODIES:
+        parts = [gltf.Part(parts[0].name, [t for p in parts for t in p.triangles],
+                           parts[0].color)]
+    out = []
+    for p in parts:
+        m = gltf.part_mesh(p)
+        if units != 1.0:
+            mat = FreeCAD.Matrix()
+            mat.scale(float(units), float(units), float(units))
+            m.transform(mat)
+        out.append((p.name, m, p.color))
+    return out
+
+
+def _colour(obj, rgba):
+    """The part's colour from its file, when the GUI is there."""
+    if not rgba:
+        return
+    try:
+        obj.ViewObject.ShapeColor = tuple(float(c) for c in rgba[:3])
+        if len(rgba) > 3 and rgba[3] < 0.99:
+            obj.ViewObject.Transparency = int(round((1 - rgba[3]) * 100))
+    except Exception:                                  # noqa: BLE001
+        pass
 
 
 def _set_down(objs, others):
@@ -195,8 +236,8 @@ def add_file(doc, path, units=1.0, source=None, agent_editable=False,
     objects. `source`: {"url", "author", "licence"}."""
     low = path.lower()
     if not low.endswith(ADD_EXT):
-        raise se.EditRefused("Atelier adds STEP, IGES, BREP, STL, 3MF, OBJ, "
-                             "PLY, OFF or AMF files, not %s."
+        raise se.EditRefused("Prompt2Product adds STEP, IGES, BREP, STL, 3MF, GLB, "
+                             "glTF, OBJ, PLY, OFF or AMF files, not %s."
                              % (os.path.splitext(path)[1] or "this file"))
     if not os.path.isfile(path):
         raise se.EditRefused("%s is not there any more." % path)
@@ -209,12 +250,24 @@ def add_file(doc, path, units=1.0, source=None, agent_editable=False,
     digest = sha256(path)
     name = label or _label(path)
     is_mesh = low.endswith(MESH_EXT)
-    geom = _read_mesh(path, units) if is_mesh else _read_solid(path, units)
+    gl = low.endswith(GLTF_EXT)
+    if gl:
+        geom = _read_gltf(path, units)          # [(part name, Mesh, colour)]
+    else:
+        geom = _read_mesh(path, units) if is_mesh else _read_solid(path, units)
     others = [o for o in doc.Objects]
     se._open(doc, "Add %s" % os.path.basename(path))
     made = []
+    names = []
     try:
-        if is_mesh:
+        if gl:
+            for pname, m, colour in geom:
+                o = doc.addObject("Mesh::Feature", "Imported")
+                o.Mesh = m
+                _colour(o, colour)
+                made.append(o)
+                names.append(pname)
+        elif is_mesh:
             o = doc.addObject("Mesh::Feature", "Imported")
             o.Mesh = geom
             made.append(o)
@@ -226,7 +279,12 @@ def add_file(doc, path, units=1.0, source=None, agent_editable=False,
                 o.Shape = s
                 made.append(o)
         for i, o in enumerate(made, 1):
-            o.Label = name if len(made) == 1 else "%s %d" % (name, i)
+            if len(made) == 1:
+                o.Label = name
+            elif names:
+                o.Label = "%s %s" % (name, names[i - 1])
+            else:
+                o.Label = "%s %d" % (name, i)
             _tag(o, path, units, digest, source)
         doc.recompute()
         _set_down(made, others)
@@ -255,7 +313,7 @@ def notes(objs):
             out.append("%s is a big mesh (%d triangles): converting it to a "
                        "solid simplifies it." % (o.Label, o.Mesh.CountFacets))
     if objs and se.kind(objs[0]) == "mesh":
-        out.append("STL, 3MF and OBJ are meshes: Edit part > Convert to solid "
+        out.append("STL, 3MF, GLB and OBJ are meshes: Edit part > Convert to solid "
                    "makes faces you can pick.")
     return out
 

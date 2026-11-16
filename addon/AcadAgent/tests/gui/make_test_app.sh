@@ -8,7 +8,7 @@
 #   make_test_app.sh [--out DIR] [--overlay | --full] [--base APP]
 #     --out DIR    default $ATECH_GUI_SCRATCH or /tmp/atech-gui
 #     --overlay    (default) APFS-clone a built Atech app (--base, default
-#                  dist/build-macos-<arch>/Atech Atelier.app, only READ) into
+#                  dist/build-macos-<arch>/Prompt2Product.app, only READ) into
 #                  <out>/app-build/AtechTest.stage, then overlay what
 #                  build_macos.sh would install from the current sources: the
 #                  addon (no tests/caches), projects/*.py, presets + meshes,
@@ -47,7 +47,7 @@ REPO="$(cd "$HERE/../../../.." && pwd)"
 ARCH="$(uname -m)"
 OUT="${ATECH_GUI_SCRATCH:-/tmp/atech-gui}"
 MODE=overlay
-BASE="$REPO/dist/build-macos-$ARCH/Atech Atelier.app"
+BASE="$REPO/dist/build-macos-$ARCH/Prompt2Product.app"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --out) OUT="$2"; shift 2 ;;
@@ -93,7 +93,7 @@ if [[ "$MODE" == full ]]; then
         --build-dir "$BUILD" --artifacts "$SRC" "${CRANE[@]}" ) 2>&1 | tee "$OUT/build.log" \
     || { echo "FAIL: build_macos.sh (log: $OUT/build.log)" >&2; exit 1; }
   tick build
-  echo "APP=$BUILD/Atech Atelier.app"
+  echo "APP=$BUILD/Prompt2Product.app"
   exit 0
 fi
 
@@ -121,7 +121,7 @@ Q="$RES/share/Gui/Stylesheets"
 install -m 0644 "$BA/AtechLight.qss" "$BA/AtechDark.qss" "$Q/"
 install -m 0644 "$BA/Atech Overlay.qss" "$Q/overlay/Atech Overlay.qss"
 for m in Light Dark; do
-  install -m 0644 "$SRC/branding/assets/theme/Atech Atelier $m.yaml" "$Q/parameters/Atech Atelier $m.yaml"
+  install -m 0644 "$SRC/branding/assets/theme/Prompt2Product $m.yaml" "$Q/parameters/Prompt2Product $m.yaml"
 done
 tick brand
 

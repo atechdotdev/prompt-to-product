@@ -9,13 +9,13 @@ WHAT HAPPENS ON INSTALL
        hash the Hub records for it (sha256 for LFS files, the git blob id for
        the rest). A file that does not match is refused.
     2. USD is read by Pixar's usd-core in a CHILD Python process
-       (simready_usd2stl.py): pxr never loads into Atelier itself. usd-core is
+       (simready_usd2stl.py): pxr never loads into Prompt2Product itself. usd-core is
        not part of the app (it is ~230 MB installed); ensure_usd() installs
        one pinned version once, into the user data folder, from wheels whose
        sha256 is written in this file (USD_WHEELS).
     3. The meshes that are drawn (purpose default/render, visible, instance
        proxies included) are triangulated in world space, converted to mm and
-       turned Y-up (Atelier's frame: x, z, -y for a Z-up stage), and written
+       turned Y-up (Prompt2Product's frame: x, z, -y for a Z-up stage), and written
        as one STL.
     4. user_parts.import_part() measures it and files it, with the licence,
        the attribution CC BY requires, and the dataset revision and file
@@ -24,7 +24,7 @@ WHAT HAPPENS ON INSTALL
 WHAT IS NOT TAKEN FROM THE DATASET
     Materials, physics and articulation. A part arrives as one rigid mesh.
     The dataset's own extents and mass are kept as its declaration; the size
-    Atelier uses is measured from the mesh.
+    Prompt2Product uses is measured from the mesh.
 
 This module imports neither FreeCAD nor pxr.
 """
@@ -47,7 +47,7 @@ CONVERTER = os.path.join(HERE, "simready_usd2stl.py")
 LICENCE = "CC BY 4.0"
 ATTRIBUTION = ("%s by NVIDIA, from the NVIDIA SimReady Assets dataset "
                "(huggingface.co/datasets/nvidia/simready-assets), CC BY 4.0. "
-               "Converted to a mesh by Atech Atelier (materials and physics "
+               "Converted to a mesh by Prompt2Product (materials and physics "
                "not kept).")
 TIMEOUT = 120
 
@@ -102,7 +102,7 @@ def _ssl_context():
 def _get(url, timeout=TIMEOUT):
     if not url.startswith("https://"):
         raise SimReadyError("refusing a non-HTTPS URL: %s" % url)
-    req = urllib.request.Request(url, headers={"User-Agent": "AtechAtelier"})
+    req = urllib.request.Request(url, headers={"User-Agent": "Prompt2Product"})
     return urllib.request.urlopen(req, timeout=timeout, context=_ssl_context())
 
 
@@ -296,7 +296,7 @@ def search(query="", electrical=False, max_mm=None, limit=200):
 
 
 def to_library_extents(ext, mpu, up):
-    """Dataset extents (stage units) -> [x, y, z] mm in Atelier's frame."""
+    """Dataset extents (stage units) -> [x, y, z] mm in Prompt2Product's frame."""
     s = float(mpu) * 1000.0
     x, y, z = (abs(float(v)) * s for v in ext)
     return [round(v, 1) for v in ((x, z, y) if str(up).upper() == "Z" else (x, y, z))]
@@ -324,8 +324,8 @@ def python_exe():
 
 
 def usd_dir():
-    """Where usd-core is installed for Atelier ($ATELIER_USD_DIR overrides)."""
-    env = (os.environ.get("ATELIER_USD_DIR") or "").strip()
+    """Where usd-core is installed for Prompt2Product ($P2P_USD_DIR overrides)."""
+    env = (os.environ.get("P2P_USD_DIR") or "").strip()
     if env:
         return os.path.abspath(os.path.expanduser(env))
     import user_parts
@@ -366,7 +366,7 @@ def ensure_usd(progress=None, python=None):
     if progress:
         progress("Installing USD support (once, about 40 MB)", None)
     hashes = sorted(USD_WHEELS.values())
-    tmp = tempfile.mkdtemp(prefix="atelier_usd_")
+    tmp = tempfile.mkdtemp(prefix="p2p_usd_")
     try:
         req = os.path.join(tmp, "requirements.txt")
         with open(req, "w") as fh:

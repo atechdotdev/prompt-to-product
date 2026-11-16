@@ -3,7 +3,7 @@
 
 Upstream's AppRun exports variables that only make sense for FreeCAD inside
 the mounted image -- QT_QPA_PLATFORM=xcb, PYTHONHOME=<image>/usr, a bundled
-SSL_CERT_FILE, ... A terminal or a `claude` child started from Atech Atelier
+SSL_CERT_FILE, ... A terminal or a `claude` child started from Prompt2Product
 inherits them. Stripping them is not enough: when the user had their own
 value (QT_QPA_PLATFORM=wayland, a corporate SSL_CERT_FILE) that value is
 already overwritten by the time Python runs, so it cannot be restored from
@@ -62,7 +62,7 @@ def snapshot_block(names):
         '    if [ -n "${!_atech_v+x}" ]; then',
         '        export "%s${_atech_v}=${!_atech_v}"' % PREFIX,
         "    else",
-        "        # unset here: a snapshot inherited from an outer Atech Atelier must",
+        "        # unset here: a snapshot inherited from an outer Prompt2Product must",
         "        # not stand in for a value this caller never had",
         '        unset "%s${_atech_v}"' % PREFIX,
         "    fi",

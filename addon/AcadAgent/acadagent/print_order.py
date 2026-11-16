@@ -186,7 +186,7 @@ def email_url(doc, o, files=()):
         getattr(doc, "Label", "") or "my design", o["plan"]["vouchers"],
         "" if o["plan"]["vouchers"] == 1 else "s")
     body = ("Hi Atech,\n\nPlease print my design with my 3D print voucher%s. The 3MF "
-            "file%s from Atech Atelier %s attached.\n\n%s\n\nSent from Atech Atelier, %s\n" % (
+            "file%s from Prompt2Product %s attached.\n\n%s\n\nSent from Prompt2Product, %s\n" % (
                 "" if o["plan"]["vouchers"] == 1 else "s",
                 "" if len(files) == 1 else "s", "is" if len(files) == 1 else "are",
                 order_sheet(doc, o, files), datetime.date.today().isoformat()))

@@ -32,7 +32,7 @@ a solid first, its flat areas merged into real faces.
 
 The agent edits a part only when the user ticked "Let the agent edit
 it" (AtechAgentEditable): it writes part_edits.json beside model.py and
-apply_agent_edits() runs it here, in Atelier, never in its sandbox.
+apply_agent_edits() runs it here, in Prompt2Product, never in its sandbox.
 Headless: no Qt (the Edit part window is part_edit.py).
 """
 import json
@@ -798,7 +798,7 @@ def parse_agent_file(text):
         for s in st:
             if not isinstance(s, dict) or s.get("op") not in OPS:
                 raise EditRefused("%s: unknown step %r." % (e["part"], s))
-            s.pop("m", None)              # the frame is Atelier's to set
+            s.pop("m", None)              # the frame is Prompt2Product's to set
         out.append((e["part"], st))
     return out
 

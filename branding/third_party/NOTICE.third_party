@@ -1,4 +1,4 @@
-Atech Atelier — third-party components added by Atech
+Prompt2Product — third-party components added by Atech
 =====================================================
 
 This file covers what Atech adds on top of the upstream FreeCAD AppImage.
@@ -18,7 +18,7 @@ FreeCADMCP (the FreeCAD addon half of freecad-mcp)
   installed usr/Mod/FreeCADMCP/
   what it is an optional XML-RPC server, off by default, that lets an
             external MCP client (for example the freecad-mcp MCP server)
-            drive the running FreeCAD. Atech Atelier's own chat agent does
+            drive the running FreeCAD. Prompt2Product's own chat agent does
             not use it.
   licence text usr/Mod/FreeCADMCP/LICENSE and
                usr/share/doc/@DOC_NAME@/third_party/LICENSE.FreeCADMCP
@@ -48,8 +48,8 @@ Feather icons
 
 Theme files derived from FreeCAD's own
   files     usr/share/Gui/Stylesheets/overlay/Atech Overlay.qss
-            usr/share/Gui/Stylesheets/parameters/Atech Atelier Light.yaml
-            usr/share/Gui/Stylesheets/parameters/Atech Atelier Dark.yaml
+            usr/share/Gui/Stylesheets/parameters/Prompt2Product Light.yaml
+            usr/share/Gui/Stylesheets/parameters/Prompt2Product Dark.yaml
   derived from FreeCAD 1.1.3's Gui/Stylesheets/overlay/Freecad Overlay.qss
             and Gui/Stylesheets/parameters/FreeCAD Light.yaml / FreeCAD
             Dark.yaml; MODIFIED BY ATECH
@@ -95,7 +95,7 @@ Licence texts Atech adds for libraries bundled by FreeCAD
 
 FreeType (bundled by FreeCAD, used under the FreeType License)
   Portions of this software are copyright (C) 2026 The FreeType Project
-  (https://freetype.org). All rights reserved. Atech Atelier is based in
+  (https://freetype.org). All rights reserved. Prompt2Product is based in
   part on the work of the FreeType Team.
 
 Upstream components Atech's code relies on directly
@@ -142,7 +142,7 @@ opencode (the `opencode` CLI) — NOT bundled
 Claude Code (the `claude` CLI) — NOT bundled, NOT open source
   vendor    Anthropic, https://claude.com/claude-code
   licence   proprietary, Anthropic's terms
-  used in   the chat panel runs the user's own installed copy. Atech Atelier
+  used in   the chat panel runs the user's own installed copy. Prompt2Product
             is not endorsed by or affiliated with Anthropic.
 
 FreeType License text

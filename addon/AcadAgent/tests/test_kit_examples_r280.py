@@ -81,6 +81,17 @@ PRODUCTS = {
     'motion_light.py': 'a motion-sensing night light',
     'arm_dock.py': 'a robot arm dock',
     'balance_bot.py': 'a self-balancing robot',
+    # R940: ten viral products (2026-11-10)
+    'coffee_scale.py': 'a pour-over coffee scale',
+    'plant_pal.py': 'a plant pot with a face',
+    'focus_cube.py': 'a flip focus timer',
+    'tiny_tv.py': 'a tiny retro TV',
+    'retro_camera.py': 'a retro pixel camera',
+    'photo_turntable.py': 'a 360 photo turntable',
+    'debug_duck.py': 'a rubber duck debugger',
+    'follower_counter.py': 'a live follower counter',
+    'bird_cam.py': 'a smart bird feeder camera',
+    'hype_button.py': 'a giant sound button',
 }
 PARAMS_MARKER = "# === PARAMETERS (restyle here) ==="
 STAGE_A_MARKER = "# === STAGE A: hardware, shell, every working-face opening, fasteners ==="

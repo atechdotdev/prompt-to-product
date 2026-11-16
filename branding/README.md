@@ -1,6 +1,6 @@
-# Atech Atelier — branded FreeCAD distribution
+# Prompt2Product — branded FreeCAD distribution
 
-Product name **Atech Atelier** (ADR-005, owner 2026-10-03; previously
+Product name **Prompt2Product** (ADR-005, owner 2026-10-03; previously
 "Atech Studio"). Licences, repository and version: ADR-006.
 
 Upstream FreeCAD 1.1.3 (no FreeCAD source patched or recompiled), plus our
@@ -14,7 +14,7 @@ split: **VS Code authors, FreeCAD points.** This tree is the FreeCAD half.
 
 ```bash
 ./build_appimage.sh --tree-only      # build + verify, no repack (no appimagetool needed)
-./build_appimage.sh                  # …and repack into dist/AtechAtelier-<version>-x86_64.AppImage
+./build_appimage.sh                  # …and repack into dist/Prompt2Product-<version>-x86_64.AppImage
 ./build_appimage.sh -i /path/to/FreeCAD.AppImage -o /tmp/out.AppImage
 ./build_appimage.sh --help           # every option
 ```
@@ -84,7 +84,7 @@ when written, its `.zsync`) and re-checks it.
 | variable | effect |
 |---|---|
 | `APPIMAGETOOL` | path to appimagetool (else `PATH`). Absent: exit 3, CANNOT DETERMINE |
-| `ATECH_UPDATE_INFO` | unset: `gh-releases-zsync\|atechdotdev\|atech-atelier\|latest\|AtechAtelier-*x86_64.AppImage.zsync` (the **proposed** public repo, ADR-006), embedded only when this appimagetool lists `-u`; set to another value to override; set empty for none |
+| `ATECH_UPDATE_INFO` | unset: `gh-releases-zsync\|atechdotdev\|prompt2product\|latest\|Prompt2Product-*x86_64.AppImage.zsync` (the **proposed** public repo, ADR-006), embedded only when this appimagetool lists `-u`; set to another value to override; set empty for none |
 | `ATECH_SIGN_KEY` | empty (default): unsigned, and the build prints `SKIPPED: unsigned image`. Set: `appimagetool --sign --sign-key <id>` |
 | `ATECH_SCREENSHOT_URLS` | space-separated `https://…png\|jpg` for the AppStream `<screenshots>`; empty: a `SCREENSHOTS: PLACEHOLDER` comment and a WARN line |
 | `ATECH_SOURCE_CONTACT` | written-offer contact in `SOURCE_OFFER.txt` |
@@ -106,23 +106,23 @@ or remove it when there is no `ATECH_PRE_APPRUN_` twin. The addon's
 
 ### Licence (ADR-006)
 
-Atech's code is **LGPL-3.0-or-later** (root `LICENSE`, the verbatim LGPL v3
-text; `LICENSE.GPL-3.0`, the GPL v3 it builds on) with an added credit term
-(`LICENSE-ATTRIBUTION.md`, GPL v3 section 7(b): credit Atech and FreeCAD;
-R722, 2026-10-28, was LGPL-2.1-or-later up to 0.1.2); the Atech module models and `presets.yaml` are **CC BY-NC 4.0** (root
-`LICENSE-models.md`). The build installs `LICENSE`, `LICENSE.GPL-3.0`, `LICENSE-ATTRIBUTION.md`, `LICENSE-models.md`,
-`NOTICE` and `CREDITS.md` into `usr/share/doc/atech-atelier/`, puts
+Atech's code is **GPL-3.0-or-later** (root `LICENSE`, the verbatim GPL v3
+text) with an added credit term (`LICENSE-ATTRIBUTION.md`, GPL v3 section
+7(b): credit Atech and FreeCAD; changed 2026-11-09 from LGPL-3.0-or-later,
+which 0.1.3 keeps; R722, 2026-10-28, was LGPL-2.1-or-later up to 0.1.2); the Atech module models and `presets.yaml` are **CC BY-NC 4.0** (root
+`LICENSE-models.md`). The build installs `LICENSE`, `LICENSE-ATTRIBUTION.md`, `LICENSE-models.md`,
+`NOTICE` and `CREDITS.md` into `usr/share/doc/prompt2product/`, puts
 `LICENSE-models.md` next to the models in `usr/Mod/AcadAgent/data/models/`,
-checks the contents (LGPL v3 heading, the 7(b) term, "CC BY-NC 4.0"), and **fails when any
+checks the contents (GPL v3 heading, the 7(b) term, "CC BY-NC 4.0"), and **fails when any
 is absent**. The metainfo's `project_license` is
-`LGPL-3.0-or-later AND CC-BY-NC-4.0`: both kinds ship, so a conjunction.
+`GPL-3.0-or-later AND CC-BY-NC-4.0`: both kinds ship, so a conjunction.
 For local work,
 `--dev-unlicensed --tree-only` builds and verifies a tree marked
 **NOT RELEASABLE** and never repacks it.
 
 ### What the image says about itself
 
-`usr/share/doc/atech-atelier/` in the built tree:
+`usr/share/doc/prompt2product/` in the built tree:
 
 | file | content |
 |---|---|
@@ -131,10 +131,10 @@ For local work,
 | `third_party/` | FreeCADMCP (MIT, modified, with the applied patches), Lucide (ISC), Feather (MIT) |
 | `README.md`, `CREDITS.md`, `LICENSE`, `LICENSE-models.md`, `NOTICE` | the root files |
 
-Desktop integration uses one reverse-DNS id, `dev.atech.Atelier`, for the
+Desktop integration uses one reverse-DNS id, `dev.atech.Prompt2Product`, for the
 desktop file (root and `usr/share/applications/`, from the template
-`dev.atech.Atelier.desktop`), the AppStream metainfo (`usr/share/metainfo/`,
-from `dev.atech.Atelier.metainfo.xml`), the icon, `.DirIcon` and
+`dev.atech.Prompt2Product.desktop`), the AppStream metainfo (`usr/share/metainfo/`,
+from `dev.atech.Prompt2Product.metainfo.xml`), the icon, `.DirIcon` and
 branding.xml's `DesktopFileName`. FreeCAD's own desktop entry and metainfo are
 removed (its hicolor PNG icons and MIME package stay; nothing presents them).
 
@@ -142,7 +142,7 @@ removed (its hicolor PNG icons and MIME package stay; nothing presents them).
 
 Renaming `ExeName` moves the user-data and config folders. AppRun copies
 `~/.local/share/Atech Studio` and `~/.config/Atech Studio` (XDG variables
-honoured) to the `Atech Atelier` names **only when the new folder does not
+honoured) to the `Prompt2Product` names **only when the new folder does not
 exist**, never moving or editing the old ones, and rewrites old absolute
 paths and the old theme name in the copy's `user.cfg`/`system.cfg`.
 `ATECH_MIGRATE=0` turns it off. Source `apprun_migrate_block.sh`, tests
@@ -166,14 +166,14 @@ layout, so every file lands where `build_appimage.sh` puts it. What differs:
 | step | macOS |
 |---|---|
 | upstream | the DMG's sha256 must match, **and** `codesign --verify --deep --strict` must pass on FreeCAD.app with team `289DJRF23X` (the FreeCAD Project Association) |
-| identity | `Contents/Info.plist` stamped by `macos_bundle.py`: `dev.atech.Atelier`, name, version, `atech.icns` (rendered by the bundle's own Qt), FreeCAD's document types at rank Alternate, its UTI imported rather than exported |
+| identity | `Contents/Info.plist` stamped by `macos_bundle.py`: `dev.atech.Prompt2Product`, name, version, `atech.icns` (rendered by the bundle's own Qt), FreeCAD's document types at rank Alternate, its UTI imported rather than exported |
 | launcher | none added: there is no AppRun, so there's no environment snapshot or agent-backend block. The profile migration isn't needed (there's never been a macOS release under an older name) |
 | bytecode | `site-packages/atech-no-bytecode.pth` turns bytecode writing off at interpreter start, and `encodings` is precompiled (unchecked-hash). A `.pyc` written at runtime would break the bundle's seal |
 | gate | `verify_tree.py` with Info.plist checks in place of the desktop entry, metainfo and AppRun ones |
 | signing | only the outer bundle is re-signed (never `--deep`). Every nested program and library keeps FreeCAD's Developer ID signature. The build asserts that signing changed exactly `MacOS/FreeCAD` (its signature) and `_CodeSignature/CodeResources` |
 | order | copy, add files, write ATECH_CHANGES, **sign**, then gate and smoke test (read-only) |
 | smoke | the signed bundle's own `freecadcmd` imports the addon, reports `isolation=seatbelt`, and the seal still verifies afterwards |
-| output | `dist/AtechAtelier-<version>-macOS-<arch>.dmg` + `SHA256SUMS` |
+| output | `dist/Prompt2Product-<version>-macOS-<arch>.dmg` + `SHA256SUMS` |
 
 Environment: `ATECH_MAC_SIGN_IDENTITY` (a Developer ID Application identity;
 empty = ad-hoc) and `ATECH_NOTARY_PROFILE` (`xcrun notarytool
@@ -224,7 +224,7 @@ fallback (`StartupProcess.cpp:533` reads the user preference first), so both
 sheets install to `share/Gui/Stylesheets/` and the mode is chosen by the
 `MainWindow/StyleSheet` preference seeded in `atech_user_template.cfg`.
 **Light is the default**, matching the website. Switch by setting that
-preference to `AtechDark.qss` and `MainWindow/Theme` to `Atech Atelier Dark`.
+preference to `AtechDark.qss` and `MainWindow/Theme` to `Prompt2Product Dark`.
 
 `auto` (follow the OS) is NOT implemented — Qt does not follow
 `prefers-color-scheme` for free.
@@ -234,7 +234,7 @@ preference to `AtechDark.qss` and `MainWindow/Theme` to `Atech Atelier Dark`.
 | file | role |
 |---|---|
 | `branding.xml` | the branding descriptor. Installed to `usr/bin/`, read by FreeCAD at startup |
-| `assets/theme/Atech Atelier {Light,Dark}.yaml` | **the colours**, generated by `brand/tools/build_theme.py`, with token parity against upstream's own `FreeCAD.qss` |
+| `assets/theme/Prompt2Product {Light,Dark}.yaml` | **the colours**, generated by `brand/tools/build_theme.py`, with token parity against upstream's own `FreeCAD.qss` |
 | `assets/atech_user_template.cfg` | first-run defaults: theme, accent, workbench, no setup wizard |
 | `assets/atech_{icon,logo,splash}.svg` | window icon · statusbar logo · splash |
 | `build_appimage.sh` | assembles the distribution |
@@ -243,7 +243,7 @@ preference to `AtechDark.qss` and `MainWindow/Theme` to `Atech Atelier Dark`.
 | `upstream.env` | the pinned upstream AppImage |
 | `vendor/freecad-mcp/` | pinned FreeCADMCP + patches |
 | `third_party/` | third-party notice and licence texts |
-| `dev.atech.Atelier.desktop`, `dev.atech.Atelier.metainfo.xml` | desktop entry and AppStream metainfo templates |
+| `dev.atech.Prompt2Product.desktop`, `dev.atech.Prompt2Product.metainfo.xml` | desktop entry and AppStream metainfo templates |
 | `release_meta.py` | reads the root `VERSION` and stamps it, the release and the screenshots (R39) |
 | `apprun_migrate_block.sh`, `apprun_agent_block.sh` | the two blocks inserted before AppRun's launch line |
 | `apprun_env.py` | the pre-AppRun environment snapshot and its reference `restore()` (R61) |
@@ -291,7 +291,7 @@ only**.
 > **Iterating on design?** Wipe the profile between runs or you are looking at a
 > stale one and will conclude your edit did nothing:
 > ```bash
-> rm -rf ~/.config/"Atech Atelier" ~/.local/share/"Atech Atelier" ~/.cache/"Atech Atelier"
+> rm -rf ~/.config/"Prompt2Product" ~/.local/share/"Prompt2Product" ~/.cache/"Prompt2Product"
 > ```
 
 **3. `ExeName` is load-bearing twice.** It names the user-data directory
@@ -299,12 +299,12 @@ only**.
 Start page's "Welcome to %1". Consequences: an addon installed in the user's
 *FreeCAD* `Mod` dir is **not** read by a branded build, so `AcadAgent` ships
 bundled inside the image; and a lowercase slug greets users with
-"Welcome to atech-atelier".
+"Welcome to prompt2product".
 
 ## Licensing
 
 FreeCAD is LGPL-2.0-or-later ("LGPL2+") and **no FreeCAD source file is patched or
-recompiled**. The build writes `usr/share/doc/atech-atelier/ATECH_CHANGES.txt`
+recompiled**. The build writes `usr/share/doc/prompt2product/ATECH_CHANGES.txt`
 into the image with the pinned upstream, a measured list of every file
 added, removed or modified (AppRun is modified), preserved copyright, a
 pointer to corresponding source, and an explicit non-endorsement statement.

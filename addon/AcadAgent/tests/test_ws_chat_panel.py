@@ -30,7 +30,7 @@ if HERE not in sys.path:
 
 import test_chat_robustness as tcr  # noqa: E402  (sets HOME, Qt, settings)
 
-from PySide6 import QtGui, QtWidgets  # noqa: E402
+from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 
 from acadagent import build, capture, claude_cli, engine, panel  # noqa: E402
 from acadagent import settings as cfgmod  # noqa: E402
@@ -187,7 +187,7 @@ class TestLaunchThroughPanel(Case):
         self.assertNotIn("-5 mm thinner", " ".join(a))
         self.assertIn("--append-system-prompt-file", a)
         self.assertNotIn("--append-system-prompt", a)
-        self.assertIn("CAD agent inside Atech Atelier", t["sp"])
+        self.assertIn("CAD agent inside Prompt2Product", t["sp"])
         # S16 / R78: the isolating flags, from agent_argv.
         for flag in ("--strict-mcp-config", "--disable-slash-commands",
                      "--exclude-dynamic-system-prompt-sections",
@@ -448,6 +448,42 @@ class TestAskInChat(Case):
             self.assertEqual(os.path.dirname(path), t["cwd"])
             self.assertIn(path, t["stdin"])
         self.assertTrue(t["stdin"].startswith("what is this?"))
+
+
+# ------------------------------------------------------------------ R930
+class TestNamedFiles(Case):
+
+    def test_r930_a_named_file_is_brought_into_the_chat_folder(self):
+        import test_references_r930 as tr
+        src = os.path.join(self.tmp, "crab plate.gcode.3mf")
+        tr.bambu_3mf(src)
+        url = "file://" + src.replace(" ", "%20")
+        self.send("%s\n\nuse this one but adjust it for atech" % url)
+        self.assertTrue(self.idle())
+        t = self.turns()[-1]
+        self.assertTrue(t["stdin"].startswith("FILES THE USER NAMED"), t["stdin"][:300])
+        self.assertIn("refs/crab_plate/", t["stdin"])
+        self.assertIn("use this one but adjust it for atech", t["stdin"])
+        ref = os.path.join(t["cwd"], "refs", "crab_plate")
+        self.assertTrue(os.path.isfile(os.path.join(ref, "bottom_cover.stl")))
+        self.assertTrue(os.path.isfile(os.path.join(ref, "README.md")))
+        self.assertTrue(any("Using crab plate.gcode.3mf (2 parts)" in b
+                            for b in self.bubbles()), self.bubbles())
+
+    def test_r930_no_path_no_block(self):
+        self.send("make it cooler")
+        self.assertTrue(self.idle())
+        self.assertTrue(self.turns()[-1]["stdin"].startswith("make it cooler\n\n---\n"))
+
+    def test_r930_a_dropped_file_is_written_as_its_path(self):
+        box = panel.PromptEdit()
+        md = QtCore.QMimeData()
+        md.setUrls([QtCore.QUrl.fromLocalFile("/tmp/My Parts/crab.stl"),
+                    QtCore.QUrl.fromLocalFile("/tmp/b.step")])
+        box.setPlainText("use")
+        box.moveCursor(QtGui.QTextCursor.End)
+        box.insertFromMimeData(md)
+        self.assertEqual(box.toPlainText(), 'use "/tmp/My Parts/crab.stl" /tmp/b.step ')
 
 
 # ------------------------------------------------------------------ S02

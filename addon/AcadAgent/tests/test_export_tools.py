@@ -35,7 +35,7 @@ sys.path.insert(0, ADDON)
 from acadagent import export_tools as et  # noqa: E402
 
 KIT = os.path.join(ADDON, "acadagent", "agent_kit")
-BUNDLE = os.path.join(REPO, "dist", "build-macos-arm64", "Atech Atelier.app", "Contents",
+BUNDLE = os.path.join(REPO, "dist", "build-macos-arm64", "Prompt2Product.app", "Contents",
                       "Resources", "bin")
 FC = os.environ.get("ATECH_FREECADCMD") or os.path.join(BUNDLE, "freecadcmd")
 if not os.path.isfile(FC):
@@ -430,7 +430,7 @@ class Widgets(unittest.TestCase):
 
     def test_factories(self):
         btns = et.view_bar_buttons(None, lambda: self.doc, lambda: [])
-        self.assertEqual(sorted(btns), ["colour", "explode", "export", "share"])
+        self.assertEqual(sorted(btns), ["colour", "explode", "export", "files", "share"])
         for b in btns.values():
             self.assertEqual(b.objectName(), "VBtn")
             self.assertTrue(b.accessibleName())
@@ -439,7 +439,7 @@ class Widgets(unittest.TestCase):
         self.assertFalse(any(b.icon().isNull() for b in btns.values()))
         acts = et.menu_actions(None, lambda: self.doc, lambda: [])
         self.assertEqual([a.text() for a in acts],
-                         ["Colour", "Export for print...", "Exploded view (E)",
+                         ["Colour", "Print...", "Export for print...", "Exploded view (E)",
                           "Bill of materials...", "Get it made by Atech...", "Post to atech.dev...",
                           "Save share image",
                           "Save review sheet",

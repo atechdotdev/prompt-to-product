@@ -16,7 +16,7 @@ order the user asked for. Each has a checklist and a GATE: the review that
 must pass before the level ends.
 
 The user's own request is LEVEL 1 (its checklist is in the system prompt);
-Atelier sends levels 2..N as messages ending with TURN_TAIL once the
+Prompt2Product sends levels 2..N as messages ending with TURN_TAIL once the
 previous level built cleanly. The level state lives in the workspace
 marker MARKER, so the panel and the eval harness drive the same ladder.
 
@@ -435,13 +435,13 @@ def overview():
 
 
 def level_message(n, seed=None, **kw):
-    """The message Atelier sends to start LEVEL n (n >= 2); `seed` and the
+    """The message Prompt2Product sends to start LEVEL n (n >= 2); `seed` and the
     other keywords go to level_text (R430)."""
     return "%s\n%s" % (level_text(n, seed=seed, **kw), TURN_TAIL)
 
 
 def is_level_turn(request):
-    """True when `request` is Atelier's level message, not the user's."""
+    """True when `request` is Prompt2Product's level message, not the user's."""
     return isinstance(request, str) and request.rstrip().endswith(TURN_TAIL)
 
 

@@ -46,6 +46,48 @@ def _fit():
         _log("fit: %r" % (exc,))
 
 
+EXPLODE_QSS = """
+#XSeg {{ background: {sunken}; border: 1px solid {line}; border-radius: 10px; }}
+#XSegBtn {{
+    background: transparent; color: {muted}; border: none; border-radius: 8px;
+    min-height: 26px; max-height: 26px; padding: 0 8px;
+    font-family: {UI}; font-size: 12px; font-weight: 500;
+}}
+#XSegBtn:hover {{ color: {text}; }}
+#XSegBtn:checked {{ background: {panel}; color: {text}; border: 1px solid {line}; font-weight: 600; }}
+#XLabel {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
+#XValue {{ color: {text}; font-family: {MONO}; font-size: 11px; }}
+#XStep {{ background: {sunken}; border: 1px solid {line}; border-radius: 12px; }}
+#XPart {{ color: {text}; font-family: {UI}; font-size: 13px; font-weight: 600; }}
+#XInfo {{ color: {muted}; font-family: {UI}; font-size: 11px; }}
+#XArrow {{
+    background: {panel}; color: {text}; border: 1px solid {line}; border-radius: 14px;
+    min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px;
+    font-size: 16px; padding: 0 0 2px 0;
+}}
+#XArrow:hover {{ background: {hover}; }}
+#XArrow:disabled {{ color: {dim}; }}
+#XKeys {{ color: {dim}; font-family: {UI}; font-size: 11px; }}
+"""
+
+
+def _cube_clearance():
+    """Room the navigation cube takes at the top right of the 3D view, so
+    the card sits under it rather than over it (0 when it is elsewhere)."""
+    try:
+        import FreeCAD
+        v = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/View")
+        nv = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/NaviCube")
+        if not v.GetBool("ShowNaviCube", True):
+            return 0
+        if v.GetInt("CornerNaviCube", 1) != 1:      # 1 = top right
+            return 0
+        size = nv.GetInt("CubeSize", 0) or v.GetInt("NaviCubeSize", 132)
+        return int(size) + 8
+    except Exception:                                     # noqa: BLE001
+        return 0
+
+
 def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None):
     """The card. `select_fn(doc, obj)` and `fit_fn()` default to the 3D
     selection and viewport.fit_all; tests pass their own."""
@@ -64,18 +106,16 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
             self.doc = None
             self.step = -1
             self._sync = False
-            hint = QtWidgets.QLabel(
-                "Only the picture moves: every part goes back when you close "
-                "this, build or save.")
-            hint.setObjectName("MHint")
-            hint.setWordWrap(True)
-            self.lay.addWidget(hint)
+            self.setToolTip("Only the picture moves: every part goes back "
+                            "when you close this, build or save.")
 
-            how = QtWidgets.QLabel("HOW")
-            how.setObjectName("MSub")
-            self.lay.addWidget(how)
-            row = QtWidgets.QHBoxLayout()
-            row.setSpacing(6)
+            # How: one segmented switch, the two halves the full width
+            seg = QtWidgets.QFrame()
+            seg.setObjectName("XSeg")
+            seg.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            row = QtWidgets.QHBoxLayout(seg)
+            row.setContentsMargins(3, 3, 3, 3)
+            row.setSpacing(2)
             self.group = QtWidgets.QButtonGroup(self)
             self.group.setExclusive(True)
             self.chips = {}
@@ -83,7 +123,7 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
                     "layers": "The printed parts stack up along Z, bottom to top"}
             for key, label in et.EXPLODE_MODES:
                 b = QtWidgets.QPushButton(label)
-                b.setObjectName("MChip")
+                b.setObjectName("XSegBtn")
                 b.setCheckable(True)
                 b.setCursor(QtCore.Qt.PointingHandCursor)
                 b.setToolTip(tips.get(key, label))
@@ -91,50 +131,66 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
                 b.clicked.connect(lambda _=False, k=key: self.set_mode(k))
                 self.group.addButton(b)
                 self.chips[key] = b
-                row.addWidget(b)
-            row.addStretch(1)
-            self.lay.addLayout(row)
+                row.addWidget(b, 1)
+            self.lay.addWidget(seg)
 
-            far = QtWidgets.QLabel("HOW FAR APART")
-            far.setObjectName("MSub")
-            self.lay.addWidget(far)
+            # Spread: label, slider, value on one line
+            frow = QtWidgets.QHBoxLayout()
+            frow.setSpacing(10)
+            far = QtWidgets.QLabel("Spread")
+            far.setObjectName("XLabel")
             self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
             self.slider.setObjectName("MSlider")
             self.slider.setRange(5, 100)
             self.slider.setAccessibleName("How far apart")
+            self.slider.setToolTip("How far apart the parts go")
             self.slider.valueChanged.connect(self._on_slider)
-            self.lay.addWidget(self.slider)
+            self.amount = QtWidgets.QLabel("")
+            self.amount.setObjectName("XValue")
+            self.amount.setFixedWidth(38)
+            self.amount.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            far.setBuddy(self.slider)
+            frow.addWidget(far)
+            frow.addWidget(self.slider, 1)
+            frow.addWidget(self.amount)
+            self.lay.addLayout(frow)
 
-            st = QtWidgets.QLabel("STEP THROUGH THE PARTS")
-            st.setObjectName("MSub")
-            self.lay.addWidget(st)
-            srow = QtWidgets.QHBoxLayout()
+            # Step through the parts: an inset box, ‹ name › with what it is
+            box = QtWidgets.QFrame()
+            box.setObjectName("XStep")
+            box.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+            srow = QtWidgets.QHBoxLayout(box)
+            srow.setContentsMargins(6, 6, 6, 6)
             srow.setSpacing(6)
             self.btn_prev = QtWidgets.QPushButton("‹")
             self.btn_next = QtWidgets.QPushButton("›")
             for b, name, tip in ((self.btn_prev, "Previous part", "Previous part (←)"),
                                  (self.btn_next, "Next part", "Next part (→)")):
-                b.setObjectName("MGhost")
+                b.setObjectName("XArrow")
                 b.setCursor(QtCore.Qt.PointingHandCursor)
                 b.setAccessibleName(name)
                 b.setToolTip(tip)
-                b.setFixedWidth(34)
             self.btn_prev.clicked.connect(lambda: self.go(-1))
             self.btn_next.clicked.connect(lambda: self.go(1))
+            mid = QtWidgets.QVBoxLayout()
+            mid.setSpacing(1)
             self.part_name = QtWidgets.QLabel("")
-            self.part_name.setObjectName("MTitle")
+            self.part_name.setObjectName("XPart")
             self.part_name.setWordWrap(True)
-            srow.addWidget(self.btn_prev)
-            srow.addWidget(self.part_name, 1)
-            srow.addWidget(self.btn_next)
-            self.lay.addLayout(srow)
+            self.part_name.setAlignment(QtCore.Qt.AlignCenter)
             self.part_info = QtWidgets.QLabel("")
-            self.part_info.setObjectName("MDetail")
+            self.part_info.setObjectName("XInfo")
             self.part_info.setWordWrap(True)
-            self.lay.addWidget(self.part_info)
+            self.part_info.setAlignment(QtCore.Qt.AlignCenter)
+            mid.addWidget(self.part_name)
+            mid.addWidget(self.part_info)
+            srow.addWidget(self.btn_prev)
+            srow.addLayout(mid, 1)
+            srow.addWidget(self.btn_next)
+            self.lay.addWidget(box)
 
             brow = QtWidgets.QHBoxLayout()
-            brow.setSpacing(6)
+            brow.setSpacing(8)
             self.btn_fit = QtWidgets.QPushButton("Fit to view")
             self.btn_fit.setObjectName("MGhost")
             self.btn_fit.setToolTip("Take in every part where it is now")
@@ -144,27 +200,40 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
             for b in (self.btn_fit, self.btn_back):
                 b.setCursor(QtCore.Qt.PointingHandCursor)
                 b.setAccessibleName(b.text())
+                brow.addWidget(b, 1)
             self.btn_fit.clicked.connect(lambda: et._guard(fit_fn))
             self.btn_back.clicked.connect(self.close_card)
-            brow.addWidget(self.btn_fit)
-            brow.addStretch(1)
-            brow.addWidget(self.btn_back)
             self.lay.addLayout(brow)
-            keys = QtWidgets.QLabel("← → step · E or Esc put back")
-            keys.setObjectName("MHint")
+            keys = QtWidgets.QLabel("← → step  ·  E or Esc put back")
+            keys.setObjectName("XKeys")
+            keys.setAlignment(QtCore.Qt.AlignCenter)
             self.lay.addWidget(keys)
             self.closed.connect(self._on_closed)
             et.on_explode_changed(self._follow)
 
-        # -- placement: top right, so Measure's card (top left) stays clear
+        # -- placement: top right, under the navigation cube, so Measure's
+        # card (top left) and the cube both stay clear
         def place(self):
             p = self.parentWidget()
             if p is None:
                 return
             self.adjustSize()
-            h = min(self.sizeHint().height(), max(120, p.height() - 32))
-            self.setGeometry(max(16, p.width() - self.width() - 16), 16, self.width(), h)
+            top = 16 + _cube_clearance()
+            h = min(self.sizeHint().height(), max(120, p.height() - top - 16))
+            self.setGeometry(max(16, p.width() - self.width() - 16), top, self.width(), h)
             self.raise_()
+
+        def restyle(self):
+            super().restyle()
+            from . import style
+            self.setStyleSheet(self.styleSheet() + style.qss(EXPLODE_QSS, reset=False))
+
+        def showEvent(self, ev):                      # noqa: N802
+            # Whatever shows the card, it shows styled and in its place.
+            if not getattr(self, "_styled", False):
+                self._styled = True
+                et._guard(self.restyle)
+            super().showEvent(ev)
 
         def keyPressEvent(self, ev):                  # noqa: N802
             k = ev.key()
@@ -205,6 +274,7 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
                 doc = self.doc
                 amount = et.explode_amount(doc)
                 self.slider.setValue(max(5, int(round(amount * 100))))
+                self.amount.setText("%d%%" % self.slider.value())
                 mode = et.explode_mode(doc)
                 for k, b in self.chips.items():
                     b.setChecked(k == mode)
@@ -227,8 +297,7 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
                 return
             if not 0 <= self.step < len(ps):
                 self.part_name.setText("%d parts apart" % len(ps))
-                self.part_info.setText("Step through them one at a time with "
-                                       "‹ ›")
+                self.part_info.setText("Step through them one at a time")
                 return
             o = ps[self.step]
             self.part_name.setText("%d of %d: %s" % (self.step + 1, len(ps), o.Label))
@@ -258,6 +327,7 @@ def ExplodeCard(parent=None, doc_fn=et._active_doc, select_fn=None, fit_fn=None)
             et._guard(fit_fn)
 
         def _on_slider(self, v):
+            self.amount.setText("%d%%" % v)
             if self._sync or self.doc is None:
                 return
             self._sync = True

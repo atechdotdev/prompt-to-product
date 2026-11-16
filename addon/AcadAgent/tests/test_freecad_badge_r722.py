@@ -39,7 +39,7 @@ class TestFiles(unittest.TestCase):
         with open(os.path.join(REPO, "LICENSE-ATTRIBUTION.md"), encoding="utf-8") as fh:
             t = fh.read()
         self.assertIn("section 7(b)", t)
-        self.assertIn("Based on Atech Atelier by Atech", t)
+        self.assertIn("Based on Prompt2Product by Atech", t)
         self.assertIn("built on FreeCAD", t)
 
 
@@ -65,11 +65,13 @@ class TestBadge(unittest.TestCase):
             QtGui.QDesktopServices.openUrl = real
         self.assertEqual(opened, ["https://www.freecad.org"])
 
-    def test_home_shows_it(self):
+    def test_home_leaves_it_out(self):
+        # Owner, 2026-11-07: not on Home; Credits and About carry it.
         from acadagent import shell
         h = shell.HomeView()
         h.restyle()
-        self.assertFalse(h.based_on.logo.pixmap().isNull())
+        self.assertFalse(hasattr(h, "based_on"))
+        self.assertEqual(h.findChildren(shell.FreeCadBadge), [])
 
 
 if __name__ == "__main__":

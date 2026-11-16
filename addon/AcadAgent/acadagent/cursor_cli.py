@@ -35,7 +35,7 @@ THE PROMPT IS AN ARGUMENT
     The docs show no stdin prompt, so it is the last argv entry. It is
     readable in the process list (claude_cli R35 avoids that with stdin;
     no documented way exists here) and it never starts with "-" (it would
-    be read as an option). Cursor has no system-prompt flag: Atelier's
+    be read as an option). Cursor has no system-prompt flag: Prompt2Product's
     instructions go in front of the request. Past agent_cli.ARG_LIMIT the
     whole text goes in a private file in the chat folder that the prompt
     points the agent to.
@@ -58,7 +58,7 @@ PERMISSIONS AND SANDBOX
     ./check runs through check_broker (Cursor's sandbox is Seatbelt too,
     and Seatbelt does not nest).
     NOT isolated: the Cursor CLI loads the user's own MCP servers
-    (~/.cursor/mcp.json) and rules; no flag turns that off. Atelier does
+    (~/.cursor/mcp.json) and rules; no flag turns that off. Prompt2Product does
     not pass --approve-mcps.
 """
 import json
@@ -308,12 +308,12 @@ class CursorRun(ClaudeRun):
         return out
 
     def _prompt_arg(self):
-        """The prompt argument: Atelier's instructions, then the request.
+        """The prompt argument: Prompt2Product's instructions, then the request.
         Never starts with "-"; past ARG_LIMIT it lives in a 0600 file in
         the chat folder (removed when the turn ends)."""
         text = self._compose_prompt()
         if self._system_prompt:
-            text = ("<atelier_instructions>\n%s\n</atelier_instructions>"
+            text = ("<prompt2product_instructions>\n%s\n</prompt2product_instructions>"
                     "\n\n%s" % (self._system_prompt, text))
         if agent_cli.fits_argv(text):
             return ("Request:\n" + text) if text.startswith("-") else text

@@ -1,10 +1,129 @@
 # Changelog
 
-All notable changes to Atech Atelier are listed here. Versions follow
-[Semantic Versioning](https://semver.org). Before 1.0.0, any release may
-change behaviour.
+All notable changes to Prompt2Product (called Atech Atelier until
+2026-11-10, and Prompt To Product until 2026-11-16) are listed here.
+Versions follow [Semantic Versioning](https://semver.org). Before 1.0.0, any
+release may change behaviour.
 
 ## [Unreleased]
+
+### Ten new examples, an examples gallery, and import a model to change it
+
+- **Ten new example products**, each with the Atech board and real modules
+  inside: Hype button, Debug duck, Plant pal, Tiny TV, Focus cube, Pixel
+  camera, Bird feeder cam, Follower counter, Coffee scale and Photo
+  turntable. The agent starts from the right one when you ask for one ("a
+  rubber duck debugger").
+- **Examples gallery**: Home shows a short row and **All examples**, a
+  window with a picture of every example product (37), grouped (New,
+  Robots & vehicles, Home & living, Desk & creator, Sound & games,
+  Sensors & smart home) and searchable. Also in the right-click menu:
+  Examples….
+- **Import a model to change** (Home, and the right-click menu): pick STL,
+  3MF, GLB, STEP or OBJ files from MakerWorld, Printables, Thingiverse,
+  Sketchfab, a scanner app or an AI 3D generator. They come in exactly as
+  they are, as a new project; then say what to change ("make the hole
+  2 mm wider", "fit the Atech board inside"), or pick one of the
+  suggestions. Several files go side by side. Dropping 3D files on Home
+  does the same.
+- **GLB and glTF files** open, import and can be named in the chat, in
+  their own colours and parts (glTF is read in metres). Draco or meshopt
+  compressed files are refused with how to export them without it.
+- An imported file's own parts touching each other (a part pressed into
+  another, an open scan mesh) are no longer sent back to the agent as
+  problems to fix.
+
+### New name: Prompt2Product, made by Atech.dev
+
+- Atech Atelier is now called **Prompt2Product**. The app, its window,
+  icon label, splash screen, installer, disk image and AppImage carry the
+  new name; the only Atech branding left is "Made by Atech.dev" (on the
+  splash, Home, About and Credits).
+- Your work comes with you: on first start the app copies your chat index,
+  trusted builds, parts library and macros from the "Atech Atelier" folder
+  (or an older "Atech Studio" one, or a "Prompt To Product" one from a
+  development build of 10-16 Nov). The old folder is never changed or
+  deleted. On Linux the launcher copies the whole profile, settings
+  included; on macOS FreeCAD's own preferences start fresh.
+- You stay signed in to your Atech account (the Keychain entry keeps its
+  name).
+- The installer replaces an installed "Atech Atelier" (or "Prompt To
+  Product") app, and on Linux removes its old launcher (`atech-atelier`,
+  `prompt-to-product`) and menu entry.
+- New ids and file names: `dev.atech.Prompt2Product`,
+  `Prompt2Product-<version>-…`, `prompt2product`. The GitHub repository is
+  now `atechdotdev/prompt2product` (GitHub redirects the old address); the
+  atech.dev pages keep their addresses for now.
+- Developer variables `ATELIER_*` are now `P2P_*` (`P2P_PARTS`,
+  `P2P_USD_DIR`, `P2P_MUJOCO_DIR`, `P2P_NET_TESTS`).
+
+### atech.dev, one click away
+
+- Home has a new **On atech.dev** row of buttons right under its title:
+  community builds, the board and modules, the docs, and what's new in
+  Prompt2Product.
+- "Made by Atech.dev" under the Home title opens atech.dev, and the line at
+  the bottom of Home links Community, Shop, Docs and What's new.
+- The sidebar shows an "atech.dev" link next to "Based on FreeCAD", and the
+  account menu has "Docs on atech.dev".
+- On the site, atech.dev/atelier (also at atech.dev/prompt-to-product) is new:
+  a gallery of what the app makes, how it works, and a FAQ.
+
+### Fixed
+
+- The design check knew only 22 of the agent's 31 product types: the ten
+  products added on 10 Nov (coffee scale, flip timer, tiny TV, ...) were
+  missing from its table. The check's table now has the same rows, in the
+  same order, as the agent's.
+- Example paths in a code comment (`/Users/a/...`) stopped the build's
+  personal-data gate; a new test (`test_no_personal_paths`) finds these
+  before a build does.
+- Builds reuse the FreeCAD download and unpacked app cached under the old
+  name (`~/.cache/atech-atelier-build/`) instead of fetching 650 MB again.
+
+### Use a file in the chat
+
+- Name a file in your message, or drop it on the message box, and the agent
+  works from it: "use this one but adjust it for Atech", "use this file and
+  make it look cooler". STEP, IGES, BREP, STL, OBJ, PLY, OFF, 3MF
+  (including Bambu Studio's sliced `.gcode.3mf`) and PNG/JPG pictures work.
+  Atelier copies the file into the chat's own folder, because the agent
+  cannot read anything outside it. A Bambu 3MF is split into one part per
+  object, with the names from Bambu Studio and the plate picture. The
+  sliced G-code is not copied. The agent keeps the parts it does not need
+  to change exactly as they are and redesigns the rest. "For Atech" means
+  fitting the Atech board, screen and modules into the design. If a part
+  in the file is a broken mesh, it is still shown and fitted, but the agent
+  is not sent back to repair it.
+
+### Licence: now the GNU GPL v3 or later
+
+- Atech's code is now licensed under the GNU GPL v3 or later (it was the
+  GNU LGPL v3 or later). The GPL is copyleft: anyone who distributes a
+  version of Atech Atelier, or a program based on Atech's code, must release
+  it under the GPL too, with its complete source code. The credit term
+  (`LICENSE-ATTRIBUTION.md`) is unchanged. The root `LICENSE` is now the
+  GPL v3 text and `LICENSE.GPL-3.0` is gone. The module models stay
+  CC BY-NC 4.0. Release 0.1.3 and earlier keep the licence they shipped with.
+
+### More off-the-shelf parts
+
+- **Add off-the-shelf part…** now offers about 170 parts (it was about 75),
+  all from the FreeCAD Parts Library. A new **Screws and fittings** kind
+  has M2 to M5 socket-head screws, a countersunk screw, set screw, hex and
+  lock nuts, washers, M3 standoffs, and 2020 extrusion with T-nuts,
+  brackets and plates. **Bearings and mechanics** adds ball bearings
+  (608, 623, 624 and more), LM8UU to LM12UU linear bearings, MGN9 and MGN12
+  rails and carriages, KP08 and KFL08 bearing blocks, a T8 lead screw and
+  nuts, shaft couplers, GT2 pulleys, a cable-chain link and two 3D-printer
+  hotends.
+- Also new: RAMPS 1.4, an Arduino Nano I/O shield, a RepRap smart LCD, a
+  NEMA 23 stepper, servo horns for the SG90 and S3003, a 12 V 7 Ah
+  lead-acid battery, more 22 mm panel and mushroom buttons, a multi-turn
+  trimmer, more switches, pin and box headers, jumper-wire plugs, a 6-way
+  terminal block, Mini-USB, an SD card and a TO-220 MOSFET.
+- Each screw and nut says its clearance hole, counterbore or nut-trap size
+  and hex key, so the agent can draw the holes they need.
 
 ### Bring in your own CAD files and edit them part by part
 

@@ -692,7 +692,7 @@ class Round5Kit(unittest.TestCase):
                               {"board": "upright", "fitted_after": ["End_Cap_L", "Lid"]})
         self.assertEqual(r["fitted_after_missing"], ["Lid"])
         self.assertFalse(any("fitted_after" in p for p in r["problems"]), r["problems"])
-        self.assertTrue(any("fitted_after names Lid" in n and "Atelier fails the turn" in n
+        self.assertTrue(any("fitted_after names Lid" in n and "Prompt2Product fails the turn" in n
                             for n in r["notes"]), r["notes"])
         self.assertIn("NOTE intent.json fitted_after names Lid", text)
         self.assertEqual(r["fitted_after"], ["End_Cap_L"])
@@ -860,7 +860,7 @@ class Round6Kit(unittest.TestCase):
             with open(os.path.join(ws, "model.py"), "w") as fh:
                 fh.write(INTENT_BOX % 27)
             r4, text = self._check(ws)          # the 34 miss is a note; 30 is not met
-            self.assertTrue(any("the user asked for 30 mm, Atelier measured 27 mm" in p
+            self.assertTrue(any("the user asked for 30 mm, Prompt2Product measured 27 mm" in p
                                 for p in r4["problems"]), r4["problems"])
         finally:
             shutil.rmtree(ws, ignore_errors=True)
@@ -1310,7 +1310,7 @@ class Round7Kit(unittest.TestCase):
         r, last = self._check(BOX_AND_LID % {"box_h": 30, "lid_z": 30}, intent, req)
         self.assertTrue(last.startswith("CHECK FAIL: overall size from the request "
                                         "(\"80 x 50 x 30 mm\""), last)
-        for s in ("the user asked for 30 mm, Atelier measured 34 mm (4 mm over)",
+        for s in ("the user asked for 30 mm, Prompt2Product measured 34 mm (4 mm over)",
                   "the Z extent, 0.00 .. 34.00 mm", "Enclosure_Lid sets the top end (34.00)",
                   "Enclosure_Box the bottom end (0.00)", "Change that extent by 4 mm"):
             self.assertIn(s, last)
@@ -1322,7 +1322,7 @@ class Round7Kit(unittest.TestCase):
         self.assertEqual(_not_joint(r), [], r["problems"])
         # the proud lid on the D65 numbers: box 28 + lid 4 = 32 vs 30
         r, last = self._check(BOX_AND_LID % {"box_h": 28, "lid_z": 28}, intent, req)
-        self.assertIn("Atelier measured 32 mm (2 mm over) - the Z extent", last)
+        self.assertIn("Prompt2Product measured 32 mm (2 mm over) - the Z extent", last)
         # a top-level size_mm is compared (once), over all parts as before;
         # the request is the fallback when intent.json gives none (R151:
         # the user's turn may still correct the agent's own reading)
@@ -1332,7 +1332,7 @@ class Round7Kit(unittest.TestCase):
         self.assertTrue(r["problems"][0].startswith("overall size: you intended 30 mm"))
         # no intent.json at all: the request's size still holds
         r, last = self._check(BOX_AND_LID % {"box_h": 30, "lid_z": 30}, None, req)
-        self.assertIn("the user asked for 30 mm, Atelier measured 34 mm", last)
+        self.assertIn("the user asked for 30 mm, Prompt2Product measured 34 mm", last)
 
     # ---------------------------------------------------------------- R169
     def test_R169_container_open_probe(self):
@@ -1381,7 +1381,7 @@ class Round7Kit(unittest.TestCase):
         self.assertEqual(last, "CHECK PASS", r["problems"])
         r, last = self._check(CLIP % {"slot": False}, {"slots": {"count": 3, "d_mm": 6}}, req)
         self.assertIn("slots: you intended 3 x diameter 6 mm round channel(s) open along "
-                      "their length, Atelier found 0", last)
+                      "their length, Prompt2Product found 0", last)
         # a miss names what was measured
         r, last = self._check(CLIP % {"slot": True}, {"holes": {"count": 3, "d_mm": 5}}, req)
         self.assertIn("round channels open along their length (slots), not holes: "
@@ -1652,7 +1652,7 @@ class Round8Kit(unittest.TestCase):
         r, last = self._check(JAR_NECK.replace(
             'doc.addObject', 'jar = cad.hole(jar, (0, 0, 0), "+Z", 5, through="wall")\n'
             'doc.addObject'), {"holes": {"count": 0}}, "a jar with a drain hole")
-        self.assertIn("holes: you intended 0, Atelier found 1 (all closed hole diameters "
+        self.assertIn("holes: you intended 0, Prompt2Product found 1 (all closed hole diameters "
                       "found: [5.0]; blind cavities and container mouths, not counted: "
                       "[47.6, 56.0])", last)
 
@@ -1708,13 +1708,13 @@ class Round8Kit(unittest.TestCase):
         r, last = self._check(ROCKET, intent, "rocket")
         self.assertEqual(last, "CHECK PASS", r["problems"])
         notes = " ".join(r["notes"])
-        self.assertIn("holes: you intended 4 x diameter 4 mm, Atelier found 0", notes)
+        self.assertIn("holes: you intended 4 x diameter 4 mm, Prompt2Product found 0", notes)
         self.assertIn("the user's message names no holes", notes)
         self.assertIn("140 mm is not a size the user's message gives", notes)
         # the same misses on a request that states them stay PROBLEMS
         r, last = self._check(ROCKET, intent, "a 140 mm rocket with 4 fin-pin holes")
-        self.assertIn("holes: you intended 4 x diameter 4 mm, Atelier found 0", last)
-        self.assertIn("overall size: you intended 140 mm, Atelier measured 120 mm", last)
+        self.assertIn("holes: you intended 4 x diameter 4 mm, Prompt2Product found 0", last)
+        self.assertIn("overall size: you intended 140 mm, Prompt2Product measured 120 mm", last)
         self.assertIn(atech_geom.INTENT_RULE, r["warnings"])
         # count right, only a diameter the user never gave differs: a note
         plate = ("import Part\nfrom FreeCAD import Vector\nb = Part.makeBox(40, 20, 5)\n"
@@ -1727,7 +1727,7 @@ class Round8Kit(unittest.TestCase):
         self.assertTrue([n for n in r["notes"] if "the count matches" in n], r["notes"])
         r, last = self._check(plate, {"holes": {"count": 2, "d_mm": 3.2}},
                               "a lid held by two M3 screws in 3.2 mm holes")
-        self.assertIn("holes: you intended 2 x diameter 3.2 mm, Atelier found 0", last)
+        self.assertIn("holes: you intended 2 x diameter 3.2 mm, Prompt2Product found 0", last)
 
     # ---------------------------------------------------------------- S56
     def test_S56_library_limits_named(self):

@@ -1,5 +1,5 @@
 """shelf - off-the-shelf parts (Arduino, Raspberry Pi, servos, batteries,
-switches, sensors...) from the FreeCAD Parts Library, installed into the
+switches, sensors, screws, nuts, bearings, rails...) from the FreeCAD Parts Library, installed into the
 user's own parts (user_parts.py).
 
 SOURCE
@@ -41,7 +41,7 @@ TIMEOUT = 300
 GROUPS = (("boards", "Boards"), ("sensors", "Sensors"), ("motors", "Motors and servos"),
           ("power", "Power"), ("controls", "Buttons and switches"),
           ("displays", "Lights and displays"), ("connectors", "Connectors"),
-          ("mechanical", "Mechanical"))
+          ("mechanical", "Bearings and mechanics"), ("hardware", "Screws and fittings"))
 
 
 class ShelfError(Exception):
@@ -220,7 +220,7 @@ def has_picture(entry):
 
 
 def thumbnail(key, dest_dir):
-    """The part's picture: the one shipped with Atelier (drawn from its mesh
+    """The part's picture: the one shipped with Prompt2Product (drawn from its mesh
     by build_shelf_index.py), else the library's own (downloaded, cached in
     dest_dir); None when there is neither."""
     check_key(key)

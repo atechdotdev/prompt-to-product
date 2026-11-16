@@ -19,7 +19,7 @@ run:
 meta:
   title: "Bench Lattice Gantry Crane"
   note: >
-    Synthetic reference fixture authored to exercise Atelier's seven modes and
+    Synthetic reference fixture authored to exercise Prompt2Product's seven modes and
     to be genuinely buildable in PLA. NOT output of VEHICLE-FULLSTACK. No
     physical unit exists; every load figure is an ESTIMATED hand calculation.
 

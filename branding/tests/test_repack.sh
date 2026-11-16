@@ -19,7 +19,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 REPACK="${REPACK:-$HERE/repack.sh}"
 W="$(mktemp -d)"; trap 'rm -rf "$W"' EXIT
-DEFAULT="gh-releases-zsync|atechdotdev|atech-atelier|latest|AtechAtelier-*x86_64.AppImage.zsync"
+DEFAULT="gh-releases-zsync|atechdotdev|prompt2product|latest|Prompt2Product-*x86_64.AppImage.zsync"
 
 mkdir -p "$W/AppDir"; printf '#!/bin/sh\n' > "$W/AppDir/AppRun"; chmod +x "$W/AppDir/AppRun"
 
@@ -53,7 +53,7 @@ run() {  # <out dir> [env ...] -- prints combined output, sets RC
   local out="$1"; shift
   rm -rf "$out" "$W/argv"; mkdir -p "$out"
   OUTPUT="$(env -i PATH=/usr/bin:/bin HOME="$W" ATECH_DEFAULT_UPDATE_INFO="$DEFAULT" "$@" \
-            bash "$REPACK" "$W/AppDir" "$out/AtechAtelier-0.1.0-x86_64.AppImage" 2>&1)"
+            bash "$REPACK" "$W/AppDir" "$out/Prompt2Product-0.1.0-x86_64.AppImage" 2>&1)"
   RC=$?
 }
 argv_has() { [[ -f "$W/argv" ]] && grep -qxF -- "$1" "$W/argv"; }
@@ -74,14 +74,14 @@ run "$W/o1b" APPIMAGETOOL="$W/does-not-exist"
 run "$W/o2" APPIMAGETOOL="$W/ait-u"
 if [[ $RC -eq 0 ]] && argv_has "-u" && argv_has "$DEFAULT" && ! argv_has "--sign" \
    && grep -q "SKIPPED: unsigned image" <<<"$OUTPUT" \
-   && grep -q "AtechAtelier-0.1.0-x86_64.AppImage.zsync" "$W/o2/SHA256SUMS" \
+   && grep -q "Prompt2Product-0.1.0-x86_64.AppImage.zsync" "$W/o2/SHA256SUMS" \
    && (cd "$W/o2" && sha256sum -c --quiet SHA256SUMS); then
   ok "-u supported -> default update info embedded, unsigned announced, SHA256SUMS (image + zsync) checks"
 else
   bad "-u supported (rc=$RC)" "$OUTPUT"
 fi
 # tampering is caught by the published sums
-printf 'tampered\n' >> "$W/o2/AtechAtelier-0.1.0-x86_64.AppImage"
+printf 'tampered\n' >> "$W/o2/Prompt2Product-0.1.0-x86_64.AppImage"
 (cd "$W/o2" && sha256sum -c --quiet SHA256SUMS >/dev/null 2>&1) \
   && bad "SHA256SUMS did not catch a tampered image" \
   || ok "SHA256SUMS catches a tampered image"

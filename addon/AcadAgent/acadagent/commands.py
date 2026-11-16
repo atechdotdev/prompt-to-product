@@ -132,7 +132,7 @@ class FitView:
 
 
 class Credits:
-    """Credit every open-source project Atech Atelier is built on.
+    """Credit every open-source project Prompt2Product is built on.
 
     Shows CREDITS.md as installed in the image (credits.py resolves it), so
     the menu and the shipped file cannot disagree.
@@ -140,7 +140,7 @@ class Credits:
 
     def GetResources(self):
         return {"MenuText": "Credits && Open-Source Licences",
-                "ToolTip": "Atech Atelier, powered by FreeCAD: the open-source "
+                "ToolTip": "Prompt2Product, powered by FreeCAD: the open-source "
                            "projects it is built on and their licences"}
 
     def Activated(self):

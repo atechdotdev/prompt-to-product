@@ -1,4 +1,4 @@
-# CI for Atech Atelier (public repository).
+# CI for Prompt2Product (public repository).
 #
 # Runs the addon and branding tests that need neither FreeCAD nor the
 # `claude` CLI, under plain setup-python on ubuntu-latest:

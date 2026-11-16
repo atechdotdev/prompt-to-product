@@ -12,7 +12,7 @@ b6ae8936df90d85d4d6f6b24ea53bd387bd0508da2090fdbc535227d5feb9be0), a fork of
 Dorian Todd's Sesame Robot (github.com/dorianborian/sesame-robot). Apache-2.0.
 
 What it does to them (NOTICE.md says the same):
-  * moves the assembly from its Y-up frame to Atelier's: Z up, the robot
+  * moves the assembly from its Y-up frame to Prompt2Product's: Z up, the robot
     facing -Y, the body centred on X and Y, the lowest point on z = 0;
   * fuses each servo's pieces (case, horn, gears seen from outside) into one
     solid, so a servo is one part;
@@ -30,10 +30,10 @@ import Import
 import Part
 
 STEP_SHA256 = "b6ae8936df90d85d4d6f6b24ea53bd387bd0508da2090fdbc535227d5feb9be0"
-# Y-up (Sesame) -> Z-up (Atelier): new x = old z, new y = old x, new z = old y,
+# Y-up (Sesame) -> Z-up (Prompt2Product): new x = old z, new y = old x, new z = old y,
 # then centred on the frame; main() lifts it so the lowest point (measured
 # exactly, not the loose BoundBox) is on the desk.
-TO_ATELIER = App.Placement(App.Matrix(0, 0, 1, -2.38,
+TO_PTP = App.Placement(App.Matrix(0, 0, 1, -2.38,
                                       1, 0, 0, -26.02,
                                       0, 1, 0, 32.36,
                                       0, 0, 0, 1))
@@ -77,7 +77,7 @@ def pieces(o):
 
 def world(o):
     s = o.Shape.copy()
-    s.Placement = TO_ATELIER.multiply(o.getGlobalPlacement())
+    s.Placement = TO_PTP.multiply(o.getGlobalPlacement())
     return s
 
 

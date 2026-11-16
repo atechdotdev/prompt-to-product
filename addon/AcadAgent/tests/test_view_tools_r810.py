@@ -60,8 +60,8 @@ def _run(sabotage=""):
     env = {"HOME": home, "FREECAD_USER_HOME": home, "PATH": "/usr/bin:/bin",
            "QT_QPA_PLATFORM": "offscreen", "R810_ADDON": ADDON,
            "R810_SABOTAGE": sabotage}
-    if os.environ.get("ATELIER_MUJOCO_DIR"):       # R813: a real physics run too
-        env["ATELIER_MUJOCO_DIR"] = os.environ["ATELIER_MUJOCO_DIR"]
+    if os.environ.get("P2P_MUJOCO_DIR"):       # R813: a real physics run too
+        env["P2P_MUJOCO_DIR"] = os.environ["P2P_MUJOCO_DIR"]
     p = subprocess.run([FC, os.path.join(HERE, "fc_view_tools_r810.py")], env=env,
                        cwd=home, capture_output=True, text=True, timeout=300)
     line = [ln for ln in (p.stdout + p.stderr).splitlines()
@@ -87,8 +87,8 @@ class TestFreeCAD(unittest.TestCase):
         r = _run("same_signs")
         self.assertFalse(r["checks"]["mjcf_car_sides_drive_together"])
 
-    @unittest.skipUnless(os.environ.get("ATELIER_MUJOCO_DIR"),
-                         "set ATELIER_MUJOCO_DIR to an installed MuJoCo")
+    @unittest.skipUnless(os.environ.get("P2P_MUJOCO_DIR"),
+                         "set P2P_MUJOCO_DIR to an installed MuJoCo")
     def test_physics_runs(self):
         r = _run()
         self.assertTrue(r["checks"].get("physics_shaft_turns"), r["errors"])

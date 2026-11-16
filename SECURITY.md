@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Atech Atelier is a preview. Only the latest release gets fixes.
+Prompt2Product is a preview. Only the latest release gets fixes.
 
 | version | supported |
 |---|---|
@@ -19,7 +19,7 @@ report.
 
 Include:
 
-- the Atech Atelier version (it is in the AppImage file name)
+- the Prompt2Product version (it is in the AppImage file name)
 - what you did, what happened, and what you expected
 - whether the problem needs a malicious file, a malicious network peer, or
   only local access
@@ -39,7 +39,7 @@ agree a disclosure date with you before anything is published.
 
 - FreeCAD itself and the libraries it bundles. Report those to the
   [FreeCAD project](https://github.com/FreeCAD/FreeCAD/security) or to the
-  library's own maintainers. Atech Atelier ships the official FreeCAD 1.1.3
+  library's own maintainers. Prompt2Product ships the official FreeCAD 1.1.3
   image unmodified, so a FreeCAD fix reaches us through a FreeCAD release.
 - Claude Code, the agent engine the chat uses. It is installed and updated
   separately by the user. Report problems in it to Anthropic.

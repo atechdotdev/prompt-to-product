@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate every Atech Atelier brand asset from two sources of truth.
+"""Generate every Prompt2Product brand asset from two sources of truth.
 
     geometry : the atech.dev logo PNGs (vendored in brand/assets/source),
                traced (brand/tools/trace.py)
@@ -53,10 +53,12 @@ LOCKUP_SPLIT_X = 100
 
 GENERATED_BY = "brand/tools/build_brand.py"
 
-# The product name (owner, 2026-10-03; ADR-005). The splash draws the
-# wordmark as traced geometry ("Atech.dev"), so only the second word is text.
-PRODUCT = "Atech Atelier"
-PRODUCT_WORD = PRODUCT.split(" ", 1)[1].upper()   # "ATELIER"
+# The product name (owner, 2026-11-10; before: Atech Atelier, ADR-005) and
+# the one line of Atech branding it carries: "Made by Atech.dev", with the
+# Atech.dev lockup as traced geometry (it does not depend on a font).
+PRODUCT = "Prompt2Product"
+PRODUCT_LINES = ("Prompt To", "Product")       # the splash's two title lines
+MADE_BY = "MADE BY"
 
 
 def _rings(png):
@@ -153,7 +155,7 @@ def build_icon(mode):
             f'fill="{p["panel"]}" stroke="{p["line"]}" stroke-width="1.5"/>\n'
             f'  <path d="{_d(rings)}" fill="{p["text"]}" '
             f'fill-rule="evenodd"/>')
-    return _svg(S, S, body, "Atech Atelier")
+    return _svg(S, S, body, "Prompt2Product")
 
 
 def build_logo(mode):
@@ -165,41 +167,165 @@ def build_logo(mode):
     return _svg(w, h, body, "Atech.dev")
 
 
+def _iso(x, y, z, cx, cy, k=1.0):
+    """Isometric projection, screen y down: larger x+y is nearer."""
+    return (cx + (x - y) * 0.8660 * k, cy + (x + y) * 0.5 * k - z * k)
+
+
+def _box_faces(x0, y0, z0, w, d, h, cx, cy, k):
+    """The three visible faces of a box (top, +y side, +x side) as
+    polygons in screen space."""
+    P = lambda x, y, z: _iso(x, y, z, cx, cy, k)          # noqa: E731
+    x1, y1, z1 = x0 + w, y0 + d, z0 + h
+    top = [P(x0, y0, z1), P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1)]
+    side_y = [P(x0, y1, z1), P(x1, y1, z1), P(x1, y1, z0), P(x0, y1, z0)]
+    side_x = [P(x1, y0, z1), P(x1, y1, z1), P(x1, y1, z0), P(x1, y0, z0)]
+    return top, side_y, side_x
+
+
+def _poly(pts, fill, stroke, sw=0.75, extra=""):
+    d = " ".join(f"{x:.1f},{y:.1f}" for x, y in pts)
+    return (f'  <polygon points="{d}" fill="{fill}" stroke="{stroke}" '
+            f'stroke-width="{sw}" stroke-linejoin="round"{extra}/>\n')
+
+
+def _exploded_build(p, cx, cy, k):
+    """A design pulled apart along Z, in line: the enclosure (open at the
+    top), an Atech module board above it, the lid above that, joined by
+    dashed assembly guides. The app's own exploded view and assembly
+    videos, as a drawing."""
+    out = []
+    W_, D_ = 96.0, 72.0
+    base_h, lid_h, wall = 30.0, 8.0, 6.0
+    board_z, lid_z = base_h + 30.0, base_h + 82.0
+    stroke = p["text"]
+    # Assembly guides first, under everything: from the enclosure's top
+    # corners up to the lid's bottom corners.
+    for x, y in ((0, 0), (W_, 0), (W_, D_), (0, D_)):
+        (ax, ay), (bx, by) = (_iso(x, y, base_h, cx, cy, k),
+                              _iso(x, y, lid_z, cx, cy, k))
+        out.append(f'  <line x1="{ax:.1f}" y1="{ay:.1f}" x2="{bx:.1f}" '
+                   f'y2="{by:.1f}" stroke="{p["dim"]}" stroke-width="0.75" '
+                   f'stroke-dasharray="2 3"/>\n')
+    # The enclosure: outer faces, then its open top as a rim around the
+    # hollow.
+    top, sy, sx = _box_faces(0, 0, 0, W_, D_, base_h, cx, cy, k)
+    out.append(_poly(sy, p["sunken"], stroke))
+    out.append(_poly(sx, p["panel"], stroke))
+    out.append(_poly(top, p["panel"], stroke))
+    P = lambda x, y, z: _iso(x, y, z, cx, cy, k)          # noqa: E731
+    i0, i1, j0, j1 = wall, W_ - wall, wall, D_ - wall
+    hollow = [P(i0, j0, base_h), P(i1, j0, base_h), P(i1, j1, base_h),
+              P(i0, j1, base_h)]
+    out.append(_poly(hollow, p["hover"], stroke))
+    # The module board: a thin slab, its leading edge in the accent - the
+    # one coloured thing in the drawing - with a chip and four pads.
+    bx0, by0, bw, bd = 22.0, 16.0, 52.0, 40.0
+    top, sy, sx = _box_faces(bx0, by0, board_z, bw, bd, 3.0, cx, cy, k)
+    out.append(_poly(sy, p["accent"], p["accent"], 0.75))
+    out.append(_poly(sx, p["accent"], p["accent"], 0.75))
+    out.append(_poly(top, p["panel"], p["accent"], 1.0))
+    chip = _box_faces(bx0 + 18, by0 + 13, board_z + 3, 16, 14, 4, cx, cy, k)
+    for face, fill in zip(chip, (p["text"], p["text"], p["text"])):
+        out.append(_poly(face, fill, p["text"], 0.5))
+    for px, py in ((6, 6), (bw - 6, 6), (bw - 6, bd - 6), (6, bd - 6)):
+        hx, hy = P(bx0 + px, by0 + py, board_z + 3)
+        out.append(f'  <ellipse cx="{hx:.1f}" cy="{hy:.1f}" rx="{1.7 * k:.1f}" '
+                   f'ry="{1.0 * k:.1f}" fill="none" stroke="{p["accent"]}" '
+                   f'stroke-width="0.75"/>\n')
+    # The lid, last: nearest the eye.
+    top, sy, sx = _box_faces(0, 0, lid_z, W_, D_, lid_h, cx, cy, k)
+    out.append(_poly(sy, p["sunken"], stroke))
+    out.append(_poly(sx, p["panel"], stroke))
+    out.append(_poly(top, p["panel"], stroke))
+    # A dimension along the enclosure's near +x edge, CAD-style: extension
+    # lines, the dimension line with end ticks, the value in mono.
+    off = 14.0
+    (ax, ay), (bx, by) = P(W_, 0, 0), P(W_, D_, 0)
+    (ex, ey), (fx, fy) = P(W_ + off, 0, 0), P(W_ + off, D_, 0)
+    for (sx_, sy_), (tx, ty) in (((ax, ay), (ex, ey)), ((bx, by), (fx, fy))):
+        out.append(f'  <line x1="{sx_:.1f}" y1="{sy_:.1f}" x2="{tx:.1f}" '
+                   f'y2="{ty:.1f}" stroke="{p["dim"]}" stroke-width="0.6"/>\n')
+    out.append(f'  <line x1="{ex:.1f}" y1="{ey:.1f}" x2="{fx:.1f}" '
+               f'y2="{fy:.1f}" stroke="{p["muted"]}" stroke-width="0.75"/>\n')
+    for tx, ty in ((ex, ey), (fx, fy)):
+        out.append(f'  <circle cx="{tx:.1f}" cy="{ty:.1f}" r="1.3" '
+                   f'fill="{p["muted"]}"/>\n')
+    mx, my = (ex + fx) / 2, (ey + fy) / 2
+    out.append(f'  <text x="{mx:.1f}" y="{my + 11:.1f}" text-anchor="middle" '
+               f'transform="rotate(-30 {mx:.1f} {my + 11:.1f})" '
+               f'font-family="{tokens.FONT_MONO}, monospace" font-size="7.5" '
+               f'fill="{p["muted"]}">72.0</text>\n')
+    return "".join(out)
+
+
 def build_splash(mode):
     """Splash screen. 480x300, the proportion FreeCAD's splash expects.
 
-    The mark's own silhouette is the structure: a swept curve terminating in
-    a hard vertical. That vertical becomes the rule under the wordmark, so
-    the layout is derived from the logo rather than decorated with it.
+    A drawing sheet: a faint dot grid that fades at the edges, crop marks
+    in the corners, the lockup on the left and, on the right, a design
+    pulled apart along its assembly guides - what the app does, drawn.
+    The bottom-left stays clear: FreeCAD writes its loading messages there.
+    No "powered by FreeCAD" (owner, 2026-11-07); the credit the licence
+    asks for is in About and Credits. Product name as the title, and the
+    only Atech branding is "Made by" + the Atech.dev lockup (2026-11-10).
     """
     p = tokens.palette(mode)
     W, H = 480.0, 300.0
     mark, word, (lw, lh) = lockup_geometry()
-    s = 236.0 / lw
-    ox, oy = 40.0, 104.0
+    ox = 36.0
+    title_y = (118.0, 150.0)                   # baselines, font-size 28
+    rule_y = 170.0
+    made_y = rule_y + 22.0                     # "MADE BY", small caps
+    # The Atech.dev lockup under "MADE BY", 92 px wide.
+    s = 92.0 / lw
+    oy = made_y + 8.0
     mark = _xform(mark, ox / s, oy / s, s)
     word = _xform(word, ox / s, oy / s, s)
-    rule_y = oy + lh * s + 22.0
-    body = (
-        f'  <rect width="{W:.0f}" height="{H:.0f}" fill="{p["base"]}"/>\n'
-        f'  <path d="{_d(mark)}" fill="{p["text"]}" fill-rule="evenodd"/>\n'
-        f'  <path d="{_d(word)}" fill="{p["text"]}" fill-rule="evenodd"/>\n'
-        f'  <rect x="{ox:.0f}" y="{rule_y:.0f}" width="236" height="1" '
-        f'fill="{p["line"]}"/>\n'
-        f'  <rect x="{ox:.0f}" y="{rule_y:.0f}" width="28" height="1" '
-        f'fill="{p["accent"]}"/>\n'
-        f'  <text x="{ox:.0f}" y="{rule_y + 22:.0f}" '
+
+    # Dot grid, every 16 px. QtSvg has no <pattern>, so the dots are
+    # drawn; the fade is a radial gradient of the background over them.
+    dots = "".join(f"M{x:.0f} {y:.0f}h0.01"
+                   for x in range(8, int(W), 16) for y in range(10, int(H), 16))
+    fade = (f'  <defs>\n'
+            f'    <radialGradient id="fade" cx="0.68" cy="0.46" r="0.62">\n'
+            f'      <stop offset="0" stop-color="{p["base"]}" stop-opacity="0"/>\n'
+            f'      <stop offset="1" stop-color="{p["base"]}" stop-opacity="1"/>\n'
+            f'    </radialGradient>\n'
+            f'  </defs>\n')
+    marks = ""
+    m, L = 14.0, 10.0
+    # Three corners: the bottom left is where FreeCAD writes its loading
+    # messages.
+    for x, y, dx, dy in ((m, m, 1, 1), (W - m, m, -1, 1),
+                         (W - m, H - m, -1, -1)):
+        marks += (f'  <path d="M{x:.0f} {y + dy * L:.0f}V{y:.0f}H{x + dx * L:.0f}" '
+                  f'fill="none" stroke="{p["line_strong"]}" stroke-width="1"/>\n')
+
+    title = "".join(
+        f'  <text x="{ox:.0f}" y="{ty:.0f}" '
         f'font-family="{tokens.FONT_DISPLAY}, {tokens.FONT_BODY}, sans-serif" '
-        f'font-size="13" font-weight="600" letter-spacing="0.08em" '
-        f'fill="{p["muted"]}">{PRODUCT_WORD}</text>\n'
-        # The product line (owner, 2026-09-25): says what the app is built
-        # on. No version number: that lives in upstream.env and in the
-        # About box, and a typed copy here would drift from it. Sits under
-        # the product word, well above FreeCAD's own loading messages at the bottom.
-        f'  <text x="{ox:.0f}" y="{rule_y + 42:.0f}" '
-        f'font-family="{tokens.FONT_BODY}, sans-serif" '
-        f'font-size="11" fill="{p["muted"]}">powered by FreeCAD</text>')
-    return _svg(W, H, body, f"{PRODUCT}, powered by FreeCAD")
+        f'font-size="28" font-weight="700" fill="{p["text"]}">{line}</text>\n'
+        for line, ty in zip(PRODUCT_LINES, title_y))
+    body = (
+        fade
+        + f'  <rect width="{W:.0f}" height="{H:.0f}" fill="{p["base"]}"/>\n'
+        + f'  <path d="{dots}" stroke="{p["line_strong"]}" stroke-width="1.6" '
+          f'stroke-linecap="round"/>\n'
+        + f'  <rect width="{W:.0f}" height="{H:.0f}" fill="url(#fade)"/>\n'
+        + marks
+        + _exploded_build(p, 356.0, 132.0, 0.92)
+        + title
+        + f'  <rect x="{ox:.0f}" y="{rule_y:.0f}" width="160" height="1" '
+          f'fill="{p["line"]}"/>\n'
+        + f'  <rect x="{ox:.0f}" y="{rule_y:.0f}" width="28" height="1" '
+          f'fill="{p["accent"]}"/>\n'
+        + f'  <text x="{ox:.0f}" y="{made_y:.0f}" '
+          f'font-family="{tokens.FONT_BODY}, sans-serif" font-size="8" '
+          f'letter-spacing="0.2em" fill="{p["muted"]}">{MADE_BY}</text>\n'
+        + f'  <path d="{_d(mark)}" fill="{p["text"]}" fill-rule="evenodd"/>\n'
+        + f'  <path d="{_d(word)}" fill="{p["text"]}" fill-rule="evenodd"/>')
+    return _svg(W, H, body, PRODUCT + ", made by Atech.dev")
 
 
 BUILDERS = {"icon": build_icon, "logo": build_logo, "splash": build_splash}

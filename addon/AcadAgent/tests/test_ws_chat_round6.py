@@ -500,7 +500,7 @@ class TestR153Markdown(twp.Case):
 # ------------------------------------------------------------------ S49
 def _intent_result(vol=1000.0):
     r = twp._ok_result(vol=vol)
-    r.intent_problems = ["overall size: you intended 60 mm, Atelier measured "
+    r.intent_problems = ["overall size: you intended 60 mm, Prompt2Product measured "
                          "50 mm"]
     return r
 

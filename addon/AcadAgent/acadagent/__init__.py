@@ -3,7 +3,7 @@ import os
 import sys
 
 __version__ = "0.1.0"
-PRODUCT = "Atech Atelier"
+PRODUCT = "Prompt2Product"
 
 
 def fallback_data_root():

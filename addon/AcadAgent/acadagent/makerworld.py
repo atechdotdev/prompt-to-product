@@ -2,7 +2,7 @@
 
 MakerWorld (Bambu Lab's model site) has no public API: no sign-in for
 other apps, no upload, and downloads only from a signed-in browser. So
-Atelier works with files and the browser, never with MakerWorld's private
+Prompt2Product works with files and the browser, never with MakerWorld's private
 endpoints or the user's cookies:
 
   From MakerWorld...   paste a model's link; Open its page downloads it in
@@ -36,10 +36,10 @@ SITE = "https://makerworld.com"
 #: upload form is documented, so its home page opens.
 UPLOAD_URL = SITE + "/en"
 HELP_URL = "https://wiki.bambulab.com/en/makerworld/tutorials/how-to-upload-models"
-MADE_WITH = "Made with Atech Atelier: https://atech.dev/atelier"
+MADE_WITH = "Made with Prompt2Product by Atech.dev: https://atech.dev/atelier"
 _LINK = re.compile(r"https?://(?:www\.)?makerworld\.com(\.cn)?/(?:[a-z]{2}(?:-[a-z]{2,4})?/)?"
                    r"models/(\d+)(?:-([A-Za-z0-9_-]+))?", re.I)
-DOWNLOAD_EXT = (".3mf", ".stl", ".step", ".stp", ".obj")
+DOWNLOAD_EXT = (".3mf", ".stl", ".step", ".stp", ".obj", ".glb", ".gltf")
 MAX_3MF_TRIANGLES = 3000000
 
 
@@ -244,7 +244,7 @@ def description(title, text, plan):
 
 def bundle_dir(doc, root=None):
     root = root or os.path.join(os.path.expanduser("~"), "Documents",
-                                "Atech Atelier", "MakerWorld")
+                                "Prompt2Product", "MakerWorld")
     name = re.sub(r"[^\w .-]", "_", getattr(doc, "Label", "") or "design").strip() or "design"
     return os.path.join(root, name)
 
@@ -455,7 +455,7 @@ def PublishDialog(parent=None, doc=None, opener=None):
     t = QtWidgets.QLabel("Publish to MakerWorld", d)
     t.setObjectName("ToolTitle")
     lay.addWidget(t)
-    sub = QtWidgets.QLabel("Atelier makes the files and the text; you upload them on "
+    sub = QtWidgets.QLabel("Prompt2Product makes the files and the text; you upload them on "
                            "MakerWorld (it has no way for apps to upload).", d)
     sub.setObjectName("ToolMuted")
     sub.setWordWrap(True)

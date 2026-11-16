@@ -22,7 +22,7 @@
 10. Separate bodies must not intersect unless you list them in
     INTENDED_OVERLAPS = [("Peg", "Plate")]. A tiny stray solid beside a body
     (a fuse that did not join) is a failure too.
-11. Do not assert solid counts or collisions in model.py: Atelier and ./check
+11. Do not assert solid counts or collisions in model.py: Prompt2Product and ./check
     measure them.
 12. Many cutters (vents, slots, holes): ONE call `cad.cut(body, list_of_tools)`.
     Never `fuse_one` cutters first - disjoint tools are not one body.

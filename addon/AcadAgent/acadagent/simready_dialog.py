@@ -1,7 +1,7 @@
 """simready_dialog - "Install from NVIDIA SimReady..." on the Modules page.
 
 Search NVIDIA's SimReady assets (CC BY 4.0) from the index shipped with
-Atelier, see one's picture, size and licence, and install it into the
+Prompt2Product, see one's picture, size and licence, and install it into the
 user's own parts (projects/simready.py does the work: download, hash check,
 USD -> STL in a child process, user_parts.import_part).
 
@@ -48,7 +48,7 @@ def _thumb_dir():
         return os.path.join(FreeCAD.getUserAppDataDir(), "cache", "simready")
     except Exception:                                  # noqa: BLE001
         import tempfile
-        return os.path.join(tempfile.gettempdir(), "atelier_simready")
+        return os.path.join(tempfile.gettempdir(), "p2p_simready")
 
 
 def SimReadyDialog(parent=None, on_done=None, sr=None):

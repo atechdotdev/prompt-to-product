@@ -1,7 +1,7 @@
 # Licence for the Atech module models: CC BY-NC 4.0
 
 This notice covers the Atech **models**, not the code. The application code is
-under the GNU LGPL v3 or later with a credit term; see `LICENSE` and
+under the GNU GPL v3 or later with a credit term; see `LICENSE` and
 `LICENSE-ATTRIBUTION.md`. These are two separate
 licences, and each applies only to the files listed under it.
 
@@ -20,7 +20,7 @@ In the built application these files are installed under
 `usr/Mod/AcadAgent/data/models/` and `usr/Mod/AcadAgent/acadagent/board_sprites/`
 (on macOS, under `Contents/Resources/Mod/AcadAgent/`).
 
-It does **not** cover the application code (`LICENSE`, LGPL-3.0-or-later),
+It does **not** cover the application code (`LICENSE`, GPL-3.0-or-later),
 FreeCAD or its bundled libraries (their own licences, under `usr/share/doc/`),
 or the third-party components listed in `branding/third_party/NOTICE.third_party`.
 
@@ -42,8 +42,8 @@ purposes, provided you credit Atech, keep the copyright and licence notices,
 link the licence, and indicate if you changed the models (CC BY-NC 4.0
 §3(a)). Commercial use needs separate permission from Atech.
 
-The licence does not grant any right to use the names "Atech" or "Atech
-Atelier" or the Atech logos except to describe where the models come from.
+The licence does not grant any right to use the names "Atech" or
+"Prompt2Product" or the Atech logos except to describe where the models come from.
 
 ## Attribution
 

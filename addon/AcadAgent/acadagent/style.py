@@ -1,4 +1,4 @@
-"""style — the Atech Atelier design system for everything this addon draws.
+"""style — the Prompt2Product design system for everything this addon draws.
 
 ONE token table per mode, copied from brand/tokens.py (which is itself ported
 from the atech.dev frontend). The addon ships alone inside the AppImage, so it
@@ -44,9 +44,12 @@ DARK.update({"bubble": "#222222", "card": "#161616", "composer": "#1f1f1f",
              "track": "#0d0d0d", "view_top": "#1c1c1e", "view_bot": "#0b0b0c"})
 
 #: The product name in UI strings (wordmark, About, notices): the same
-#: "Atech Atelier" as the bundle and the data folder (R722; 0.1.2 showed
-#: "Atech AI CAD").
-PRODUCT = "Atech Atelier"
+#: "Prompt2Product" as the bundle and the data folder (owner, 2026-11-16;
+#: before: "Prompt To Product", "Atech Atelier", and 0.1.2 showed "Atech AI CAD").
+PRODUCT = "Prompt2Product"
+#: The one line of Atech branding the product carries (owner, 2026-11-10).
+MAKER = "Atech.dev"
+MADE_BY = "Made by " + MAKER
 
 FONT_UI = "Inter"
 FONT_MONO = "Geist Mono"
@@ -104,10 +107,11 @@ THEME_KEY = "AppearanceTheme"
 THEMES = ("light", "dark", "system")
 THEME_LABELS = {"light": "Light", "dark": "Dark", "system": "System"}
 #: FreeCAD theme (parameters/*.yaml) and style sheet per mode. The first
-#: name is what this build installs; the second is the name the rename to
-#: "Atech AI CAD" would give it, used when the build has it instead.
-FC_THEMES = {"light": ("Atech Atelier Light", "Atech AI CAD Light"),
-             "dark": ("Atech Atelier Dark", "Atech AI CAD Dark")}
+#: name is what this build installs; the others are earlier names (Atech
+#: Atelier, and "Atech AI CAD" as 0.1.2 showed), used when the build has
+#: one of them instead.
+FC_THEMES = {"light": ("Prompt2Product Light", "Prompt To Product Light", "Atech Atelier Light", "Atech AI CAD Light"),
+             "dark": ("Prompt2Product Dark", "Prompt To Product Dark", "Atech Atelier Dark", "Atech AI CAD Dark")}
 FC_SHEETS = {"light": "AtechLight.qss", "dark": "AtechDark.qss"}
 
 
@@ -225,7 +229,7 @@ def mode():
 
     FreeCAD 1.1 colours come from the THEME (token set), not only from the
     .qss file: MEASURED on a real profile, StyleSheet=FreeCAD.qss with
-    Theme="Atech Atelier Dark" paints a dark app, and reading the file name
+    Theme="Prompt2Product Dark" paints a dark app, and reading the file name
     alone put a light panel into it. So a theme that NAMES its mode decides.
 
     A theme that does not (Classic, a custom theme, none at all) is judged
@@ -286,7 +290,7 @@ QPushButton { min-width: 0px; }
 # LICENSE (c) 2013-2023 Cole Bemis). "chat" is Feather's message-square.
 # "stop" (a filled square) and "tree" (two columns of lines) are plain
 # shapes drawn for this file. Both licence texts ship in the
-# AppImage at usr/share/doc/atech-atelier/third_party/LICENSE.Lucide and
+# AppImage at usr/share/doc/prompt2product/third_party/LICENSE.Lucide and
 # LICENSE.Feather, listed in NOTICE.third_party (branding/third_party/ in
 # the repo). An icon added here must come from Lucide or be drawn here.
 _SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '

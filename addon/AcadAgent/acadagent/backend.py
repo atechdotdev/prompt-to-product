@@ -60,7 +60,7 @@ WORKING = "working"
 
 # Exact copy, from docs/verification/ui-review/DESIGN_FINDINGS.md.
 NOTICE_TITLE = "Agent backend not reachable"
-NOTICE_BODY = ("Atech Atelier talks to a local agent process on %s:%d. "
+NOTICE_BODY = ("Prompt2Product talks to a local agent process on %s:%d. "
                "Nothing is listening there right now." % (HOST, PORT))
 NOTICE_BODY2 = "Start it with:  opencode serve --port %d" % PORT
 NOTICE_ACTIONS = ("Retry connection", "Change backend address…")
@@ -257,7 +257,7 @@ def adopt_allowed():
 def describe(info):
     """One line for the user: pid, command, and who started it."""
     if not info or info.get("pid") is None:
-        return "a process Atech Atelier cannot inspect"
+        return "a process Prompt2Product cannot inspect"
     parent = info.get("parent_cmd") or ""
     orphan = info.get("ppid") in (None, 0, 1) or "systemd" in parent
     return "pid %d (%s)%s" % (
@@ -370,17 +370,17 @@ class Supervisor(object):
             return OFFLINE, "port-busy"
         if kind == OWN:
             self.adopted = True
-            _log("adopted this Atelier's own backend on %s (pid %s)"
+            _log("adopted this Prompt2Product's own backend on %s (pid %s)"
                  % (where, (info or {}).get("pid")))
             return IDLE, "adopted"
         if not adopt_allowed():
             self.refused = ("not-ours", info)
-            _log("%s is served by %s, not started by this Atelier; "
+            _log("%s is served by %s, not started by this Prompt2Product; "
                  "ATECH_AGENT_ADOPT=0, so not adopted" % (where, describe(info)))
             return OFFLINE, "foreign-refused"
         self.adopted = True
         self.foreign = info or {}
-        _log("adopted a backend this Atelier did not start on %s: %s. It is "
+        _log("adopted a backend this Prompt2Product did not start on %s: %s. It is "
              "never stopped on exit." % (where, describe(info)))
         return IDLE, "adopted-foreign"
 
@@ -506,11 +506,11 @@ def apply_to_panel(panel, state=None):
         why, info = sup.refused
         body = {
             "other-user": "Another account on this computer is using "
-                          "%s:%d. Atech Atelier will not send your work to "
+                          "%s:%d. Prompt2Product will not send your work to "
                           "it." % (sup.host, sup.port),
             "not-a-backend": "%s:%d is taken by %s, which is not an agent "
                              "backend." % (sup.host, sup.port, describe(info)),
-            "not-ours": "%s:%d is served by %s, which Atech Atelier did not "
+            "not-ours": "%s:%d is served by %s, which Prompt2Product did not "
                         "start (ATECH_AGENT_ADOPT=0)." % (
                             sup.host, sup.port, describe(info)),
         }.get(why, NOTICE_BODY)
@@ -527,7 +527,7 @@ def apply_to_panel(panel, state=None):
     return state
 
 
-FOREIGN_TITLE = "Using an agent backend Atech Atelier did not start"
+FOREIGN_TITLE = "Using an agent backend Prompt2Product did not start"
 
 
 def foreign_body(where, info, kind=USER):
@@ -537,7 +537,7 @@ def foreign_body(where, info, kind=USER):
         return ("%s is served by another account on this computer. Anything "
                 "you send goes to that account's process. Change the "
                 "backend address in Settings." % where)
-    return ("%s is served by %s. Atech Atelier is using it and will not stop "
+    return ("%s is served by %s. Prompt2Product is using it and will not stop "
             "it when you quit. If that is not yours, stop it and retry."
             % (where, describe(info)))
 

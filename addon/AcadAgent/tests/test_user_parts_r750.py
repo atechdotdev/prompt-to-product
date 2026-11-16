@@ -52,7 +52,7 @@ class TestCatalog(unittest.TestCase):
         shutil.rmtree(self.d, ignore_errors=True)
 
     def test_dir_from_env(self):
-        self.assertEqual(up.parts_dir({"ATELIER_PARTS": self.d}), self.d)
+        self.assertEqual(up.parts_dir({"P2P_PARTS": self.d}), self.d)
 
     def test_names(self):
         self.assertEqual(up.slug("Arduino Nano 33 IoT"), "arduino_nano_33_iot")
@@ -153,7 +153,7 @@ class TestInFreeCAD(unittest.TestCase):
     def test_r750(self):
         d = tempfile.mkdtemp(prefix="r750_parts_")
         try:
-            env = dict(os.environ, ATELIER_PARTS=d, ATECH_ARTIFACTS=MODELS,
+            env = dict(os.environ, P2P_PARTS=d, ATECH_ARTIFACTS=MODELS,
                        QT_QPA_PLATFORM="offscreen")
             out = subprocess.run([FC, os.path.join(HERE, "fc_user_parts_r750.py")],
                                  env=env, capture_output=True, text=True,

@@ -2,18 +2,18 @@
 
 Shows CREDITS.md exactly as it ships: the build installs the repo's root
 CREDITS.md to usr/share/doc/<doc dir>/CREDITS.md (build_appimage.sh, gated
-by verify_tree.py). The doc dir is "atech-atelier" after the rename to Atech
-Atelier (ADR-005); "atech-studio" is still looked in so an image built before
+by verify_tree.py). The doc dir is "prompt2product" after the rename to
+Prompt2Product (ADR-005); "atech-atelier" and "atech-studio" are still looked in so an image built before
 the build script follows the rename keeps showing its credits. In a development checkout the repo root copy
 is used. Nothing here writes a credit of its own: an absent file is reported as
 absent, never replaced by a summary that could drift from the real one.
 """
 import os
 
-DOC_DIRS = ("atech-atelier", "atech-studio")
+DOC_DIRS = ("prompt2product", "prompt-to-product", "atech-atelier", "atech-studio")
 DOC_REL = os.path.join("share", "doc", DOC_DIRS[0], "CREDITS.md")
 DOC_RELS = tuple(os.path.join("share", "doc", d, "CREDITS.md") for d in DOC_DIRS)
-HEADER = "Atech Atelier, powered by FreeCAD"
+HEADER = "Prompt2Product, made by Atech.dev, powered by FreeCAD"
 
 
 def candidates():

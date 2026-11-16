@@ -111,7 +111,7 @@ class AppRunEnv(unittest.TestCase):
         self.assertEqual(got, caller)
 
     def test_inherited_stale_snapshot_is_dropped(self):
-        # Atech Atelier started from a shell that already carries an outer one's
+        # Prompt2Product started from a shell that already carries an outer one's
         # snapshot: a name this caller never set must not be "restored" to
         # the outer caller's value.
         caller = _caller()

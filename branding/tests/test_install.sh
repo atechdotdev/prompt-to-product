@@ -10,7 +10,7 @@
 #   5. --uninstall removes what 1 installed.
 #
 # The stand-in on macOS is a real disk image holding a tiny ad-hoc-signed
-# "Atech Atelier.app" (bundle id dev.atech.Atelier); on Linux a shell script
+# "Prompt2Product.app" (bundle id dev.atech.Prompt2Product); on Linux a shell script
 # named like the AppImage. No network, no Claude Code (--no-claude).
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,15 +26,15 @@ ok()  { echo "  ok    $*"; }
 bad() { echo "  FAIL  $*"; fails=$((fails + 1)); }
 sum() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$@"; else shasum -a 256 "$@"; fi; }
 
-make_app() {  # make_app <dir> [marker]
-  local app="$1/Atech Atelier.app"
+make_app() {  # make_app <dir> [marker] [name] [bundle id]
+  local app="$1/${3:-Prompt2Product}.app" id="${4:-dev.atech.Prompt2Product}"
   mkdir -p "$app/Contents/MacOS"
-  cat > "$app/Contents/Info.plist" <<'PLIST'
+  cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>CFBundleIdentifier</key><string>dev.atech.Atelier</string>
-  <key>CFBundleName</key><string>Atech Atelier</string>
+  <key>CFBundleIdentifier</key><string>$id</string>
+  <key>CFBundleName</key><string>${3:-Prompt2Product}</string>
   <key>CFBundleExecutable</key><string>FreeCAD</string>
   <key>CFBundlePackageType</key><string>APPL</string>
 </dict></plist>
@@ -47,24 +47,24 @@ PLIST
 case "$(uname -s)" in
   Darwin)
     ARCH="$(uname -m)"
-    NAME="AtechAtelier-9.9.9-macOS-$ARCH.dmg"
+    NAME="Prompt2Product-9.9.9-macOS-$ARCH.dmg"
     mkdir -p "$T/stage" "$T/rel"
     make_app "$T/stage"
-    hdiutil create -quiet -volname "Atech Atelier" -srcfolder "$T/stage" -fs HFS+ -format UDZO "$T/rel/$NAME"
+    hdiutil create -quiet -volname "Prompt2Product" -srcfolder "$T/stage" -fs HFS+ -format UDZO "$T/rel/$NAME"
     # A broken one: a file added after signing.
     mkdir -p "$T/stage2"
     make_app "$T/stage2"
-    echo extra > "$T/stage2/Atech Atelier.app/Contents/MacOS/added-after-signing"
-    hdiutil create -quiet -volname "Atech Atelier" -srcfolder "$T/stage2" -fs HFS+ -format UDZO "$T/rel/broken-$NAME"
+    echo extra > "$T/stage2/Prompt2Product.app/Contents/MacOS/added-after-signing"
+    hdiutil create -quiet -volname "Prompt2Product" -srcfolder "$T/stage2" -fs HFS+ -format UDZO "$T/rel/broken-$NAME"
     DEST="$T/Applications"
-    INSTALLED="$DEST/Atech Atelier.app"
+    INSTALLED="$DEST/Prompt2Product.app"
     ;;
   Linux)
-    NAME="AtechAtelier-9.9.9-x86_64.AppImage"
+    NAME="Prompt2Product-9.9.9-x86_64.AppImage"
     mkdir -p "$T/rel"
     printf '#!/bin/sh\necho stand-in\n' > "$T/rel/$NAME"
     DEST="$T/apps"
-    INSTALLED="$DEST/AtechAtelier.AppImage"
+    INSTALLED="$DEST/Prompt2Product.AppImage"
     ;;
 esac
 ( cd "$T/rel" && sum "$NAME" > SHA256SUMS )
@@ -82,8 +82,27 @@ if [[ "$(uname -s)" == Darwin ]]; then
   left=("${left[@]/#$DEST\/\*/}"); left=("${left[@]/#$DEST\/.\[\!.\]\*/}")
   [[ "$(printf '%s' "${left[@]}")" == "$INSTALLED" ]] && ok "no staging leftovers" || bad "leftovers in $DEST: ${left[*]}"
 else
-  grep -q "Exec=" "$HOME/.local/share/applications/dev.atech.Atelier.desktop" && ok "desktop entry written" || bad "no desktop entry"
-  [[ -x "$HOME/.local/bin/atech-atelier" ]] && ok "launcher command written" || bad "no ~/.local/bin/atech-atelier"
+  grep -q "Exec=" "$HOME/.local/share/applications/dev.atech.Prompt2Product.desktop" && ok "desktop entry written" || bad "no desktop entry"
+  [[ -x "$HOME/.local/bin/prompt2product" ]] && ok "launcher command written" || bad "no ~/.local/bin/prompt2product"
+fi
+
+# 1b. the app under its previous name and id (Atech Atelier) is replaced
+if [[ "$(uname -s)" == Darwin ]]; then
+  make_app "$T/dest1b" old "Atech Atelier" dev.atech.Atelier
+  if bash "$INSTALL" --file "$T/rel/$NAME" --dir "$T/dest1b" --no-claude >/dev/null 2>&1 \
+     && [[ -e "$T/dest1b/Prompt2Product.app" && ! -e "$T/dest1b/Atech Atelier.app" ]]; then
+    ok "replaces the app under its previous name"
+  else
+    bad "the previous name's app was not replaced: $(ls "$T/dest1b")"
+  fi
+else
+  mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/atech-atelier"
+  touch "$HOME/.local/bin/atech-atelier" "$HOME/.local/share/applications/dev.atech.Atelier.desktop" \
+        "$HOME/.local/share/atech-atelier/AtechAtelier.AppImage"
+  bash "$INSTALL" --file "$T/rel/$NAME" --dir "$DEST" --no-claude >/dev/null 2>&1
+  [[ ! -e "$HOME/.local/bin/atech-atelier" && ! -e "$HOME/.local/share/applications/dev.atech.Atelier.desktop" \
+     && ! -e "$HOME/.local/share/atech-atelier" ]] \
+    && ok "removes the previous name's launcher, menu entry and image" || bad "previous name's files left behind"
 fi
 
 # 2. tampered
@@ -111,7 +130,7 @@ if [[ "$(uname -s)" == Darwin ]]; then
   if out="$(bash "$INSTALL" --file "$T/t4/$NAME" --dir "$T/dest4" --no-claude 2>&1)"; then
     bad "an app with a broken signature was installed"
   else
-    grep -q "signature does not verify" <<<"$out" && [[ ! -e "$T/dest4/Atech Atelier.app" ]] \
+    grep -q "signature does not verify" <<<"$out" && [[ ! -e "$T/dest4/Prompt2Product.app" ]] \
       && ok "refuses an app whose signature does not verify" || bad "broken signature: wrong refusal: $out"
   fi
 fi

@@ -1,6 +1,6 @@
 """shop - links to the Atech shop at atech.dev (R840).
 
-Atelier names modules as models/presets.yaml does (`orientation`,
+Prompt2Product names modules as models/presets.yaml does (`orientation`,
 `scd40_air_quality`); the shop names its products by slug (`orientation-
 sensor`, `co2-sensor`; the site's src/lib/pricing.ts). SHOP_SLUGS is the
 one join between the two. A module with no slug (the PIR sensor, the
@@ -79,8 +79,9 @@ VOUCHER_URL = SITE + "/#print-voucher"
 PRINT_REQUEST_URL = SITE + "/api/print-request"
 PRINT_REQUEST_MAX_FILES = 8
 PRINT_REQUEST_MAX_BYTES = 18 * 1024 * 1024
-#: free vouchers per kit (the site's KITS[...].printVouchers)
-KIT_VOUCHERS = {"Small Kit": 0, "Big Kit": 1, "Chunky Kit": 3}
+#: free vouchers per kit (the site's KITS[...].printVouchers); none since
+#: 7 Nov 2026, when the site's kits stopped coming with vouchers
+KIT_VOUCHERS = {"Small Kit": 0, "Big Kit": 0, "Chunky Kit": 0}
 
 #: R850 filament estimate: PLA, two 0.4 mm walls plus top and bottom
 #: (about 1 mm of skin over the whole surface) and 15 % infill inside
@@ -141,7 +142,7 @@ def quote(cart, timeout=8, opener=None):
         return None
     req = urllib.request.Request(SITE + "/api/quote?" + cart.split("?", 1)[1],
                                  headers={"Accept": "application/json",
-                                          "User-Agent": "AtechAtelier"})
+                                          "User-Agent": "Prompt2Product"})
     try:
         with (opener or urllib.request.urlopen)(req, timeout=timeout) as r:
             data = json.loads(r.read().decode("utf-8") or "{}")
@@ -405,14 +406,10 @@ def kit_note(vouchers):
     n = int(vouchers)
     if n <= 0:
         return "Nothing to print: the design has no printed parts."
-    if n == 1:
-        return ("It prints on one 3D print voucher. The Big Kit comes with one free, "
-                "the Chunky Kit with three.")
-    if n <= 3:
-        return ("It prints on %d 3D print vouchers. The Chunky Kit comes with three "
-                "free, the Big Kit with one." % n)
-    return ("It prints on %d 3D print vouchers. The Chunky Kit comes with three "
-            "free." % n)
+    head = ("It prints on one 3D print voucher." if n == 1
+            else "It prints on %d 3D print vouchers." % n)
+    kits = ["the %s with %d" % (k, v) for k, v in KIT_VOUCHERS.items() if v]
+    return "%s Free vouchers come with %s." % (head, ", ".join(kits)) if kits else head
 
 
 def mailto_url(subject, body, to=VOUCHER_EMAIL):
@@ -429,7 +426,7 @@ def valid_email(text):
 def _multipart(fields, files, content_type="model/3mf"):
     """(body bytes, content type) of a multipart/form-data request; each
     file part labelled `content_type` (servers here read the bytes)."""
-    b = "----atelier%s" % uuid.uuid4().hex
+    b = "----prompt2product%s" % uuid.uuid4().hex
     out = []
     for k, v in fields.items():
         out.append(("--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n" % (b, k)).encode()
@@ -457,7 +454,7 @@ def send_print_request(email, files, design="", sheet="", note="", order="",
                               "note": note, "order": order}, files)
     req = urllib.request.Request(url or PRINT_REQUEST_URL, data=body, method="POST",
                                  headers={"Content-Type": ctype, "Accept": "application/json",
-                                          "User-Agent": "AtechAtelier"})
+                                          "User-Agent": "Prompt2Product"})
     try:
         with (opener or urllib.request.urlopen)(req, timeout=timeout) as r:
             data = json.loads(r.read().decode("utf-8") or "{}")

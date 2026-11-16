@@ -1,4 +1,5 @@
-"""First-run migration from "Atech Studio" to "Atech Atelier" (ADR-005).
+"""First-run migration from an earlier name ("Atech Atelier", else "Atech
+Studio") to "Prompt2Product" (ADR-005; 2026-11-10).
 
 Every case builds its own old and new user-data trees in a temp dir; the
 real ~/.local/share is never read or written. No FreeCAD, no Qt.
@@ -47,8 +48,10 @@ class Base(unittest.TestCase):
         os.environ.pop("ATECH_MIGRATE", None)
         self.tmp = tempfile.mkdtemp(prefix="migrate-")
         share = os.path.join(self.tmp, "share")
-        self.old = os.path.join(share, "Atech Studio", "v1-1")
-        self.new = os.path.join(share, "Atech Atelier", "v1-1")
+        self.old = os.path.join(share, "Atech Atelier", "v1-1")
+        self.studio = os.path.join(share, "Atech Studio", "v1-1")
+        self.new = os.path.join(share, "Prompt2Product", "v1-1")
+        self.ptp = os.path.join(share, "Prompt To Product", "v1-1")
         self.chat = os.path.join(self.old, "agent", "chat-20260925-141505")
 
     def tearDown(self):
@@ -79,20 +82,43 @@ class Base(unittest.TestCase):
 
 class TestOldRoot(Base):
     def test_versioned(self):
-        self.assertEqual(migrate.old_root_for(self.new), self.old)
+        # With no data anywhere the newest earlier name is the answer.
+        self.assertEqual(migrate.old_root_for(self.new), self.ptp)
 
     def test_trailing_slash(self):
         # getUserAppDataDir() ends in a separator.
-        self.assertEqual(migrate.old_root_for(self.new + os.sep), self.old)
+        self.assertEqual(migrate.old_root_for(self.new + os.sep), self.ptp)
+
+    def test_atelier_when_only_it_has_data(self):
+        self._write(self.old, SESS, {"doc": {}})
+        self.assertEqual(migrate.old_root_for(self.new), self.old)
+
+    def test_prompt_to_product_wins_over_atelier(self):
+        # 2026-11-16: "Prompt To Product" (development builds of 10-16 Nov)
+        # is the newest earlier name.
+        self._write(self.old, SESS, {"doc": {}})
+        self._write(self.ptp, SESS, {"doc": {}})
+        self.assertEqual(migrate.old_root_for(self.new), self.ptp)
+        self.assertIsNone(migrate.old_root_for(self.ptp))
 
     def test_no_rename_means_no_old_root(self):
         self.assertIsNone(migrate.old_root_for(self.old))
         self.assertIsNone(migrate.old_root_for(self.old + os.sep))
 
     def test_unversioned(self):
-        new = os.path.join(self.tmp, "share", "Atech Atelier")
+        new = os.path.join(self.tmp, "share", "Prompt2Product")
         self.assertEqual(migrate.old_root_for(new),
-                         os.path.join(self.tmp, "share", "Atech Studio"))
+                         os.path.join(self.tmp, "share", "Prompt To Product"))
+
+    def test_studio_when_only_it_has_data(self):
+        self._write(self.studio, SESS, {"doc": {}})
+        self.assertEqual(migrate.old_root_for(self.new), self.studio)
+        self.assertIsNone(migrate.old_root_for(self.studio))
+
+    def test_newest_name_wins_when_both_have_data(self):
+        self._write(self.studio, SESS, {"doc": {}})
+        self._write(self.old, SESS, {"doc": {}})
+        self.assertEqual(migrate.old_root_for(self.new), self.old)
 
     def test_none(self):
         self.assertIsNone(migrate.old_root_for(None))
@@ -192,6 +218,40 @@ class TestMigrate(Base):
         self.assertEqual(rec["status"], migrate.DONE)
         self.assertEqual(rec["copied"], [TRUST])
         self.assertFalse(os.path.exists(os.path.join(self.new, SESS)))
+
+    def test_from_studio_when_there_is_no_atelier(self):
+        self._write(self.studio, SESS, {"from-studio": {}})
+        rec = migrate.migrate(new=self.new)
+        self.assertEqual(rec["status"], migrate.DONE, rec)
+        self.assertEqual(rec["from"], os.path.normpath(self.studio))
+        with open(os.path.join(self.new, SESS), encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh), {"from-studio": {}})
+
+    def test_parts_and_macros_are_copied_over_an_empty_folder(self):
+        """The parts library and macros are folders; FreeCAD may already
+        have made an empty Macro/ in the new tree - that is not the user's
+        work, so it neither blocks the copy nor stays empty."""
+        self._old_tree()
+        self._write(self.old, os.path.join("parts", "nema17", "part.json"), {"n": 17})
+        os.makedirs(os.path.join(self.old, "Macro"))
+        with open(os.path.join(self.old, "Macro", "m.FCMacro"), "w") as fh:
+            fh.write("print(1)\n")
+        os.makedirs(os.path.join(self.new, "Macro"))
+        before = _tree(self.old)
+        rec = migrate.migrate(new=self.new)
+        self.assertEqual(rec["status"], migrate.DONE, rec)
+        self.assertEqual(sorted(rec["copied"]), sorted([TRUST, SESS, "parts", "Macro"]))
+        self.assertTrue(os.path.isfile(os.path.join(self.new, "parts", "nema17", "part.json")))
+        self.assertTrue(os.path.isfile(os.path.join(self.new, "Macro", "m.FCMacro")))
+        self.assertEqual(_tree(self.old), before)
+
+    def test_parts_folder_with_the_users_work_is_never_overwritten(self):
+        self._old_tree()
+        self._write(self.old, os.path.join("parts", "old", "part.json"), {})
+        self._write(self.new, os.path.join("parts", "mine", "part.json"), {})
+        rec = migrate.migrate(new=self.new)
+        self.assertEqual(rec["status"], migrate.SKIPPED)
+        self.assertFalse(os.path.exists(os.path.join(self.new, "parts", "old")))
 
     def test_symlink_in_old_tree_is_not_followed(self):
         target = self._write(self.tmp, "secret.json", {"s": 1})

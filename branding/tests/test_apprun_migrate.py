@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""ADR-005: AppRun copies the user's profile from "Atech Studio" to "Atech Atelier".
+"""ADR-005: AppRun copies the user's profile from an earlier name ("Atech
+Atelier", else "Atech Studio") to "Prompt2Product".
 
 Runs branding/apprun_migrate_block.sh under real bash with HOME pointed at a
 temporary directory (never the real one) and checks:
@@ -28,7 +29,8 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BLOCK = os.path.join(os.path.dirname(HERE), "apprun_migrate_block.sh")
-OLD, NEW = "Atech Studio", "Atech Atelier"
+OLD, NEW = "Atech Studio", "Prompt2Product"
+ATELIER = "Atech Atelier"          # the name just before NEW
 
 
 def tree_digest(root):
@@ -96,6 +98,26 @@ class Migrate(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         return r
 
+    def test_newest_earlier_name_wins(self):
+        """With both "Atech Atelier" and "Atech Studio" folders, the newer
+        (Atelier) is copied; its theme name and paths are rewritten."""
+        self.seed()                                        # Atech Studio
+        ad, ac = os.path.join(self.data, ATELIER), os.path.join(self.conf, ATELIER)
+        write(os.path.join(ad, "v1-1", "Macro", "atelier.FCMacro"), "print(2)\n")
+        write(os.path.join(ac, "v1-1", "user.cfg"),
+              '<FCParameters><FCText Name="Theme">Atech Atelier Light</FCText>'
+              '<FCText Name="P">%s/v1-1/</FCText></FCParameters>\n' % ad)
+        before = (tree_digest(ad), tree_digest(ac))
+        self.run_block()
+        nd, nc = os.path.join(self.data, NEW), os.path.join(self.conf, NEW)
+        self.assertEqual((tree_digest(ad), tree_digest(ac)), before)
+        self.assertTrue(os.path.isfile(os.path.join(nd, "v1-1", "Macro", "atelier.FCMacro")))
+        self.assertFalse(os.path.exists(os.path.join(nd, "v1-1", "Macro", "m.FCMacro")))
+        cfg = read(os.path.join(nc, "v1-1", "user.cfg"))
+        self.assertIn(">Prompt2Product Light<", cfg)
+        self.assertIn(os.path.join(nd, "v1-1"), cfg)
+        self.assertNotIn(ATELIER, cfg)
+
     def test_copies_and_keeps_old(self):
         od, oc = self.seed()
         before = (tree_digest(od), tree_digest(oc))
@@ -107,7 +129,7 @@ class Migrate(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(nd, "agent", "chat-1", "design.py")))
         self.assertEqual(os.readlink(os.path.join(nd, "agent", "latest")), "chat-1")
         cfg = read(os.path.join(nc, "v1-1", "user.cfg"))
-        self.assertIn(">Atech Atelier Dark<", cfg)
+        self.assertIn(">Prompt2Product Dark<", cfg)
         self.assertIn("%s/v1-1/Macro/" % nd, cfg)
         self.assertNotIn("%s/" % od, cfg)
         # free text is NOT rewritten: only the theme value and paths are
@@ -170,7 +192,7 @@ class Migrate(unittest.TestCase):
         self.assertEqual(tree_digest(real), before,
                          "the rewrite edited the OLD profile through a symlink")
         self.assertFalse(os.path.islink(nc), "the new profile is a link to the old one")
-        self.assertIn(">Atech Atelier Dark<", read(os.path.join(nc, "v1-1", "user.cfg")))
+        self.assertIn(">Prompt2Product Dark<", read(os.path.join(nc, "v1-1", "user.cfg")))
 
 
 class Sabotage(unittest.TestCase):

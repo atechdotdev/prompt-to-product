@@ -75,7 +75,7 @@ def _crane_build_dir():
             return flat
     return None
 
-# Atech Atelier brand, matching docs/prd/assets/atech_studio.html and the theme
+# Prompt2Product brand, matching docs/prd/assets/atech_studio.html and the theme
 # tokens. The gradient is the page background, so viewport and chrome agree.
 _BG_TOP = (0.09, 0.10, 0.15)     # #171A26
 _BG_BOTTOM = (0.06, 0.06, 0.09)  # #0F1017

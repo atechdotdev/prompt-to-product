@@ -1225,7 +1225,7 @@ class ScriptReview(QtWidgets.QDialog):
         self.resize(640, 520)
         lay = QtWidgets.QVBoxLayout(self)
         head = QtWidgets.QLabel(
-            "This document carries a design script that Atech Atelier did not "
+            "This document carries a design script that Prompt2Product did not "
             "write on this computer%s. Read it before you let the chat use "
             "it: it runs as Python on this computer at the next build." % (
                 " (objects: %s)" % ", ".join(objects[:8]) if objects else ""))
@@ -1706,7 +1706,7 @@ def chat_title(snap, when=None):
 def rollback_note(restored, failed, why):
     """R452: the line that starts the next level after a rollback (the
     harness's run_eval.rollback_note says the same)."""
-    return ("Atelier restored model.py and intent.json to the passing build "
+    return ("Prompt2Product restored model.py and intent.json to the passing build "
             "of LEVEL %d: LEVEL %d did not end on a passing build (%s). "
             "Start this level from that build." % (restored, failed, why))
 
@@ -1796,6 +1796,23 @@ class PromptEdit(QtWidgets.QPlainTextEdit):
             self.submit.emit()
             return
         super().keyPressEvent(ev)
+
+    def insertFromMimeData(self, source):              # noqa: N802
+        """R930: a file dropped or pasted in is written as its path (quoted
+        when it has spaces), which the turn brings in (references)."""
+        try:
+            urls = [u.toLocalFile() for u in source.urls()
+                    if u.isLocalFile()] if source.hasUrls() else []
+        except Exception:                              # noqa: BLE001
+            urls = []
+        if not urls:
+            return super().insertFromMimeData(source)
+        text = " ".join('"%s"' % p if " " in p else p for p in urls)
+        cur = self.textCursor()
+        before = self.toPlainText()[:cur.position()]
+        if before and not before[-1].isspace():
+            text = " " + text
+        cur.insertText(text + " ")
 
     def focusInEvent(self, ev):                        # noqa: N802
         self.focused.emit(True)
@@ -2235,9 +2252,9 @@ class AgentPanel(QtWidgets.QWidget):
         where = _hostport(self._base_url())
         if kind == backend.OTHER_USER:
             why = ("%s is served by another account on this computer. Atech "
-                   "Atelier will not send your work to it." % where)
+                   "Prompt2Product will not send your work to it." % where)
         else:
-            why = ("%s is served by %s, which Atech Atelier did not start, "
+            why = ("%s is served by %s, which Prompt2Product did not start, "
                    "and ATECH_AGENT_ADOPT=0 says not to use it."
                    % (where, backend.describe(info)))
         _log("agent backend not used: %s" % why)
@@ -2259,7 +2276,7 @@ class AgentPanel(QtWidgets.QWidget):
             return
         self._foreign_noted = key
         base = self._base_url()
-        _log("agent backend at %s is not this Atelier's: %s (%s)"
+        _log("agent backend at %s is not this Prompt2Product's: %s (%s)"
              % (base, backend.describe(info), kind))
         self.show_notice(backend.FOREIGN_TITLE,
                          backend.foreign_body(_hostport(base), info, kind))
@@ -2552,7 +2569,7 @@ class AgentPanel(QtWidgets.QWidget):
         base = self._base_url()
         return self._add(Notice(
             "Agent backend not reachable",
-            "Atech Atelier talks to a local agent process on %s. Nothing is "
+            "Prompt2Product talks to a local agent process on %s. Nothing is "
             "listening there right now. Start it with "
             "opencode serve --port 4096." % _hostport(base),
             actions=[("Retry", self._probe_backend_again),
@@ -2957,7 +2974,7 @@ class AgentPanel(QtWidgets.QWidget):
             self.set_backend_state("offline")
             self.show_notice(
                 "Agent backend not reachable",
-                "Atech Atelier talks to a local agent process on %s. Nothing "
+                "Prompt2Product talks to a local agent process on %s. Nothing "
                 "is listening there right now. Start it with "
                 "opencode serve --port 4096." % _hostport(base),
                 actions=[("Retry", self._probe_backend_again),
@@ -3133,7 +3150,7 @@ class AgentPanel(QtWidgets.QWidget):
         name = getattr(doc, "Label", None) or getattr(doc, "Name", "This file")
         state.review_notice = self.show_notice(
             "This file contains a design script from elsewhere",
-            "%s carries a design script that Atech Atelier did not write on "
+            "%s carries a design script that Prompt2Product did not write on "
             "this computer. It was not loaded into the chat and has not run. "
             "Review it first: if you use it, the agent edits that design; "
             "otherwise the agent starts a new one beside the objects already "
@@ -3816,6 +3833,31 @@ class AgentPanel(QtWidgets.QWidget):
             out.append(p)
         return out
 
+    def _attach_named_files(self, text, ws):
+        """R930: CAD files and pictures the message names (a pasted path, a
+        file dropped on the box) are copied into <ws>/refs/ for the agent
+        and the build sandbox, which cannot read them where they are. The
+        chat says what came in. Returns the prompt block ("" for none)."""
+        try:
+            from . import references
+            paths = references.find_paths(text)
+            if not paths:
+                return ""
+            got = references.attach(ws, paths)
+        except Exception as exc:                       # noqa: BLE001
+            _log("named files: %s" % traceback.format_exc())
+            self.say("The file in your message could not be brought in (%s). "
+                     "The agent cannot read it where it is." % exc)
+            return ""
+        for a in got:
+            name = os.path.basename(a.path)
+            if a.ok:
+                n = len(a.info.get("parts", ()))
+                self.say("Using %s%s." % (name, (" (%d parts)" % n) if n > 1 else ""))
+            else:
+                self.say("Could not use %s: %s." % (name, a.error))
+        return references.prompt_block(got)
+
     def _brief(self, doc):
         """build.document_brief, with the per-object measurement cache when
         WS-BUILD's brief accepts one (S04)."""
@@ -3910,7 +3952,12 @@ class AgentPanel(QtWidgets.QWidget):
             else:
                 self._keep_base(state)                      # R500
                 self._watch_workspace()
-                prompt = "%s\n\n---\n%s" % (text, self._brief(brief_doc))
+                refs = "" if fix else self._attach_named_files(text, state.ws)
+                if not fix and getattr(state, "start_refs", None):
+                    # R970: the files this project was imported from go with
+                    # the first request about them
+                    refs = self._start_refs_block(state) + refs
+                prompt = "%s%s\n\n---\n%s" % (refs, text, self._brief(brief_doc))
                 sp, agent = self._turn_args(state.ws, text=text,
                                             doc=brief_doc)
                 mode = "acceptEdits"
@@ -4376,6 +4423,111 @@ class AgentPanel(QtWidgets.QWidget):
         self._run_build(files, preview=False, send_fix=False,
                         then=lambda _fix: self._remember(state))
         return state
+
+    # R970: import a model and say what to change ------------------------
+    #: Ready-made requests shown under the import notice.
+    IMPORT_IDEAS = (
+        ("Fit the Atech board", "Adjust it for Atech: fit the Atech board and "
+         "the modules it needs inside, with openings for them, keeping its look."),
+        ("Make it bigger", "Make it 20 % bigger, keeping every opening and fit "
+         "the same size."),
+        ("Make it printable", "Make it print well on a Bambu printer: flat on "
+         "the bed, no supports where you can avoid them, walls at least 1.6 mm."),
+    )
+
+    def start_from_files(self, paths, title=None):
+        """R970: a NEW project made of the files `paths` (STL, 3MF, GLB,
+        STEP, OBJ, ... from MakerWorld, Printables, Sketchfab or a scanner):
+        each is brought into this chat's refs/ (references.attach), and the
+        chat's model.py keeps every part as it is (atech_refs.keep, Labels
+        in intent.json "imported"). The composer then asks what to change;
+        the first request carries the files' description. Returns the
+        ChatState, or None (a notice says why)."""
+        if self._busy or self._pending is not None:
+            self._flash_hint("Wait for the agent to finish, then import the "
+                             "file.")
+            return None
+        from . import references
+        paths = [p for p in paths if p and os.path.isfile(p)]
+        if not paths:
+            return None
+        stem = references.slug(paths[0]).replace("_", " ").strip() or "Imported"
+        title = title or stem[:1].upper() + stem[1:]
+        try:
+            import FreeCAD
+            from . import shell
+            ws = build.new_workspace()
+            got = references.attach(ws, paths)
+            ok = [a for a in got if a.ok and a.info.get("parts")]
+            bad = [a for a in got if not a.ok]
+            if not ok:
+                why = "; ".join("%s: %s" % (os.path.basename(a.path), a.error)
+                                for a in bad) or "it holds no 3D parts"
+                self.show_notice("Could not import the file", why)
+                return None
+            code, labels = references.import_script(ok)
+            doc = FreeCAD.newDocument(shell._doc_name_for(title.replace(" ", "_")))
+            doc.Label = title
+            FreeCAD.setActiveDocument(doc.Name)
+            key = self._doc_key(doc)
+            state = ChatState(key, doc.Name, ws)
+            _write_file(os.path.join(ws, build.SCRIPT), code.encode("utf-8"))
+            _write_file(os.path.join(ws, build.INTENT), json.dumps(
+                {"imported": labels}, indent=1).encode("utf-8"))
+            try:
+                build.prepare_workspace(ws, reset_intent=False, doc=doc)
+            except Exception as exc:                   # noqa: BLE001
+                _log("import workspace: %r" % (exc,))
+            state.prev = {"uid": key, "doc": doc.Name, "names": [], "labels": {}}
+            state.start_refs = ok
+        except Exception as exc:                       # noqa: BLE001
+            _log("import: %s" % traceback.format_exc())
+            self.show_notice("Could not import the file",
+                             "The details are in the Report view.",
+                             detail="%s: %s" % (type(exc).__name__, exc))
+            return None
+        self._docs[key] = state
+        self._seeded.add(key)
+        self._follow_active_doc()
+        self._shown_key = key
+        self._clear_empty()
+        self._has_messages = True
+        names = ", ".join(os.path.basename(a.path) for a in ok)
+        n = sum(len(a.info.get("parts", ())) for a in ok)
+        body = ("%s is in, %d part%s, kept exactly as %s. Now say what to change: "
+                "\"make the hole 2 mm wider\", \"add a stand\", \"fit the Atech "
+                "board inside\"." % (names, n, "" if n == 1 else "s",
+                                    "they are" if n > 1 else "it is"))
+        if bad:
+            body += " Not imported: " + "; ".join(
+                "%s (%s)" % (os.path.basename(a.path), a.error) for a in bad) + "."
+        self.show_notice("Imported %s" % title, body, actions=[
+            (label, lambda t=text: self._use_prompt(t))
+            for label, text in self.IMPORT_IDEAS])
+        state.base_ckpt = {"script": None, "intent": None, "record": None}
+        self._cur = state
+        self._build_card = None
+        self._build_sig = None
+        self._turn_failed = False
+        self._progress_note = ""
+        self._applied = build.snapshot(state.ws)
+        self._run_build([build.SCRIPT, build.INTENT], preview=False, send_fix=False,
+                        then=lambda _fix: self._remember(state))
+        try:
+            self.input.setPlaceholderText("What should change in %s?" % title)
+            self.input.setFocus()
+        except Exception:                              # noqa: BLE001
+            pass
+        return state
+
+    def _start_refs_block(self, state):
+        """R970: the imported files' description, once (the first request)."""
+        from . import references
+        got, state.start_refs = state.start_refs, None
+        return (references.prompt_block(got) +
+                "This project was made by importing them: model.py keeps every "
+                "part with atech_refs.keep. Change model.py for the request; "
+                "parts you do not change stay kept.\n")
 
     # past chats ---------------------------------------------------------
     def _past_chats(self):
@@ -5153,7 +5305,7 @@ class AgentPanel(QtWidgets.QWidget):
 
     def _apply_part_edits(self, state):
         """R885: the agent's part_edits.json - edits to the parts the user
-        let it edit - is run here, in Atelier (part_ops checks every step
+        let it edit - is run here, in Prompt2Product (part_ops checks every step
         and every part's permission), then set aside so it never runs twice.
         What happened is said in the chat."""
         ws = getattr(state, "ws", None) or getattr(self, "_ws", None)
@@ -5638,11 +5790,11 @@ class AgentPanel(QtWidgets.QWidget):
             try:
                 body = fn(build.Result(False, build.SCRIPT, error=err))
                 if body:
-                    return "The script failed when Atech Atelier ran it:\n%s" \
+                    return "The script failed when Prompt2Product ran it:\n%s" \
                         % body
             except Exception as exc:                   # noqa: BLE001
                 _log("fix_report: %r" % (exc,))
-        return "The script failed when Atech Atelier ran it:\n%s" \
+        return "The script failed when Prompt2Product ran it:\n%s" \
             % _fix_report(err)
 
     def _turn_card(self, preview):
@@ -6087,11 +6239,11 @@ class AgentPanel(QtWidgets.QWidget):
             return lines, None, ("preview: in progress", "idle")
         if bad and preview:
             self.stats["previews_failed"] += 1
-            self._preview_error = ("Atech Atelier built it, but the measurement "
+            self._preview_error = ("Prompt2Product built it, but the measurement "
                                    "check failed: %s." % bad)
             return lines, None, ("preview: check failed", "idle")
         if bad:
-            return lines, ("Atech Atelier built it, but the measurement check "
+            return lines, ("Prompt2Product built it, but the measurement check "
                            "failed: %s. Each body must be one valid solid."
                            % bad), ("check failed", "fail")
         return lines, None, ("%d built" % len(res.created), "ok")

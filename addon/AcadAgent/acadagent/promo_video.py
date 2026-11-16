@@ -14,7 +14,7 @@ The work runs outside Studio: collect() writes the job folder (each
 visible part's triangles, colour, Atech metadata) on the GUI thread, then
 promo/job.py runs in the bundled Python with numpy + PIL - a master and
 one worker process per spare core - and writes the movie to
-~/Movies/Atech Atelier/. Nothing here changes the document.
+~/Movies/Prompt2Product/. Nothing here changes the document.
 """
 import json
 import os
@@ -27,8 +27,8 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 JOB_SCRIPT = os.path.join(HERE, "promo", "job.py")
-VIDEO_FOLDER_MAC = "~/Movies/Atech Atelier"
-VIDEO_FOLDER = "~/Videos/Atech Atelier"
+VIDEO_FOLDER_MAC = "~/Movies/Prompt2Product"
+VIDEO_FOLDER = "~/Videos/Prompt2Product"
 VIDEO_DIR_ENV = "ATECH_VIDEO_DIR"
 SETTING = "assembly_video"                # make one after each build (default True)
 STYLE_SETTING = "assembly_video_claude"   # let Claude style it (default True)

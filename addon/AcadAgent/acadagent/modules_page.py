@@ -268,7 +268,7 @@ class LibraryMissing(RuntimeError):
 # Pure functions, no Qt and no FreeCAD: projects/tests/test_library_and_
 # messages.py runs them headless against the library's real exceptions.
 MISSING_LIBRARY = ("Atech modules are missing from this installation. "
-                   "Reinstall Atech Atelier.")
+                   "Reinstall Prompt2Product.")
 
 
 def display_name(module, specs=None):
@@ -350,10 +350,10 @@ def describe_error(exc, module=None, port=None, specs=None, action="adding"):
                 "That module is not in the Atech module library.")
     if kind == "no_mesh":
         return ("The 3D model of %s is missing from this installation. "
-                "Reinstall Atech Atelier." % name)
+                "Reinstall Prompt2Product." % name)
     if kinds & {"UndefinedByLibrary", "GeometryMismatch", "SpecError"}:
         return ("The Atech module library in this installation could not be "
-                "read. Reinstall Atech Atelier.")
+                "read. Reinstall Prompt2Product.")
     return ("Something went wrong while %s %s. The details are in the "
             "Report view." % (action, name if mod else "the module"))
 
@@ -1414,6 +1414,19 @@ class ModulesPage(QtWidgets.QWidget):
         self.shelf_btn.clicked.connect(lambda _=False: self._shelf())
         self.shelf_btn.hide()
         lay.addWidget(self.shelf_btn, 0, QtCore.Qt.AlignLeft)
+        # R980: board-level electronic components (pin headers, JST, USB-C,
+        # LEDs, chips, relays...) from the KiCad 3D model library (kicad3d.py).
+        self.kicad_btn = QtWidgets.QPushButton("Add electronic component (KiCad)…")
+        self.kicad_btn.setObjectName("MLink")
+        self.kicad_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        self.kicad_btn.setAccessibleName("Add an electronic component from the KiCad library")
+        self.kicad_btn.setToolTip(
+            "Pin headers, JST and USB-C connectors, buttons, LEDs, resistors, "
+            "chips, relays, battery holders, sensors and ESP32 / Pico modules from "
+            "the KiCad 3D model library. An installed one joins your parts.")
+        self.kicad_btn.clicked.connect(lambda _=False: self._kicad())
+        self.kicad_btn.hide()
+        lay.addWidget(self.kicad_btn, 0, QtCore.Qt.AlignLeft)
         # Parts that are not Atech modules (user_parts.py): a board, a
         # battery, a motor from another maker, imported from STEP or STL.
         self.import_btn = QtWidgets.QPushButton("Import part…")
@@ -2180,6 +2193,7 @@ class ModulesPage(QtWidgets.QWidget):
         self.import_btn.setVisible(self._unavailable is None)
         self.simready_btn.setVisible(self._unavailable is None)
         self.shelf_btn.setVisible(self._unavailable is None)
+        self.kicad_btn.setVisible(self._unavailable is None)
 
     def _import_part(self):
         """R750: Import part... - a part that is not an Atech module."""
@@ -2218,6 +2232,20 @@ class ModulesPage(QtWidgets.QWidget):
         except Exception as exc:                       # noqa: BLE001
             _log("shelf: %r" % (exc,))
             self._show_failure(exc, action="opening off-the-shelf parts")
+            return
+        dlg.exec()
+
+    def _kicad(self):
+        """R980: Add electronic component (KiCad)..."""
+        from . import shelf_dialog
+        try:
+            _lib()
+            import kicad3d                             # projects/ is on sys.path
+            dlg = shelf_dialog.ShelfDialog(
+                self, on_done=lambda n: self._imported(n), shelf=kicad3d)
+        except Exception as exc:                       # noqa: BLE001
+            _log("kicad3d: %r" % (exc,))
+            self._show_failure(exc, action="opening the KiCad components")
             return
         dlg.exec()
 

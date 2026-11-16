@@ -1,4 +1,4 @@
-"""The default projects Atech Atelier comes with (R450-R456), headless.
+"""The default projects Prompt2Product comes with (R450-R456), headless.
 
     R450  branding/make_default_projects.py: each curated example built by
           the production build into <Title>.FCStd with tagged Atech
@@ -57,7 +57,7 @@ except ImportError:                                    # no Qt here
 
 from acadagent import build, default_projects as dp, projects_store as ps  # noqa: E402
 
-APP_BIN = os.path.join(REPO, "dist", "build-macos-arm64", "Atech Atelier.app",
+APP_BIN = os.path.join(REPO, "dist", "build-macos-arm64", "Prompt2Product.app",
                        "Contents", "Resources", "bin")
 FREECADCMD = os.environ.get("ATECH_FREECADCMD") or os.path.join(APP_BIN, "freecadcmd")
 GENERATOR = os.path.join(REPO, "branding", "make_default_projects.py")

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuild and verify every Atech Atelier brand asset.
+# Rebuild and verify every Prompt2Product brand asset.
 #
 #   brand/tokens.py                   colour, ported from the frontend
 #   brand/assets/source/atech_*_black.png geometry, the real logo artwork
@@ -7,7 +7,7 @@
 #        |
 #        +-- build_brand.py     -> icon / logo / splash SVGs, light + dark
 #        +-- build_qss.py       -> AtechLight.qss / AtechDark.qss
-#        +-- build_theme.py     -> Atech Atelier {Light,Dark}.yaml
+#        +-- build_theme.py     -> Prompt2Product {Light,Dark}.yaml
 #        +-- build_template.py  -> atech_user_template.built.cfg
 #
 # Nothing in brand/assets/ is edited by hand. Every generator carries a gate

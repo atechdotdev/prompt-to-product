@@ -43,11 +43,13 @@ THEMEDIR = os.path.join(ROOT, "branding", "assets", "theme")
 # The theme NAME is what FreeCAD's preferences list and what a profile's
 # BaseApp/Preferences/MainWindow/Theme stores. Renamed with the product
 # (ADR-005); AppRun's migration rewrites the old name in a copied profile.
-PRODUCT = "Atech Atelier"
+PRODUCT = "Prompt2Product"
 NAMES = {"light": PRODUCT + " Light.yaml", "dark": PRODUCT + " Dark.yaml"}
 # Files this generator wrote under the previous product name. Removed on a
 # write so the installer cannot pick a stale theme up by globbing.
-RETIRED = ("Atech Studio Light.yaml", "Atech Studio Dark.yaml")
+RETIRED = ("Atech Studio Light.yaml", "Atech Studio Dark.yaml",
+           "Atech Atelier Light.yaml", "Atech Atelier Dark.yaml",
+           "Prompt To Product Light.yaml", "Prompt To Product Dark.yaml")
 
 TEMPLATE = '''\
 # {title} — theme parameters for FreeCAD 1.1's parametrized stylesheet.

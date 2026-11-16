@@ -159,7 +159,7 @@ def _few_blas_threads(fn):
 LIBRARY_ENV = "ATECH_ARTIFACTS"
 LIBRARY_MARKER = "presets.yaml"
 MISSING_LIBRARY = ("Atech modules are missing from this installation. "
-                   "Reinstall Atech Atelier.")
+                   "Reinstall Prompt2Product.")
 
 
 def library_candidates(environ=None, here=None):
@@ -486,7 +486,7 @@ def _number_ports(housings):
 # falls back to measuring — the cache can make a call faster, never wrong.
 #
 # $ATECH_BOARD_CACHE overrides the directory; set it to "" (or "0") to turn
-# the disk cache off. Default: FreeCAD's user cache path /AtechAtelier/board.
+# the disk cache off. Default: FreeCAD's user cache path /Prompt2Product/board.
 BOARD_CACHE_ENV = "ATECH_BOARD_CACHE"
 BOARD_CACHE_FORMAT = 2                  # 2: + obstacle_drawn (R197)
 
@@ -505,7 +505,7 @@ def board_cache_dir(environ=None):
         base = None
     if not base:
         base = os.path.join(os.path.expanduser("~"), ".cache")
-    return os.path.join(base, "AtechAtelier", "board")
+    return os.path.join(base, "Prompt2Product", "board")
 
 
 def _sha256_file(path):

@@ -150,7 +150,7 @@ class StartLevels(_Mode):
             body = fh.read()
         with open(os.path.join(KIT, "examples", "toy_car.py"), encoding="utf-8") as fh:
             example = fh.read()
-        self.assertTrue(body.startswith("# Seeded by Atelier from examples/toy_car.py"))
+        self.assertTrue(body.startswith("# Seeded by Prompt2Product from examples/toy_car.py"))
         self.assertTrue(body.endswith(example))
         compile(body, "model.py", "exec")
         # the agent can edit it

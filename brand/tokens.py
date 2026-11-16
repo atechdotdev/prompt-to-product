@@ -1,4 +1,4 @@
-"""Atech brand tokens — the single source of truth for Atech Atelier.
+"""Atech brand tokens — the single source of truth for Prompt2Product.
 
 PORTED, NOT INVENTED. Every colour below is copied verbatim from the
 atech.dev frontend at frontend/src/app/globals.css, which is the live

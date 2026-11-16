@@ -368,7 +368,7 @@ class TestIconCache(ShellCase):
         s = self.shell
         d = s._icon_dir()
         self.assertTrue(d.startswith(self.fc.getUserCachePath()), d)
-        self.assertNotIn("/tmp/atech-atelier-icons", d)
+        self.assertNotIn("/tmp/prompt2product-icons", d)
         victim = os.path.join(d, "..", "victim.txt")
         with open(victim, "w", encoding="utf-8") as fh:
             fh.write("keep me")
@@ -385,8 +385,8 @@ class TestIconCache(ShellCase):
     def test_planted_file_in_place_of_dir_falls_back(self):
         s = self.shell
         cache = self.fc.getUserCachePath()
-        os.makedirs(os.path.join(cache, "AtechAtelier"), exist_ok=True)
-        with open(os.path.join(cache, "AtechAtelier", "icons"), "w") as fh:
+        os.makedirs(os.path.join(cache, "Prompt2Product"), exist_ok=True)
+        with open(os.path.join(cache, "Prompt2Product", "icons"), "w") as fh:
             fh.write("")
         d = s._icon_dir()
         self.assertTrue(os.path.isdir(d))
@@ -409,7 +409,7 @@ class TestThemeAndSize(ShellCase):
                                       ("FreeCAD Classic", True, "dark"),
                                       ("FreeCAD Classic", False, "light"),
                                       ("Atech Studio Dark", False, "dark"),
-                                      ("Atech Atelier Dark", False, "dark"),
+                                      ("Prompt2Product Dark", False, "dark"),
                                       ("FreeCAD Light", True, "light")):
                 mw.SetString("Theme", theme)
                 APP.setPalette(self._palette(dark))

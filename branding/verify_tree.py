@@ -27,11 +27,16 @@ import sys
 # The release identity (ADR-005, ADR-006). Typed ONCE here; every check below
 # derives its paths from these, and the build script carries its own copy, so
 # a rename done on one side only fails this gate.
-PRODUCT = "Atech Atelier"
-APP_ID = "dev.atech.Atelier"
-DOC_NAME = "atech-atelier"
-PROJECT_LICENSE = "LGPL-3.0-or-later AND CC-BY-NC-4.0"
-OLD_NAMES = ("Atech Studio", "atech-studio", "dev.atech.Studio", "AtechStudio")
+PRODUCT = "Prompt2Product"
+APP_ID = "dev.atech.Prompt2Product"
+DOC_NAME = "prompt2product"
+PROJECT_LICENSE = "GPL-3.0-or-later AND CC-BY-NC-4.0"
+OLD_NAMES = ("Atech Studio", "atech-studio", "dev.atech.Studio", "AtechStudio",
+             "Atech Atelier", "dev.atech.Atelier", "AtechAtelier",
+             "Prompt To Product", "prompt-to-product", "PromptToProduct")
+#: File names only: "atech-atelier" was the GitHub repo's name until
+#: 2026-11-16 (now atechdotdev/prompt2product, which redirects from it).
+OLD_FILE_NAMES = OLD_NAMES + ("atech-atelier",)
 # The macOS build (branding/build_macos.sh) runs this gate too: the same
 # image checks, with Info.plist in place of the AppImage's desktop entry,
 # metainfo and AppRun.
@@ -286,7 +291,6 @@ for rel in ("README.md", "CREDITS.md", "ATECH_CHANGES.txt", "SOURCE_OFFER.txt",
         "FAIL (missing)", key="doc:" + rel)
 models_dir = os.path.join(home, "Mod", "AcadAgent", "data", "models")
 for kind, d, rel in (("doc", doc_dir, "LICENSE"),
-                     ("doc", doc_dir, "LICENSE.GPL-3.0"),
                      ("doc", doc_dir, "LICENSE-ATTRIBUTION.md"),
                      ("doc", doc_dir, "LICENSE-models.md"),
                      ("doc", doc_dir, "NOTICE"),
@@ -297,7 +301,7 @@ for kind, d, rel in (("doc", doc_dir, "LICENSE"),
     else:
         row(kind, rel, present, "FAIL (missing; ADR-006 release file)",
             key="%s:%s" % (kind, rel))
-# The contents, not only the names: LICENSE is the LGPL v3 text (R722), and the
+# The contents, not only the names: LICENSE is the GPL v3 text, and the
 # models notice names its licence (ADR-006).
 def _read(p):
     try:
@@ -309,10 +313,10 @@ def _read(p):
 
 if os.path.isfile(os.path.join(doc_dir, "LICENSE")):
     _t = _read(os.path.join(doc_dir, "LICENSE"))
-    row("licence", "LICENSE is LGPL-3.0",
-        "GNU LESSER GENERAL PUBLIC LICENSE" in _t
+    row("licence", "LICENSE is GPL-3.0",
+        _t.lstrip().startswith("GNU GENERAL PUBLIC LICENSE")
         and "Version 3, 29 June 2007" in _t,
-        "FAIL (not the LGPL v3 text)", key="licence:lgpl")
+        "FAIL (not the GPL v3 text)", key="licence:gpl")
 for _d in (doc_dir, models_dir):
     _p = os.path.join(_d, "LICENSE-models.md")
     if os.path.isfile(_p):
@@ -435,7 +439,7 @@ for _d in (top, os.path.join(home, "share", "doc"),
            os.path.join(home, "share", "Gui", "Stylesheets", "parameters")):
     try:
         for _f in os.listdir(_d):
-            if any(o in _f for o in OLD_NAMES):
+            if any(o in _f for o in OLD_FILE_NAMES):
                 _stale_names.append(os.path.relpath(os.path.join(_d, _f), top))
     except OSError:
         pass

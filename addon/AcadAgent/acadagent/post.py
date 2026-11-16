@@ -1,6 +1,6 @@
 """R861 Post to atech.dev: share a design on the community page
 (atech.dev/community, the same Showcase post the site's "Post Build" makes)
-from Atelier, as the signed-in Atech account (account.py, R860).
+from Prompt2Product, as the signed-in Atech account (account.py, R860).
 
 What it sends is the site's own API: POST /api/community/posts {title,
 body, category} and then each picture or clip to
@@ -8,7 +8,7 @@ body, category} and then each picture or clip to
 12 a post; a bigger video needs the site's direct upload, not done here).
 The body carries "Built by:" the way the site's form writes it
 (frontend/src/lib/hub/details.ts). No atech.dev project is linked: an
-Atelier design is a file on this computer, not a project on the site.
+Prompt2Product design is a file on this computer, not a project on the site.
 """
 import glob
 import os
@@ -27,7 +27,7 @@ MEDIA_EXT = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
              ".webp": "image/webp", ".mp4": "video/mp4", ".mov": "video/quicktime",
              ".webm": "video/webm"}
 COMMUNITY_URL = shop.SITE + "/community"
-#: The site's page about Atelier (atech.dev/atelier): a post made here links it.
+#: The site's page about Prompt2Product (atech.dev/atelier): a post made here links it.
 ATELIER_URL = shop.SITE + "/atelier"
 
 
@@ -56,7 +56,7 @@ def compose_body(text, by="", links=()):
 
 def latest_video(label):
     """The newest assembly video of this design (promo_video's
-    "<label> assembly <date>.mp4" in Movies/Atech Atelier), or None."""
+    "<label> assembly <date>.mp4" in Movies/Prompt2Product), or None."""
     try:
         from . import promo_video
         folder = promo_video.video_dir()
@@ -78,7 +78,7 @@ def media_problem(path):
     except OSError:
         return "missing"
     if size > MAX_FILE_BYTES:
-        return "%.0f MB, over the 25 MB a file can be from Atelier for now" % (size / 1e6)
+        return "%.0f MB, over the 25 MB a file can be from Prompt2Product for now" % (size / 1e6)
     return ""
 
 
@@ -107,7 +107,7 @@ def publish(title, body, category, files, acct=None, opener=None):
         req = urllib.request.Request(
             "%s/api/community/posts/%s/media" % (shop.SITE, pid), data=body_bytes, method="POST",
             headers={"Content-Type": ctype, "Accept": "application/json",
-                     "User-Agent": "AtechAtelier", "Authorization": "Bearer " + tok})
+                     "User-Agent": "Prompt2Product", "Authorization": "Bearer " + tok})
         st, out = account._call(req, opener or acct.opener, timeout=300)
         if st == 201:
             uploaded += 1
@@ -159,9 +159,9 @@ def PostDialog(parent=None, doc_fn=export_tools._active_doc, acct=None, opener=N
     form.addRow("Description", d.text)
     form.addRow("Built by", d.by)
     lay.addLayout(form)
-    d.made_with = QtWidgets.QCheckBox("Say it was made with Atech Atelier (a link on the post)", d)
+    d.made_with = QtWidgets.QCheckBox("Say it was made with Prompt2Product (a link on the post)", d)
     d.made_with.setChecked(True)
-    d.made_with.setAccessibleName("Link Atech Atelier on the post")
+    d.made_with.setAccessibleName("Link Prompt2Product on the post")
     lay.addWidget(d.made_with)
 
     sec = QtWidgets.QLabel("PICTURES AND VIDEO", d)

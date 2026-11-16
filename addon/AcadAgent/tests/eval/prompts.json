@@ -1,6 +1,6 @@
 {
   "_doc": [
-    "Build-quality benchmark prompts: what a public user would type into the Atech Atelier chat.",
+    "Build-quality benchmark prompts: what a public user would type into the Prompt2Product chat.",
     "Every expectation is machine-checked by fc_build.py against the MEASURED geometry, never the agent's prose.",
     "Always checked (not listed per prompt): model.py written, build succeeds, every end object isValid() and has >=1 solid.",
     "Dimensions: 'max_dim' is the largest side of the whole design's tight bound (Shape.optimalBoundingBox).",

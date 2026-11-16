@@ -3,7 +3,7 @@
     python -I simready_usd2stl.py <root.usd> <out.stl> <dir with usd-core>
 
 Run by simready.convert() in a child Python, so Pixar's pxr never loads into
-Atelier. Prints one line SIMREADY_STL={json}: triangles, meshes, the stage's
+Prompt2Product. Prints one line SIMREADY_STL={json}: triangles, meshes, the stage's
 units and up axis, size_mm; or {"error": ...}.
 
 Which geometry: every UsdGeom.Mesh the stage DRAWS - instance proxies
@@ -68,7 +68,7 @@ def main(root, out, usd_dir):
     lo = [min(t[i][a] for t in tris for i in range(3)) for a in range(3)]
     hi = [max(t[i][a] for t in tris for i in range(3)) for a in range(3)]
     with open(out, "wb") as fh:
-        fh.write(b"NVIDIA SimReady asset via Atech Atelier".ljust(80, b" "))
+        fh.write(b"NVIDIA SimReady asset via Prompt2Product".ljust(80, b" "))
         fh.write(struct.pack("<I", len(tris)))
         pack = struct.Struct("<12fH").pack
         for a, b, c in tris:

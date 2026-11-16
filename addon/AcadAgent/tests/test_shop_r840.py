@@ -105,6 +105,25 @@ class TestHome(unittest.TestCase):
             shell._open_credits = real
         self.assertEqual(opened, ["credits"])
 
+    def test_site_links_r950(self):
+        """R950: Home's "On atech.dev" cards, the clickable "Made by
+        Atech.dev" and the footer links each open their atech.dev page."""
+        from acadagent import shell
+        home = shell.HomeView()
+        home.restyle()
+        self.assertEqual([c.site_key for c in home.site_cards],
+                         ["community", "shop", "docs", "app"])
+        with _Browser() as b:
+            for c in home.site_cards:
+                c.clicked.emit()
+            home.made_by.linkActivated.emit(shell.site_url())
+        self.assertEqual(b.urls, ["https://atech.dev/community", "https://atech.dev/modules",
+                                  "https://atech.dev/docs", "https://atech.dev/atelier",
+                                  "https://atech.dev"])
+        self.assertIn('href="https://atech.dev"', home.made_by.text())
+        for path in ("/community", "/docs", "/atelier"):
+            self.assertIn('href="https://atech.dev%s"' % path, home.credit.text())
+
 
 class _Obj(object):
     def __init__(self, name, module, ports):

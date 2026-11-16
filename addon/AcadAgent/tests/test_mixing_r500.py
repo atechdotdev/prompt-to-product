@@ -25,7 +25,7 @@ def _freecadcmd():
     if env and os.path.isfile(env):
         return env
     for arch in ("arm64", "x86_64"):
-        p = os.path.join(REPO, "dist", "build-macos-%s" % arch, "Atech Atelier.app",
+        p = os.path.join(REPO, "dist", "build-macos-%s" % arch, "Prompt2Product.app",
                          "Contents", "Resources", "bin", "freecadcmd")
         if os.path.isfile(p):
             return p

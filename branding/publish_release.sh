@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# publish_release.sh — upload a built Atech Atelier release to GitHub Releases
+# publish_release.sh — upload a built Prompt2Product release to GitHub Releases
 # (ADR-006). DRY RUN BY DEFAULT: it checks the files and prints the exact
 # commands, and changes nothing anywhere.
 #
@@ -8,19 +8,19 @@
 #   branding/publish_release.sh [--dist DIR] --execute  # really publish
 #
 # --execute additionally requires ATECH_PUBLISH_CONFIRM to equal the target
-# repository ("atechdotdev/atech-atelier"), so a stray flag cannot publish.
+# repository ("atechdotdev/prompt2product"), so a stray flag cannot publish.
 # Publishing is an OUTWARD action: the owner decides when, and to which repo.
 # The repo name is the PROPOSED one from ADR-006 and does not exist until the
 # owner creates it; this script never creates a repository.
 #
 # What it checks before printing or running anything:
-#   - dist/AtechAtelier-<VERSION>-x86_64.AppImage exists and is not a stub
+#   - dist/Prompt2Product-<VERSION>-x86_64.AppImage exists and is not a stub
 #   - SHA256SUMS lists it (and the .zsync when present) and `sha256sum -c` passes
 #   - the tag v<VERSION> is the root VERSION file's value
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$HERE/.." && pwd)"
-GH_REPO="atechdotdev/atech-atelier"
+GH_REPO="atechdotdev/prompt2product"
 DIST="$REPO_DIR/dist"
 EXECUTE=0
 while [[ $# -gt 0 ]]; do
@@ -46,13 +46,13 @@ grep -q "  $IMG\$" "$DIST/SHA256SUMS" || fail "SHA256SUMS does not list $IMG"
 FILES=("$DIST/$IMG" "$DIST/SHA256SUMS")
 [[ -f "$DIST/$IMG.zsync" ]] && FILES+=("$DIST/$IMG.zsync")
 
-NOTES="Atech Atelier $VERSION (preview), Linux x86_64 AppImage.
+NOTES="Prompt2Product $VERSION (preview), Linux x86_64 AppImage.
 
-Built on unmodified FreeCAD 1.1.3. Atech's code: LGPL-3.0-or-later (credit Atech and FreeCAD). Atech
+Built on unmodified FreeCAD 1.1.3. Atech's code: GPL-3.0-or-later (credit Atech and FreeCAD). Atech
 module models: CC BY-NC 4.0. Not endorsed by or affiliated with the FreeCAD
 project. Verify the download with: sha256sum -c SHA256SUMS"
 
-CMD=(gh release create "$TAG" --repo "$GH_REPO" --title "Atech Atelier $VERSION"
+CMD=(gh release create "$TAG" --repo "$GH_REPO" --title "Prompt2Product $VERSION"
      --prerelease --notes "$NOTES" "${FILES[@]}")
 
 echo "release      $GH_REPO $TAG (prerelease)"

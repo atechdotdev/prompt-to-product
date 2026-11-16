@@ -261,7 +261,7 @@ def _compose(question, paths, failures):
     lines = [
         question,
         "",
-        "The attached image(s) are a live capture of the Atech Atelier 3D "
+        "The attached image(s) are a live capture of the Prompt2Product 3D "
         "viewport, rendered from the real B-rep solids in the open document.",
     ]
     if len(paths) > 1:

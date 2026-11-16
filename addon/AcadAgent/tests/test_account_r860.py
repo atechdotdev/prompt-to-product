@@ -1,4 +1,4 @@
-"""R860 sign in to Atech Atelier with the atech.dev account (account.py).
+"""R860 sign in to Prompt2Product with the atech.dev account (account.py).
 
   TestFlow    the browser hop end to end against a fake atech.dev on
               127.0.0.1: the page URL, the loopback callback, the code +
@@ -179,7 +179,7 @@ class TestFlow(Base):
                                                "name": "David"})
         self.assertEqual(self.acct.label(), "David")
         self.assertEqual(self.landed["status"], 200)
-        self.assertIn("Atech Atelier is signed in", self.landed["html"])
+        self.assertIn("Prompt2Product is signed in", self.landed["html"])
         self.assertNotIn("code-0", self.landed["html"])
 
     def test_the_listener_closes_after(self):
@@ -369,7 +369,7 @@ class TestButton(Base):
             self.assertEqual(b.text(), "David")
         texts = [a.text() for a in b.menu().actions() if a.text()]
         self.assertEqual(texts, ["maker@example.com", "Your account on atech.dev", "Builds on atech.dev",
-                                 "Atech shop", "About Atech Atelier", "Sign out"])
+                                 "Atech shop", "Docs on atech.dev", "About Prompt2Product", "Sign out"])
 
     def test_cancel(self):
         from PySide6 import QtCore

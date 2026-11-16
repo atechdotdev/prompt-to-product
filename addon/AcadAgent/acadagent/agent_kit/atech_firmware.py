@@ -484,7 +484,7 @@ def reference_md(cat=None):
            "upload`). Every module in model.py that has an SDK id below gets "
            "one project.yaml entry on the SAME port(s), and the `code:` block "
            "makes the product do its job. Never invent a module, a method, an "
-           "event or an action: this file is the SDK's own catalog. In Atelier "
+           "event or an action: this file is the SDK's own catalog. In Prompt2Product "
            "the ports come from model.py (the user assembles the product to "
            "match), so where the SDK guide says to ask the user which port, "
            "read it from your build instead.", "",

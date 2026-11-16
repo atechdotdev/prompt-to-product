@@ -81,6 +81,17 @@ PRODUCTS = {
     'motion_light.py': ('motion light', 'a motion-sensing night light', None),
     'arm_dock.py': ('robot arm dock', 'a robot arm dock', None),
     'balance_bot.py': ('balancing robot', 'a self-balancing robot', None),
+    # R940: ten viral products (2026-11-10)
+    'coffee_scale.py': ('coffee scale', 'a pour-over coffee scale', None),
+    'plant_pal.py': ('planter', 'a plant pot with a face', None),
+    'focus_cube.py': ('flip timer', 'a flip focus timer', None),
+    'tiny_tv.py': ('retro tv', 'a tiny retro TV', None),
+    'retro_camera.py': ('camera', 'a retro pixel camera', None),
+    'photo_turntable.py': ('turntable', 'a 360 photo turntable', None),
+    'debug_duck.py': ('character speaker', 'a rubber duck debugger', None),
+    'follower_counter.py': ('trophy plaque', 'a live follower counter', None),
+    'bird_cam.py': ('bird feeder camera', 'a smart bird feeder camera', None),
+    'hype_button.py': ('giant button', 'a giant sound button', None),
 }
 MARKERS = ("# === PARAMETERS (restyle here) ===",
            "# === STAGE A: hardware, shell, every working-face opening, fasteners ===",

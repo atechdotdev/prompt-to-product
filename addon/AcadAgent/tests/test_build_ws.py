@@ -191,7 +191,7 @@ class TestFailuresRound2(unittest.TestCase):
 
     def test_intent_problem_passed_through(self):
         r = pbuild.Result(True, "model.py")
-        r.intent_problems = ["overall size: you intended 60 mm, Atelier measured 50 mm"]
+        r.intent_problems = ["overall size: you intended 60 mm, Prompt2Product measured 50 mm"]
         self.assertIn("intended 60 mm", pbuild.failures(r))
 
     def test_record_carries_uid_and_preview(self):
@@ -213,7 +213,7 @@ class TestFailuresRound2(unittest.TestCase):
 
     def test_S30_intent_miss_carries_the_do_not_edit_rule(self):
         r = pbuild.Result(True, "model.py")
-        r.intent_problems = ["holes: you intended 0, Atelier found 1"]
+        r.intent_problems = ["holes: you intended 0, Prompt2Product found 1"]
         text = pbuild.failures(r)
         self.assertIn("never edit intent.json to match a measurement", text)
         r.intent_problems = []
@@ -290,7 +290,7 @@ class TestPromptRound3(unittest.TestCase):
     def test_S30_intent_rule(self):
         sp = _flat(pbuild.system_prompt("/nonexistent/ws", request=self.PLAIN))
         self.assertIn("never edit intent.json to match a measurement", sp)
-        self.assertIn("Atelier and ./check measure the build against it", sp)
+        self.assertIn("Prompt2Product and ./check measure the build against it", sp)
 
     def test_S27_D44_core_prompts_are_not_atech(self):
         for p in _eval_prompts("prompts.json"):
@@ -383,7 +383,7 @@ class TestRound4Pure(unittest.TestCase):
             with open(os.path.join(ws, "intent.json"), "w") as fh:
                 fh.write('{"size_mm": [20, 10, 10]}')
             self.assertTrue(pbuild.is_fix_turn(
-                "The script failed when Atech Atelier ran it:\nX\n"
+                "The script failed when Prompt2Product ran it:\nX\n"
                 "Fix model.py and write it again."))
             self.assertFalse(pbuild.is_fix_turn("make it 13 mm tall"))
             self.assertFalse(pbuild.is_fix_turn(None))
@@ -744,7 +744,7 @@ class TestRound6Pure(unittest.TestCase):
         self.assertIn("The user's message wins over intent.json", sp)
         self.assertIn("correct intent.json to the user's number", sp)
         self.assertIn("never edit intent.json to match a measurement", sp)
-        self.assertIn("Atelier's own fix messages keep intent.json", sp)
+        self.assertIn("Prompt2Product's own fix messages keep intent.json", sp)
         self.assertNotIn("put it back", sp)
         if not pbuild.kit_reads_turn():
             self.assertIn("An INTENT CHANGED line from ./check never outranks "
@@ -916,7 +916,7 @@ class TestRound7Pure(unittest.TestCase):
 
     def test_R170_intent_fix_line_asks_which_side_is_wrong(self):
         r = pbuild.Result(True, "model.py")
-        r.intent_problems = ["holes: you intended 3 x diameter 6 mm, Atelier found 0"]
+        r.intent_problems = ["holes: you intended 3 x diameter 6 mm, Prompt2Product found 0"]
         text = pbuild.failures(r)
         self.assertNotIn("change model.py until the build meets it", text)
         self.assertIn("decide which side is wrong", text)
@@ -2399,7 +2399,7 @@ class TestGeometryGates(_Headless):
         self.write(json.dumps({"size_mm": [60, 20, 10]}), name=self.build.INTENT)
         r = self.apply()
         f = self.build.failures(r)
-        self.assertIn("you intended 60 mm, Atelier measured 50 mm (10 mm short)", f)
+        self.assertIn("you intended 60 mm, Prompt2Product measured 50 mm (10 mm short)", f)
         # the USER changes the target: a new turn (S37: within one turn the
         # edit below would be INTENT CHANGED)
         self.build.new_turn(self.ws)
@@ -2417,7 +2417,7 @@ class TestGeometryGates(_Headless):
         self.write(json.dumps({"holes": {"count": 4, "d_mm": 5.5}}), name=self.build.INTENT)
         r = self.apply()
         self.assertTrue(r.ok, r.error)
-        self.assertIn("you intended 4 x diameter 5.5 mm, Atelier found 2",
+        self.assertIn("you intended 4 x diameter 5.5 mm, Prompt2Product found 2",
                       self.build.failures(r))
 
     def test_S13_error_has_real_file_and_line(self):
@@ -3773,7 +3773,7 @@ class TestRound8Build(_Headless):
                 self.assertTrue(r.ok, r.error)
                 bad = self.build.failures(r)
                 self.assertIn("overall size from the request", bad)
-                self.assertIn("the user asked for 30 mm, Atelier measured 34 mm", bad)
+                self.assertIn("the user asked for 30 mm, Prompt2Product measured 34 mm", bad)
                 self.assertIn("Enclosure_Lid sets the top end", bad)
                 TIMINGS["R178 c3p1 (%s)" % mode] = [
                     p[:90] for p in r.intent_problems]

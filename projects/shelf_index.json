@@ -1,5 +1,5 @@
 {
- "count": 76,
+ "count": 171,
  "licence": "CC BY 3.0",
  "parts": {
   "arduino_mega": {
@@ -210,6 +210,204 @@
    "thumb": null,
    "triangles": 242257
   },
+  "battery_sla_12v_7ah": {
+   "agent_notes": "It is heavy (over 2 kg): carry it on the base, strapped or boxed in so it cannot shift, with its terminals covered.",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 69949,
+   "category": "power",
+   "description": "Sealed lead-acid battery, 12 V, 7 Ah.",
+   "display_name": "Lead-acid battery 12 V 7 Ah (Yuasa NP7-12)",
+   "electrical": {
+    "connectors": "F1 (4.8 mm) spade terminals",
+    "interface": "power",
+    "voltage_v": 12
+   },
+   "git_oid": "0157c6b4155f1377510c08bbb36b324ba0243348",
+   "group": "power",
+   "path": "Electrical Parts/Batteries/yuasa_np7_12/Yuasa_NP7-12_F1.step",
+   "picture": "shelf_pictures/battery_sla_12v_7ah.png",
+   "size_mm": [
+    151.0,
+    65.0,
+    97.5
+   ],
+   "thumb": null,
+   "triangles": 504
+  },
+  "bearing_608zz": {
+   "agent_notes": "Press it into a printed bore a little under 22 mm, or hold it with a shoulder and a cap; only the inner ring turns with the shaft.",
+   "authors": [
+    "Normand C",
+    "WladIMirG"
+   ],
+   "bytes": 39363,
+   "category": "mechanical",
+   "description": "Shielded deep-groove ball bearing: 8 mm bore, 22 mm outside, 7 mm wide.",
+   "display_name": "Ball bearing 608ZZ (8 × 22 × 7 mm)",
+   "git_oid": "865e5eab9b082236b5bc868d1723496d82b2e3bf",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/608ZZ_Ball_Bearing.step",
+   "picture": "shelf_pictures/bearing_608zz.png",
+   "size_mm": [
+    21.98,
+    21.99,
+    7.0
+   ],
+   "thumb": null,
+   "triangles": 1224
+  },
+  "bearing_6201": {
+   "agent_notes": "",
+   "authors": [
+    "WaalerThomas"
+   ],
+   "bytes": 20641,
+   "category": "mechanical",
+   "description": "Sealed ball bearing: 12 mm bore, 32 mm outside, 10 mm wide.",
+   "display_name": "Ball bearing 6201-2RS (12 × 32 × 10 mm)",
+   "git_oid": "5e1b91fe557a10fc80e91e4044378bc53b403fb2",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/Ball Bearings/6201-2RS_Ball_Bearing.step",
+   "picture": "shelf_pictures/bearing_6201.png",
+   "size_mm": [
+    31.99,
+    31.98,
+    10.0
+   ],
+   "thumb": "thumbnails/f87526cf427643136e27091c2606dcc6.png",
+   "triangles": 1560
+  },
+  "bearing_623zz": {
+   "agent_notes": "Often used as a belt idler on an M3 screw; give it washers on both sides so only the inner ring is clamped.",
+   "authors": [
+    "rcccort",
+    "WladIMirG"
+   ],
+   "bytes": 42174,
+   "category": "mechanical",
+   "description": "Small shielded ball bearing: 3 mm bore, 10 mm outside, 4 mm wide.",
+   "display_name": "Ball bearing 623ZZ (3 × 10 × 4 mm)",
+   "git_oid": "852fe818c164c80fa337333d9c1675e9e7036ed1",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/623ZZ_Ball_Bearing.step",
+   "picture": "shelf_pictures/bearing_623zz.png",
+   "size_mm": [
+    10.0,
+    4.0,
+    9.97
+   ],
+   "thumb": null,
+   "triangles": 1176
+  },
+  "bearing_624zz": {
+   "agent_notes": "",
+   "authors": [
+    "rcccort",
+    "WladIMirG"
+   ],
+   "bytes": 301499,
+   "category": "mechanical",
+   "description": "Shielded ball bearing: 4 mm bore, 13 mm outside, 5 mm wide.",
+   "display_name": "Ball bearing 624ZZ (4 × 13 × 5 mm)",
+   "git_oid": "20b1c6a8e0615657a65d027d7591b784df8f35c4",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/624ZZ_Ball_Bearing.stp",
+   "picture": "shelf_pictures/bearing_624zz.png",
+   "size_mm": [
+    13.0,
+    12.96,
+    5.0
+   ],
+   "thumb": null,
+   "triangles": 1668
+  },
+  "bearing_6803": {
+   "agent_notes": "Its large bore lets cables or a hollow shaft pass through a turntable.",
+   "authors": [
+    "WaalerThomas"
+   ],
+   "bytes": 20664,
+   "category": "mechanical",
+   "description": "Thin-section sealed ball bearing: 17 mm bore, 26 mm outside, 5 mm wide.",
+   "display_name": "Thin ball bearing 6803-2RS (17 × 26 × 5 mm)",
+   "git_oid": "a876806fd108769593a748c5ae5b88245b4b88b3",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/Ball Bearings/6803-2RS_Ball_Bearing.step",
+   "picture": "shelf_pictures/bearing_6803.png",
+   "size_mm": [
+    25.99,
+    25.98,
+    5.0
+   ],
+   "thumb": "thumbnails/81aca99712a3dc667bba5bd65861a090.png",
+   "triangles": 1492
+  },
+  "bearing_f623zz": {
+   "agent_notes": "Two face to face, flanges outward, make a belt idler on an M3 screw.",
+   "authors": [
+    "diegotrap",
+    "WladIMirG"
+   ],
+   "bytes": 38055,
+   "category": "mechanical",
+   "description": "Small flanged ball bearing for a 3 mm shaft.",
+   "display_name": "Flanged ball bearing F623ZZ (3 mm)",
+   "git_oid": "f6715faf7bac40b1925fd1ab440ee172fc08733e",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/F623ZZ_Ball_Bearing.stp",
+   "picture": "shelf_pictures/bearing_f623zz.png",
+   "size_mm": [
+    11.5,
+    11.47,
+    4.0
+   ],
+   "thumb": null,
+   "triangles": 1176
+  },
+  "bearing_kfl08": {
+   "agent_notes": "Bolt it flat against a wall by its two holes; the shaft passes through the wall, so the wall needs a hole larger than the bearing's boss.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 1187725,
+   "category": "mechanical",
+   "description": "Two-bolt flange bearing for an 8 mm shaft.",
+   "display_name": "Flange bearing KFL08 (8 mm)",
+   "git_oid": "72bea2dc98c53754695657b0fa6f7f4e439b1752",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/KFL08/KFL08.step",
+   "picture": "shelf_pictures/bearing_kfl08.png",
+   "size_mm": [
+    12.6,
+    47.97,
+    27.0
+   ],
+   "thumb": "thumbnails/c1ed7c3e5110cac8d2a765f0eeb50933.png",
+   "triangles": 35540
+  },
+  "bearing_kp08": {
+   "agent_notes": "Bolt it down by its two slots on a flat face; the shaft passes through and is locked by the grub screws in the collar.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 1229331,
+   "category": "mechanical",
+   "description": "Cast pillow-block bearing for an 8 mm shaft, two bolt holes.",
+   "display_name": "Pillow-block bearing KP08 (8 mm)",
+   "git_oid": "e8e1cd2a666f8fd5daaf71a8fca96d0b4301fb2e",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/KP08/KP08.step",
+   "picture": "shelf_pictures/bearing_kp08.png",
+   "size_mm": [
+    15.0,
+    55.0,
+    28.5
+   ],
+   "thumb": "thumbnails/618ffd5e65ea7d3f35a656ca383d68eb.png",
+   "triangles": 30266
+  },
   "blower_50mm": {
    "agent_notes": "Leave its face inlet open and duct its side outlet to a vent.",
    "authors": [
@@ -234,6 +432,56 @@
    ],
    "thumb": null,
    "triangles": 4858
+  },
+  "box_header_2x5": {
+   "agent_notes": "The ribbon plug comes in sideways: room at the board edge for it.",
+   "authors": [
+    "berserkdesign",
+    "hasecilu"
+   ],
+   "bytes": 762340,
+   "category": "electronics",
+   "description": "Shrouded 10-pin header for a ribbon cable, at right angles.",
+   "display_name": "Box header 2 × 5, right angle (2.54 mm)",
+   "electrical": {
+    "interface": "other"
+   },
+   "git_oid": "784dad501703192322dd54a1f861d4a8acef6c6b",
+   "group": "connectors",
+   "path": "Electronics Parts/Headers/2.54mm-pitch/male/box/2x5-pin-box-header-male-right-angle.step",
+   "picture": "shelf_pictures/box_header_2x5.png",
+   "size_mm": [
+    20.4,
+    13.78,
+    12.79
+   ],
+   "thumb": null,
+   "triangles": 1682
+  },
+  "bus_pirate": {
+   "agent_notes": "",
+   "authors": [
+    "Ricardo Mena C",
+    "WladIMirG"
+   ],
+   "bytes": 7781533,
+   "category": "electronics",
+   "description": "Small USB tool board for talking to I²C, SPI and serial devices.",
+   "display_name": "Bus Pirate",
+   "electrical": {
+    "interface": "usb"
+   },
+   "git_oid": "0d70d3a0acf932d487e22cc5bbc15d5320684283",
+   "group": "boards",
+   "path": "Computing/SingleBoardComputers/Shields/bus-pirate.step",
+   "picture": "shelf_pictures/bus_pirate.png",
+   "size_mm": [
+    30.8,
+    54.5,
+    12.58
+   ],
+   "thumb": null,
+   "triangles": 17074
   },
   "buzzer": {
    "agent_notes": "Sound must get out: a hole or a few small holes over its opening.",
@@ -260,6 +508,49 @@
    "thumb": null,
    "triangles": 2476
   },
+  "cabinet_lock": {
+   "agent_notes": "It mounts through a door or lid; the cam must swing behind the frame inside.",
+   "authors": [
+    "BERSERK"
+   ],
+   "bytes": 55363,
+   "category": "mechanical",
+   "description": "Small key-operated cabinet lock.",
+   "display_name": "Cabinet cam lock, 40 × 42 mm",
+   "git_oid": "29969642ea823548858c18828e67871a64282ccc",
+   "group": "mechanical",
+   "path": "Industrial Design/Locks/cabinet_lock_40x42mm.step",
+   "picture": "shelf_pictures/cabinet_lock.png",
+   "size_mm": [
+    30.0,
+    40.0,
+    52.0
+   ],
+   "thumb": null,
+   "triangles": 380
+  },
+  "cable_chain_link": {
+   "agent_notes": "A chain is many links; leave room for its bend radius along the whole travel.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 129765,
+   "category": "mechanical",
+   "description": "One link of a drag chain that guides cables to a moving part.",
+   "display_name": "Cable chain link",
+   "git_oid": "8ee451e7b245d4b3f6cfc112905507b167e8a251",
+   "group": "mechanical",
+   "path": "Mechanical Parts/cable-chain-links/cable-chain-link-25_5x16x12_5mm.step",
+   "picture": "shelf_pictures/cable_chain_link.png",
+   "size_mm": [
+    24.82,
+    16.0,
+    12.5
+   ],
+   "thumb": null,
+   "triangles": 1232
+  },
   "cherry_mx_switch": {
    "agent_notes": "It clips into a 14 mm square plate hole in a 1.5 mm plate; a key cap goes on its stem.",
    "authors": [
@@ -283,6 +574,71 @@
    ],
    "thumb": null,
    "triangles": 1192
+  },
+  "corner_bracket_2020": {
+   "agent_notes": "Fixed with M5 screws into T-nuts in each extrusion.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 132515,
+   "category": "mechanical",
+   "description": "Right-angle bracket joining two 2020 extrusions.",
+   "display_name": "Corner bracket for 2020 extrusion",
+   "git_oid": "cdbd2f55ca29c85fb5ff03a0762f6b8b7d4e7211",
+   "group": "hardware",
+   "path": "Mechanical Parts/Mountings/Corner/2020_corner_bracket-Corner.step",
+   "picture": "shelf_pictures/corner_bracket_2020.png",
+   "size_mm": [
+    17.0,
+    21.0,
+    21.0
+   ],
+   "thumb": null,
+   "triangles": 1092
+  },
+  "coupler_4x3": {
+   "agent_notes": "",
+   "authors": [
+    "18turbo",
+    "WladIMirG"
+   ],
+   "bytes": 150689,
+   "category": "mechanical",
+   "description": "Rigid coupler joining a 4 mm and a 3 mm shaft, M3 set screws.",
+   "display_name": "Shaft coupler, 4 mm to 3 mm",
+   "git_oid": "23f4f391a17fdd377617382a6d0f805443e50d31",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Fasteners/Shaft Couplers & Dowel Pins/ShaftCoupler_4mm_to_3mm_setscrew_M3.step",
+   "picture": "shelf_pictures/coupler_4x3.png",
+   "size_mm": [
+    6.0,
+    5.98,
+    10.0
+   ],
+   "thumb": null,
+   "triangles": 1016
+  },
+  "coupler_5x8": {
+   "agent_notes": "The two shafts must be in line; leave room round it to tighten its grub screws.",
+   "authors": [
+    "Daniel Stauffer",
+    "WladIMirG"
+   ],
+   "bytes": 427920,
+   "category": "mechanical",
+   "description": "Flexible coupler joining a 5 mm motor shaft to an 8 mm lead screw.",
+   "display_name": "Shaft coupler, 5 mm to 8 mm",
+   "git_oid": "a21a8bc865f6bbd0afa4701eaac13dd821af284d",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Fasteners/Shaft Couplers & Dowel Pins/Zaxis_coupling_5x8mm.step",
+   "picture": "shelf_pictures/coupler_5x8.png",
+   "size_mm": [
+    25.0,
+    25.0,
+    33.8
+   ],
+   "thumb": "thumbnails/080e2f48625dec03cbbe7c4d3531678b.png",
+   "triangles": 3026
   },
   "cqrobot_37d": {
    "agent_notes": "Mount it by the screws in its gearbox face; leave room behind the encoder for its cable.",
@@ -382,6 +738,56 @@
    ],
    "thumb": null,
    "triangles": 3240
+  },
+  "dupont_housing_1x3": {
+   "agent_notes": "It plugs straight onto pins: leave room above them for the housing and the wires bending away.",
+   "authors": [
+    "Pablo Bacho",
+    "WladIMirG"
+   ],
+   "bytes": 469596,
+   "category": "electronics",
+   "description": "Female DuPont-style housing for 2.54 mm pins, 3 ways.",
+   "display_name": "Jumper-wire plug, 3 way (2.54 mm)",
+   "electrical": {
+    "interface": "other"
+   },
+   "git_oid": "789ba12ef0e8fdb32cdfb31f433b242d2083694b",
+   "group": "connectors",
+   "path": "Electronics Parts/Connectors/dupont-connectors/dupont-2_54mm-female-conn-1x3.step",
+   "picture": "shelf_pictures/dupont_housing_1x3.png",
+   "size_mm": [
+    7.62,
+    2.54,
+    12.0
+   ],
+   "thumb": null,
+   "triangles": 960
+  },
+  "dupont_housing_1x4": {
+   "agent_notes": "",
+   "authors": [
+    "Pablo Bacho",
+    "WladIMirG"
+   ],
+   "bytes": 632375,
+   "category": "electronics",
+   "description": "Female DuPont-style housing for 2.54 mm pins, 4 ways.",
+   "display_name": "Jumper-wire plug, 4 way (2.54 mm)",
+   "electrical": {
+    "interface": "other"
+   },
+   "git_oid": "7aa1595ede2ca59e2ba9b7b2ec53bb748dd39a40",
+   "group": "connectors",
+   "path": "Electronics Parts/Connectors/dupont-connectors/dupont-2_54mm-female-conn-1x4.step",
+   "picture": "shelf_pictures/dupont_housing_1x4.png",
+   "size_mm": [
+    10.16,
+    2.54,
+    12.0
+   ],
+   "thumb": null,
+   "triangles": 1280
   },
   "emax_es08a": {
    "agent_notes": "Hold it by its mounting ears in a pocket the body's size; the horn needs room to swing.",
@@ -612,6 +1018,71 @@
    "thumb": null,
    "triangles": 12932
   },
+  "futaba_s3003_horn_4": {
+   "agent_notes": "",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 366397,
+   "category": "mechanical",
+   "description": "Cross horn for a Futaba S3003 servo.",
+   "display_name": "Futaba S3003 servo horn, 4 arms",
+   "git_oid": "d6034f946ae9146d3f72facdc9def3b772293c9c",
+   "group": "motors",
+   "path": "Electrical Parts/Servos/Futaba3003/Futaba3003-4-arms-horn.step",
+   "picture": "shelf_pictures/futaba_s3003_horn_4.png",
+   "size_mm": [
+    38.85,
+    38.85,
+    6.3
+   ],
+   "thumb": null,
+   "triangles": 5420
+  },
+  "futaba_s3003_horn_round": {
+   "agent_notes": "",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 261748,
+   "category": "mechanical",
+   "description": "Round horn (disc) for a Futaba S3003 servo.",
+   "display_name": "Futaba S3003 servo horn, round",
+   "git_oid": "19bc29553d458a2cc2c265727739dede29776412",
+   "group": "motors",
+   "path": "Electrical Parts/Servos/Futaba3003/Futaba3003-rounded-horn.stp",
+   "picture": "shelf_pictures/futaba_s3003_horn_round.png",
+   "size_mm": [
+    21.0,
+    20.95,
+    6.2
+   ],
+   "thumb": null,
+   "triangles": 4414
+  },
+  "gantry_plate_2020": {
+   "agent_notes": "",
+   "authors": [
+    "Igor Diakonov"
+   ],
+   "bytes": 489072,
+   "category": "mechanical",
+   "description": "Plate that carries V-wheels along a 20 mm V-slot extrusion.",
+   "display_name": "Gantry plate for 20 mm V-slot",
+   "git_oid": "568f4f1feb0ad926c6d65da034e7cd889a5ab613",
+   "group": "hardware",
+   "path": "Mechanical Parts/Mountings/Gantry_plate/Gantry_plate_20mm_v_slot.step",
+   "picture": "shelf_pictures/gantry_plate_2020.png",
+   "size_mm": [
+    65.5,
+    65.5,
+    3.0
+   ],
+   "thumb": null,
+   "triangles": 8416
+  },
   "gnss_antenna": {
    "agent_notes": "It needs a view of the sky: top of the product, under plastic only, never under metal.",
    "authors": [
@@ -635,6 +1106,50 @@
    ],
    "thumb": null,
    "triangles": 17160
+  },
+  "gt2_pulley_16t": {
+   "agent_notes": "",
+   "authors": [
+    "Daniel Stauffer",
+    "WladIMirG"
+   ],
+   "bytes": 615112,
+   "category": "mechanical",
+   "description": "Small timing-belt pulley for a GT2 belt.",
+   "display_name": "GT2 pulley, 16 teeth",
+   "git_oid": "0edcd35184273faa12c6dd643a587fcaca350b0f",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Pulleys/GT2_16T.step",
+   "picture": "shelf_pictures/gt2_pulley_16t.png",
+   "size_mm": [
+    13.0,
+    12.98,
+    15.0
+   ],
+   "thumb": null,
+   "triangles": 4360
+  },
+  "gt2_pulley_20t": {
+   "agent_notes": "It goes on a NEMA 17 shaft; the belt must run square to it, in line with the idler at the other end.",
+   "authors": [
+    "Márcio Pessoa",
+    "WladIMirG"
+   ],
+   "bytes": 51245,
+   "category": "mechanical",
+   "description": "Timing-belt pulley for a 6 mm GT2 belt, for a 5 mm motor shaft.",
+   "display_name": "GT2 pulley, 20 teeth, 5 mm bore",
+   "git_oid": "fd2aaf89843a540a2381cc0c610bd84c40024283",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Pulleys/GT2_20T_Smooth_5mm_Bore.step",
+   "picture": "shelf_pictures/gt2_pulley_20t.png",
+   "size_mm": [
+    17.98,
+    17.99,
+    8.75
+   ],
+   "thumb": "thumbnails/bde241dd2da84b6794e2efe5d2a3df4f.png",
+   "triangles": 2024
   },
   "hc_sr04": {
    "agent_notes": "Both transducers must look out through the wall: one round hole each, a little wider than the transducer, with nothing in front of them. Point them at what is measured.",
@@ -709,6 +1224,93 @@
    "thumb": null,
    "triangles": 3636
   },
+  "heatsink_8mm": {
+   "agent_notes": "Air must reach its fins.",
+   "authors": [
+    "berserkdesign",
+    "hasecilu"
+   ],
+   "bytes": 79817,
+   "category": "mechanical",
+   "description": "Tiny stick-on heatsink.",
+   "display_name": "Heatsink, 8 × 6 × 5 mm",
+   "git_oid": "b67f3e6123dbaaca9d47f8d0362ff4a0482e7e0a",
+   "group": "mechanical",
+   "path": "Electronics Parts/Heatsinks/heat-sink-8x6x5.step",
+   "picture": "shelf_pictures/heatsink_8mm.png",
+   "size_mm": [
+    8.0,
+    6.38,
+    4.83
+   ],
+   "thumb": null,
+   "triangles": 580
+  },
+  "hex_coupler_12mm": {
+   "agent_notes": "",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 41978,
+   "category": "mechanical",
+   "description": "Hub that adapts a 6 mm shaft to a wheel's 12 mm hex.",
+   "display_name": "Wheel hex coupler, 12 mm hex, 6 mm shaft",
+   "git_oid": "6dd88ee17cb87ca5cf5ea3c3826ae1ff4c656827",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Wheels/Wheel-RC-1:8-17mm-hex/hex_coupler/Hex_Coupler_6mm_12hex_18L.step",
+   "picture": "shelf_pictures/hex_coupler_12mm.png",
+   "size_mm": [
+    13.86,
+    12.0,
+    18.0
+   ],
+   "thumb": null,
+   "triangles": 978
+  },
+  "hotend_jhead": {
+   "agent_notes": "Held by its groove mount; keep plastic away from the heater block.",
+   "authors": [
+    "rcccort",
+    "WladIMirG"
+   ],
+   "bytes": 1592848,
+   "category": "mechanical",
+   "description": "J-head style hotend.",
+   "display_name": "3D-printer hotend, J-head",
+   "git_oid": "22293fca11cc99978b4b67f9e6fed87ff5ed682b",
+   "group": "mechanical",
+   "path": "Electrical Parts/Hotend/j-head.step",
+   "picture": "shelf_pictures/hotend_jhead.png",
+   "size_mm": [
+    16.0,
+    18.88,
+    52.5
+   ],
+   "thumb": null,
+   "triangles": 10986
+  },
+  "hotend_mk8": {
+   "agent_notes": "It runs at printing temperature: keep plastic well away from the heater block and give its cooling fins a fan.",
+   "authors": [
+    "Daniel Stauffer",
+    "WladIMirG"
+   ],
+   "bytes": 3234890,
+   "category": "mechanical",
+   "description": "MK8-style extruder hotend (heater block, nozzle, heat break).",
+   "display_name": "3D-printer hotend, MK8 style",
+   "git_oid": "bf16c5e014016e5814e3669ad83f329d7e8b05f9",
+   "group": "mechanical",
+   "path": "Electrical Parts/Hotend/MK8.step",
+   "picture": "shelf_pictures/hotend_mk8.png",
+   "size_mm": [
+    80.5,
+    52.0,
+    74.0
+   ],
+   "thumb": "thumbnails/14c0180332280b480389f158bb9a62a0.png",
+   "triangles": 16128
+  },
   "inductive_proximity": {
    "agent_notes": "Mount it by its thread through a wall or bracket hole with its two nuts; its face must be free, no metal round the face.",
    "authors": [
@@ -758,6 +1360,48 @@
    ],
    "thumb": null,
    "triangles": 2860
+  },
+  "joining_plate_l": {
+   "agent_notes": "",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 85934,
+   "category": "mechanical",
+   "description": "Flat L plate joining two 2020 extrusions at a corner.",
+   "display_name": "Joining plate, L, 5 holes (2020)",
+   "git_oid": "1d49d1176361409e0f56ed9caaaecdde9ba4c8cb",
+   "group": "hardware",
+   "path": "Mechanical Parts/Mountings/Joining_plate/L_shaped_5_holes-Plate.step",
+   "picture": "shelf_pictures/joining_plate_l.png",
+   "size_mm": [
+    60.0,
+    4.0,
+    60.0
+   ],
+   "thumb": null,
+   "triangles": 1726
+  },
+  "joining_plate_t": {
+   "agent_notes": "",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 74481,
+   "category": "mechanical",
+   "description": "Flat T plate joining 2020 extrusions at a T.",
+   "display_name": "Joining plate, T, 5 holes (2020)",
+   "git_oid": "ff4ed021c0c91c56adc2fcf662526799cdb43b26",
+   "group": "hardware",
+   "path": "Mechanical Parts/Mountings/Joining_plate/T_shaped_5_holes-Plate.step",
+   "picture": "shelf_pictures/joining_plate_t.png",
+   "size_mm": [
+    55.0,
+    4.0,
+    60.0
+   ],
+   "thumb": null,
+   "triangles": 1720
   },
   "l298n_driver": {
    "agent_notes": "Its heatsink gets hot: vents over it and no wall touching it. Leave its screw terminals reachable.",
@@ -830,6 +1474,31 @@
     3.69,
     3.68,
     11.4
+   ],
+   "thumb": null,
+   "triangles": 828
+  },
+  "led_3mm_long": {
+   "agent_notes": "A 3.1 mm hole in the wall shows it, or a light pipe.",
+   "authors": [
+    "berserkdesign",
+    "hasecilu"
+   ],
+   "bytes": 88780,
+   "category": "electronics",
+   "description": "3 mm through-hole LED.",
+   "display_name": "LED, 3 mm (long legs)",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "817a2e706ed88a99854ca4c6245df56899d602f0",
+   "group": "displays",
+   "path": "Electronics Parts/LEDs/led-3mm-long.step",
+   "picture": "shelf_pictures/led_3mm_long.png",
+   "size_mm": [
+    3.69,
+    3.68,
+    19.1
    ],
    "thumb": null,
    "triangles": 828
@@ -910,6 +1579,50 @@
    "thumb": null,
    "triangles": 3317
   },
+  "lm10uu": {
+   "agent_notes": "",
+   "authors": [
+    "Francisco",
+    "WladIMirG"
+   ],
+   "bytes": 49738,
+   "category": "mechanical",
+   "description": "Linear ball bushing for a 10 mm smooth rod.",
+   "display_name": "Linear bearing LM10UU (10 mm rod)",
+   "git_oid": "afe443886d86c233b28663f3b20b496bfcff319d",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LM10uu.step",
+   "picture": "shelf_pictures/lm10uu.png",
+   "size_mm": [
+    19.0,
+    29.0,
+    19.0
+   ],
+   "thumb": null,
+   "triangles": 1712
+  },
+  "lm12uu": {
+   "agent_notes": "",
+   "authors": [
+    "Francisco",
+    "WladIMirG"
+   ],
+   "bytes": 51409,
+   "category": "mechanical",
+   "description": "Linear ball bushing for a 12 mm smooth rod.",
+   "display_name": "Linear bearing LM12UU (12 mm rod)",
+   "git_oid": "8ead8a8c1d8486a97c2c23bfa5087e335785b49b",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LM12uu.step",
+   "picture": "shelf_pictures/lm12uu.png",
+   "size_mm": [
+    21.0,
+    30.0,
+    20.95
+   ],
+   "thumb": null,
+   "triangles": 1760
+  },
   "lm2596_buck": {
    "agent_notes": "Leave its trim potentiometer reachable (or set it before closing) and air over its inductor and chip.",
    "authors": [
@@ -935,6 +1648,28 @@
    "thumb": null,
    "triangles": 8008
   },
+  "lm8uu": {
+   "agent_notes": "Hold it in a printed clamp or a snug bore; it slides along a hardened 8 mm rod, so the rod must be straight and the two ends of a pair in line.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 49650,
+   "category": "mechanical",
+   "description": "Linear ball bushing for an 8 mm smooth rod (15 mm outside, 24 mm long).",
+   "display_name": "Linear bearing LM8UU (8 mm rod)",
+   "git_oid": "9465643fde92dd98143664f3560675845464dab0",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LM8uu.stp",
+   "picture": "shelf_pictures/lm8uu.png",
+   "size_mm": [
+    15.0,
+    14.96,
+    24.0
+   ],
+   "thumb": null,
+   "triangles": 1680
+  },
   "maxsonar_mb1010": {
    "agent_notes": "The transducer must look out through a round hole with nothing in front of it.",
    "authors": [
@@ -959,6 +1694,114 @@
    ],
    "thumb": null,
    "triangles": 1962
+  },
+  "mcb_din": {
+   "agent_notes": "Mains wiring belongs to a qualified electrician; in a design, it clips on a DIN rail with its lever reachable through a cut-out.",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 117417,
+   "category": "power",
+   "description": "Single-pole miniature circuit breaker for a 35 mm DIN rail.",
+   "display_name": "DIN-rail circuit breaker (Schneider EZ9F16110)",
+   "electrical": {
+    "interface": "power"
+   },
+   "git_oid": "2787e2f2c286916695fdddc37cfeec4cedda4110",
+   "group": "power",
+   "path": "Electrical Parts/Breakers/Schneider_EZ9F16110_MCB/Schneider_EZ9F16110_MCB.step",
+   "picture": "shelf_pictures/mcb_din.png",
+   "size_mm": [
+    18.0,
+    83.5,
+    72.0
+   ],
+   "thumb": null,
+   "triangles": 1104
+  },
+  "mgn12_rail": {
+   "agent_notes": "Screw it down along a flat, straight face; the real rail is cut to the length you need.",
+   "authors": [
+    "Adrian McEwen"
+   ],
+   "bytes": 46309,
+   "category": "mechanical",
+   "description": "12 mm miniature linear guide rail (a short section).",
+   "display_name": "Linear rail MGN12 (section)",
+   "git_oid": "07a021252ef3d14d45d9422577a108beef1fab23",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LinearSlide-MGN12-Rail.step",
+   "picture": "shelf_pictures/mgn12_rail.png",
+   "size_mm": [
+    12.0,
+    8.0,
+    100.0
+   ],
+   "thumb": null,
+   "triangles": 1436
+  },
+  "mgn12h": {
+   "agent_notes": "",
+   "authors": [
+    "Adrian McEwen"
+   ],
+   "bytes": 33384,
+   "category": "mechanical",
+   "description": "Long carriage for an MGN12 rail, four tapped holes on top.",
+   "display_name": "Linear carriage MGN12H",
+   "git_oid": "bcbcfbd6fa12ca3d17543acca4c760dd9f5a27fd",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LinearSlide-MGN12H.step",
+   "picture": "shelf_pictures/mgn12h.png",
+   "size_mm": [
+    27.0,
+    10.0,
+    45.4
+   ],
+   "thumb": null,
+   "triangles": 900
+  },
+  "mgn9_rail": {
+   "agent_notes": "",
+   "authors": [
+    "Adrian McEwen"
+   ],
+   "bytes": 52078,
+   "category": "mechanical",
+   "description": "9 mm miniature linear guide rail (a short section).",
+   "display_name": "Linear rail MGN9 (section)",
+   "git_oid": "1acea08399abeb42c9a6c0a35d198fb24e23b21b",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LinearSlide-MGN9-Rail.step",
+   "picture": "shelf_pictures/mgn9_rail.png",
+   "size_mm": [
+    9.0,
+    95.0,
+    6.5
+   ],
+   "thumb": null,
+   "triangles": 1784
+  },
+  "mgn9h": {
+   "agent_notes": "",
+   "authors": [
+    "Adrian McEwen"
+   ],
+   "bytes": 35143,
+   "category": "mechanical",
+   "description": "Long carriage for an MGN9 rail.",
+   "display_name": "Linear carriage MGN9H",
+   "git_oid": "d8f1ca760f388806c555ef306d19b2de72fa8754",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Bearings/linear_bearings/LinearSlide-MGN9H.step",
+   "picture": "shelf_pictures/mgn9h.png",
+   "size_mm": [
+    20.0,
+    39.9,
+    8.0
+   ],
+   "thumb": null,
+   "triangles": 900
   },
   "micro_sd_card": {
    "agent_notes": "A slot in the wall in line with the card socket, with room for a fingertip to push it in and out.",
@@ -1006,6 +1849,30 @@
    "thumb": "thumbnails/7663680576cae2541f4f8141060cfdb1.png",
    "triangles": 1872
   },
+  "microswitch_lever_h": {
+   "agent_notes": "",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 723430,
+   "category": "electronics",
+   "description": "Lever microswitch lying flat on a board.",
+   "display_name": "Microswitch with lever (horizontal)",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "a5f7b4a7e10e984af2357cfbf4fec956404ee66e",
+   "group": "controls",
+   "path": "Electronics Parts/Switch/Limit switch/Microswitch_SPDT_Horizontal_L.step",
+   "picture": "shelf_pictures/microswitch_lever_h.png",
+   "size_mm": [
+    16.78,
+    10.03,
+    12.61
+   ],
+   "thumb": "thumbnails/43f62f6298faa3f2bf6ba29e6295cb9e.png",
+   "triangles": 2040
+  },
   "mini_vacuum_pump": {
    "agent_notes": "Leave its two nozzles reachable for tubing; it vibrates: mount it on soft pads, not hard against the case.",
    "authors": [
@@ -1029,6 +1896,129 @@
    ],
    "thumb": null,
    "triangles": 11344
+  },
+  "mosfet_to220": {
+   "agent_notes": "For heavy loads it needs a heatsink on its tab, and air.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 316521,
+   "category": "power",
+   "description": "N-channel power MOSFET in a TO-220 package.",
+   "display_name": "MOSFET STP55NF06L (TO-220)",
+   "electrical": {
+    "interface": "power",
+    "wiring": "N-channel, logic-level gate"
+   },
+   "git_oid": "8a9d5160349e8d34fa2e9bacaaf133a0c4c530ca",
+   "group": "power",
+   "path": "Electronics Parts/Transistors/mosfet-P55NF06L.step",
+   "picture": "shelf_pictures/mosfet_to220.png",
+   "size_mm": [
+    9.65,
+    4.5,
+    28.42
+   ],
+   "thumb": null,
+   "triangles": 452
+  },
+  "mushroom_button_22mm_black": {
+   "agent_notes": "",
+   "authors": [
+    "Henrique Enzweiler"
+   ],
+   "bytes": 428122,
+   "category": "electronics",
+   "description": "22 mm panel push button with a large mushroom head.",
+   "display_name": "Mushroom-head push button, 22 mm, black",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "d17ce6b55df028d0dc541304d806ccc888d44c5b",
+   "group": "controls",
+   "path": "Electrical Parts/Push buttons/Black mushroom head push button - 22 mm.step",
+   "picture": "shelf_pictures/mushroom_button_22mm_black.png",
+   "size_mm": [
+    40.0,
+    80.52,
+    40.0
+   ],
+   "thumb": null,
+   "triangles": 15604
+  },
+  "mushroom_button_22mm_green": {
+   "agent_notes": "",
+   "authors": [
+    "Henrique Enzweiler"
+   ],
+   "bytes": 422559,
+   "category": "electronics",
+   "description": "22 mm panel push button with a large mushroom head.",
+   "display_name": "Mushroom-head push button, 22 mm, green",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "256255cfe6c63cdb1ff84caa5746eaf9a7004b75",
+   "group": "controls",
+   "path": "Electrical Parts/Push buttons/Green mushroom head push button - 22 mm.step",
+   "picture": "shelf_pictures/mushroom_button_22mm_green.png",
+   "size_mm": [
+    40.0,
+    80.52,
+    40.0
+   ],
+   "thumb": null,
+   "triangles": 15604
+  },
+  "mushroom_button_22mm_red": {
+   "agent_notes": "22.3 mm panel hole; leave room round the head for a palm.",
+   "authors": [
+    "Henrique Enzweiler"
+   ],
+   "bytes": 422563,
+   "category": "electronics",
+   "description": "22 mm panel push button with a large mushroom head.",
+   "display_name": "Mushroom-head push button, 22 mm, red",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "8d52338a83315416c460e6b06ab34082136878ca",
+   "group": "controls",
+   "path": "Electrical Parts/Push buttons/Red mushroom head push button - 22 mm.step",
+   "picture": "shelf_pictures/mushroom_button_22mm_red.png",
+   "size_mm": [
+    40.0,
+    80.52,
+    40.0
+   ],
+   "thumb": null,
+   "triangles": 15604
+  },
+  "nano_io_shield": {
+   "agent_notes": "The Nano plugs in on top; its USB socket must stay reachable. Leave room above the 3-pin rows for servo and sensor plugs.",
+   "authors": [
+    "infthi",
+    "WladIMirG"
+   ],
+   "bytes": 13456931,
+   "category": "electronics",
+   "description": "Carrier board for an Arduino Nano with its pins brought out to 3-pin headers.",
+   "display_name": "Arduino Nano I/O expansion shield",
+   "electrical": {
+    "interface": "other",
+    "wiring": "takes an Arduino Nano"
+   },
+   "git_oid": "fe129683090d4c8a01e9c30205943df7ec8249d3",
+   "group": "boards",
+   "path": "Computing/SingleBoardComputers/Shields/nano_expansion_shield.step",
+   "picture": "shelf_pictures/nano_io_shield.png",
+   "size_mm": [
+    59.0,
+    54.0,
+    14.77
+   ],
+   "thumb": null,
+   "triangles": 24500
   },
   "nema17_bracket": {
    "agent_notes": "",
@@ -1077,6 +2067,119 @@
    "thumb": null,
    "triangles": 311050
   },
+  "nema23_stepper": {
+   "agent_notes": "Mount it by its four face holes on a stiff plate; leave room behind for the connector and cable. It is heavy and can get warm.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 8076379,
+   "category": "motor",
+   "description": "Large stepper motor (57 mm square face) with a connector.",
+   "display_name": "NEMA 23 stepper motor",
+   "electrical": {
+    "connectors": "connector on the body",
+    "interface": "other"
+   },
+   "git_oid": "6f28ea9219197ae68d95e27f2b49f9d315022c6c",
+   "group": "motors",
+   "path": "Electrical Parts/Motors/Stepper/NEMA/NEMA_23_with_connector.step",
+   "picture": "shelf_pictures/nema23_stepper.png",
+   "size_mm": [
+    62.57,
+    56.4,
+    77.14
+   ],
+   "thumb": null,
+   "triangles": 311368
+  },
+  "nut_m3": {
+   "agent_notes": "For a printed nut trap, a hexagon about 5.8 mm across flats and 2.6 mm deep, reached from the side the screw does not come from.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 117368,
+   "category": "mechanical",
+   "description": "ISO 4032 hex nut, M3 (5.5 mm across flats, 2.4 mm thick).",
+   "display_name": "Hex nut M3",
+   "git_oid": "595b38eca184b1f11f5df48d06c50c1d9ff5f798",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Nuts/Metric/ISO4032_Hex_Nut_M3.step",
+   "picture": "shelf_pictures/nut_m3.png",
+   "size_mm": [
+    5.5,
+    6.35,
+    2.4
+   ],
+   "thumb": null,
+   "triangles": 696
+  },
+  "nut_m3_nyloc": {
+   "agent_notes": "Use it on a joint that moves or vibrates (an idler, a hinge pin).",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 154078,
+   "category": "mechanical",
+   "description": "M3 nut with a nylon insert that keeps it from working loose.",
+   "display_name": "Nylon lock nut M3",
+   "git_oid": "ffb0e43e8a0e3315336f3dffea533f011e92c77d",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Nuts/Metric/Nyloc-nut-M3.step",
+   "picture": "shelf_pictures/nut_m3_nyloc.png",
+   "size_mm": [
+    5.5,
+    6.35,
+    3.86
+   ],
+   "thumb": null,
+   "triangles": 2980
+  },
+  "nut_m4": {
+   "agent_notes": "Nut trap about 7.3 mm across flats.",
+   "authors": [
+    "David",
+    "WladIMirG"
+   ],
+   "bytes": 69081,
+   "category": "mechanical",
+   "description": "ISO 4032 hex nut, M4 (7 mm across flats).",
+   "display_name": "Hex nut M4",
+   "git_oid": "21b7a1bf3c55fb3eafc61436b8f72be1bd972f8d",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Nuts/Metric/ISO4032_Hex_Nut_M4.step",
+   "picture": "shelf_pictures/nut_m4.png",
+   "size_mm": [
+    7.08,
+    7.08,
+    3.2
+   ],
+   "thumb": null,
+   "triangles": 696
+  },
+  "nut_m5": {
+   "agent_notes": "Nut trap about 8.3 mm across flats.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 90882,
+   "category": "mechanical",
+   "description": "ISO 4032 hex nut, M5 (8 mm across flats).",
+   "display_name": "Hex nut M5",
+   "git_oid": "035f7042e3c4411a714f4a8ed5058cf702ee5de2",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Nuts/Metric/ISO4032_Hex_Nut_M5.step",
+   "picture": "shelf_pictures/nut_m5.png",
+   "size_mm": [
+    8.0,
+    9.24,
+    4.0
+   ],
+   "thumb": null,
+   "triangles": 648
+  },
   "photoresistor": {
    "agent_notes": "It reads the light that reaches it: an opening or a clear window over its face.",
    "authors": [
@@ -1100,6 +2203,56 @@
    ],
    "thumb": null,
    "triangles": 2232
+  },
+  "pin_header_1x4": {
+   "agent_notes": "",
+   "authors": [
+    "berserkdesign",
+    "hasecilu"
+   ],
+   "bytes": 472602,
+   "category": "electronics",
+   "description": "Straight male pin header, 4 pins.",
+   "display_name": "Pin header 1 × 4 (2.54 mm)",
+   "electrical": {
+    "interface": "other"
+   },
+   "git_oid": "9b26ec5812e689d3b341c173af2985b14def57a8",
+   "group": "connectors",
+   "path": "Electronics Parts/Headers/2.54mm-pitch/male/straight/1x4-male-pin-header.step",
+   "picture": "shelf_pictures/pin_header_1x4.png",
+   "size_mm": [
+    10.16,
+    2.54,
+    11.2
+   ],
+   "thumb": null,
+   "triangles": 406
+  },
+  "pin_header_female_1x8": {
+   "agent_notes": "",
+   "authors": [
+    "berserkdesign",
+    "hasecilu"
+   ],
+   "bytes": 512097,
+   "category": "electronics",
+   "description": "Female socket header, 8 ways.",
+   "display_name": "Socket header 1 × 8 (2.54 mm)",
+   "electrical": {
+    "interface": "other"
+   },
+   "git_oid": "3a52cb4cbd0d13c50e0cf4643932b29759f60f70",
+   "group": "connectors",
+   "path": "Electronics Parts/Headers/2.54mm-pitch/female/1x8-female-pin-header.step",
+   "picture": "shelf_pictures/pin_header_female_1x8.png",
+   "size_mm": [
+    20.32,
+    2.54,
+    11.85
+   ],
+   "thumb": null,
+   "triangles": 402
   },
   "pololu_micro_298": {
    "agent_notes": "Clamp the gearbox in a bracket or a pocket with a strap; the motor end needs its two terminals reachable.",
@@ -1151,6 +2304,30 @@
    "thumb": null,
    "triangles": 4182
   },
+  "push_button_22mm_blue": {
+   "agent_notes": "It mounts through a 22.3 mm round panel hole and is held by its ring nut; room behind the panel for its contact block.",
+   "authors": [
+    "Henrique Enzweiler"
+   ],
+   "bytes": 417928,
+   "category": "electronics",
+   "description": "Industrial 22 mm panel push button, blue.",
+   "display_name": "Panel push button, 22 mm, blue",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "c30caeb527113a8204a4cc9e05f2c13ac839ca28",
+   "group": "controls",
+   "path": "Electrical Parts/Push buttons/Blue Push-button - 22 mm.step",
+   "picture": "shelf_pictures/push_button_22mm_blue.png",
+   "size_mm": [
+    36.0,
+    69.0,
+    30.0
+   ],
+   "thumb": null,
+   "triangles": 13932
+  },
   "push_button_22mm_green": {
    "agent_notes": "It mounts through a 22 mm panel hole; its contact block needs room behind the wall.",
    "authors": [
@@ -1198,6 +2375,34 @@
    ],
    "thumb": null,
    "triangles": 13932
+  },
+  "ramps_14": {
+   "agent_notes": "It sits on top of an Arduino Mega: design the two together. Its power terminals and the stepper drivers need air; leave room above for the drivers' heatsinks.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 40801436,
+   "category": "electronics",
+   "description": "3D-printer controller shield that plugs onto an Arduino Mega 2560.",
+   "display_name": "RAMPS 1.4 (Arduino Mega shield)",
+   "electrical": {
+    "connectors": "sockets for 5 stepper drivers; screw terminals for power, heaters",
+    "interface": "other",
+    "voltage_v": 12,
+    "wiring": "plugs onto an Arduino Mega; 12 V power input"
+   },
+   "git_oid": "6d2ff06f43c6f6b0781de4b6b6ea01cbc490227a",
+   "group": "boards",
+   "path": "Computing/SingleBoardComputers/Reprap/ramps-1_4.step",
+   "picture": "shelf_pictures/ramps_14.png",
+   "size_mm": [
+    103.86,
+    61.76,
+    38.98
+   ],
+   "thumb": null,
+   "triangles": 142130
   },
   "raspberry_pi_4b": {
    "agent_notes": "Open the connector edges you need (USB/Ethernet end, USB-C and HDMI side) to the outside; it runs warm: vent the case or leave room for a heatsink or fan over the processor. Mount on M2.5 standoffs through its four holes.",
@@ -1279,6 +2484,53 @@
    "thumb": null,
    "triangles": 22122
   },
+  "rc_wheel_1_8": {
+   "agent_notes": "It needs a 17 mm hex hub on its axle and clearance all round for the tyre to turn (and to steer, on a steered axle).",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 25969,
+   "category": "wheel",
+   "description": "Large RC car wheel with a 17 mm hex hub.",
+   "display_name": "RC car wheel, 1:8 scale (17 mm hex)",
+   "git_oid": "b1a08de148a236a419c8d6d6b010a6325a816bab",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Wheels/Wheel-RC-1:8-17mm-hex/Wheel-RC-1:8-17mm-hex.step",
+   "picture": "shelf_pictures/rc_wheel_1_8.png",
+   "size_mm": [
+    112.0,
+    111.95,
+    46.0
+   ],
+   "thumb": null,
+   "triangles": 8408
+  },
+  "reprap_smart_lcd": {
+   "agent_notes": "A front-panel window over the LCD, a hole for the knob's shaft, a slot in line with the SD card, and room behind for the two ribbon cables.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 6222594,
+   "category": "electronics",
+   "description": "20 × 4 character LCD with a click knob, buzzer and SD-card slot, for RAMPS.",
+   "display_name": "RepRap smart LCD controller (20 × 4)",
+   "electrical": {
+    "connectors": "two 2 × 5 ribbon sockets",
+    "interface": "other"
+   },
+   "git_oid": "6a4db1c01982a891bc7407bdd9f6b172a72706b8",
+   "group": "displays",
+   "path": "Computing/SingleBoardComputers/Shields/smart-lcd-ramps.step",
+   "picture": "shelf_pictures/reprap_smart_lcd.png",
+   "size_mm": [
+    150.0,
+    64.11,
+    26.9
+   ],
+   "thumb": null,
+   "triangles": 26612
+  },
   "rgb_led_5mm": {
    "agent_notes": "Behind a diffuser the colours mix; through a hole they show apart.",
    "authors": [
@@ -1353,6 +2605,30 @@
    "thumb": null,
    "triangles": 2252
   },
+  "rocker_switch_round_3pin": {
+   "agent_notes": "It snaps into a round panel hole; its pins need room behind.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 424418,
+   "category": "electronics",
+   "description": "Round panel rocker switch with three pins.",
+   "display_name": "Round rocker switch, 3 pins",
+   "electrical": {
+    "interface": "power"
+   },
+   "git_oid": "281028d4b7b8b8993693a17964ea9b8a06e59be9",
+   "group": "controls",
+   "path": "Electronics Parts/Switch/Box/RoundRockerSwitch3Pins.step",
+   "picture": "shelf_pictures/rocker_switch_round_3pin.png",
+   "size_mm": [
+    23.0,
+    23.0,
+    28.51
+   ],
+   "thumb": null,
+   "triangles": 2452
+  },
   "rotary_encoder": {
    "agent_notes": "Its threaded bushing mounts through a panel hole with its nut; a knob goes on the shaft outside.",
    "authors": [
@@ -1377,6 +2653,379 @@
    "thumb": null,
    "triangles": 3022
   },
+  "sc8uu": {
+   "agent_notes": "Screw the moving plate onto its four top holes; two blocks per rod.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 175950,
+   "category": "mechanical",
+   "description": "Aluminium block holding an LM8UU bearing, with four tapped holes on top.",
+   "display_name": "Linear slide block SC8UU (8 mm rod)",
+   "git_oid": "12dfd0fe18af12cc34eded63970a63d8499989b3",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/SC8UU/SC8UU.step",
+   "picture": "shelf_pictures/sc8uu.png",
+   "size_mm": [
+    34.0,
+    30.0,
+    22.0
+   ],
+   "thumb": "thumbnails/d9f4d42eedae8606991aa2146c33434e.png",
+   "triangles": 3120
+  },
+  "screw_m2x10": {
+   "agent_notes": "Clearance hole 2.4 mm; 1.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39053,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M2, 10 mm long.",
+   "display_name": "Socket head screw M2 × 10",
+   "git_oid": "3b2ced706173e32275b89c7276c694d428e2b8d2",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M2x10 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m2x10.png",
+   "size_mm": [
+    3.79,
+    3.8,
+    12.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m2x6": {
+   "agent_notes": "Clearance hole 2.4 mm; 1.5 mm hex key. Into plastic, use a 1.6 mm pilot hole or a heat-set insert.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 38910,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M2, 6 mm long.",
+   "display_name": "Socket head screw M2 × 6",
+   "git_oid": "0c9ef9953bed9c2ad8671b0ff010349617bd10f6",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M2x6 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m2x6.png",
+   "size_mm": [
+    3.79,
+    3.8,
+    8.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m3x10": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39082,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 10 mm long.",
+   "display_name": "Socket head screw M3 × 10",
+   "git_oid": "479cb38da18a919589b95d383399c239942342f6",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x10 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x10.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    13.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m3x10_countersunk": {
+   "agent_notes": "Sits flush in a 90° countersink about 6.7 mm across over a 3.4 mm hole; good for an outside face or a lid.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 100849,
+   "category": "mechanical",
+   "description": "ISO 10642 hex socket countersunk screw, M3, 10 mm long.",
+   "display_name": "Countersunk screw M3 × 10",
+   "git_oid": "3446683236b701ee28f18497e8febb3c73f8f1c6",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO10642_Hex_Socket_Countersunk_Head_Screw_M3x10.step",
+   "picture": "shelf_pictures/screw_m3x10_countersunk.png",
+   "size_mm": [
+    6.05,
+    6.03,
+    10.0
+   ],
+   "thumb": null,
+   "triangles": 874
+  },
+  "screw_m3x12": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 38992,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 12 mm long.",
+   "display_name": "Socket head screw M3 × 12",
+   "git_oid": "fd638310be1bbd1d4b829828e8eefe293c4dce76",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x12 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x12.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    15.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m3x16": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39178,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 16 mm long.",
+   "display_name": "Socket head screw M3 × 16",
+   "git_oid": "a42a79675a40fb512bdbac36d5bb025b763cd6bb",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x16 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x16.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    19.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m3x20": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39154,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 20 mm long.",
+   "display_name": "Socket head screw M3 × 20",
+   "git_oid": "a91cecc8c86414f7fb6fbd803e49c248ce5c5d89",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x20 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x20.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    23.0
+   ],
+   "thumb": null,
+   "triangles": 1406
+  },
+  "screw_m3x30": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39164,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 30 mm long.",
+   "display_name": "Socket head screw M3 × 30",
+   "git_oid": "097d99ddfc1312808806c71f2e2a0bace01a942d",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x30 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x30.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    33.0
+   ],
+   "thumb": null,
+   "triangles": 1742
+  },
+  "screw_m3x6": {
+   "agent_notes": "Clearance hole 3.4 mm; head 5.5 mm across, 3 mm tall (counterbore about 6 mm); 2.5 mm hex key. Into plastic, use an M3 heat-set insert or a nut trap.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39156,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 6 mm long.",
+   "display_name": "Socket head screw M3 × 6",
+   "git_oid": "dc3e62fd290b1d2d9268d8ed930c301a7a0413c2",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x6 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x6.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    9.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m3x8": {
+   "agent_notes": "Clearance hole 3.4 mm; counterbore about 6 mm; 2.5 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39184,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M3, 8 mm long.",
+   "display_name": "Socket head screw M3 × 8",
+   "git_oid": "da95c975780c5fe71cdb73eeb4656d491fd71191",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M3x8 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m3x8.png",
+   "size_mm": [
+    5.48,
+    5.5,
+    11.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m4x10": {
+   "agent_notes": "Clearance hole 4.5 mm; head 7 mm across (counterbore about 8 mm); 3 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 38847,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M4, 10 mm long.",
+   "display_name": "Socket head screw M4 × 10",
+   "git_oid": "afe7462a1d6d7807bfc4d98b7a1319c539bd45e0",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M4x10 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m4x10.png",
+   "size_mm": [
+    6.98,
+    7.0,
+    14.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m4x20": {
+   "agent_notes": "Clearance hole 4.5 mm; counterbore about 8 mm; 3 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39262,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M4, 20 mm long.",
+   "display_name": "Socket head screw M4 × 20",
+   "git_oid": "9f78dd11fdcdbd23ab19aa57eac20f4193d92980",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M4x20 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m4x20.png",
+   "size_mm": [
+    6.98,
+    7.0,
+    24.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m5x10": {
+   "agent_notes": "Clearance hole 5.5 mm; head 8.5 mm across (counterbore about 9.5 mm); 4 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39049,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M5, 10 mm long (the usual 2020 extrusion screw).",
+   "display_name": "Socket head screw M5 × 10",
+   "git_oid": "9b97eae3fddff3b2fa4d8ec023b687539070e81b",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M5x10 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m5x10.png",
+   "size_mm": [
+    8.48,
+    8.5,
+    15.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "screw_m5x20": {
+   "agent_notes": "Clearance hole 5.5 mm; counterbore about 9.5 mm; 4 mm hex key.",
+   "authors": [
+    "Peta-T",
+    "WladIMirG"
+   ],
+   "bytes": 39190,
+   "category": "mechanical",
+   "description": "ISO 4762 hex socket head cap screw, M5, 20 mm long.",
+   "display_name": "Socket head screw M5 × 20",
+   "git_oid": "f4e6e93f64b695068e0efa1b08cbe3ba281e920f",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/ISO4762 Hexagon socket head cap screws/Screw M5x20 ISO4762 8,8 A2K.step",
+   "picture": "shelf_pictures/screw_m5x20.png",
+   "size_mm": [
+    8.48,
+    8.5,
+    25.0
+   ],
+   "thumb": null,
+   "triangles": 1322
+  },
+  "sd_card": {
+   "agent_notes": "A slot in the wall in line with the card socket, with fingertip room.",
+   "authors": [
+    "jcarolinares",
+    "WladIMirG"
+   ],
+   "bytes": 345748,
+   "category": "electronics",
+   "description": "A full-size SD card (the card, for a slot).",
+   "display_name": "SD card (full size)",
+   "git_oid": "9ea41b55c0cd0b521346144cba49a1d2c8080135",
+   "group": "connectors",
+   "path": "Computing/Storage/SD/Generic_SD_card.step",
+   "picture": "shelf_pictures/sd_card.png",
+   "size_mm": [
+    24.0,
+    32.0,
+    2.0
+   ],
+   "thumb": null,
+   "triangles": 1132
+  },
+  "set_screw_m3x4": {
+   "agent_notes": "Locks a hub, knob or pulley on a shaft; leave a straight path for a 1.5 mm hex key to reach it.",
+   "authors": [
+    "18turbo",
+    "WladIMirG"
+   ],
+   "bytes": 31117,
+   "category": "mechanical",
+   "description": "DIN 913 grub screw, M3, 4 mm long.",
+   "display_name": "Set screw M3 × 4",
+   "git_oid": "25cc6f848c4245ce8dc3c7286cf29e0290e40c4d",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Bolts & Screws/Metric/DIN913_Setscrew_M3x4.step",
+   "picture": "shelf_pictures/set_screw_m3x4.png",
+   "size_mm": [
+    3.0,
+    2.99,
+    4.0
+   ],
+   "thumb": null,
+   "triangles": 314
+  },
   "seven_segment": {
    "agent_notes": "A window or a tinted panel over its face.",
    "authors": [
@@ -1400,6 +3049,72 @@
    ],
    "thumb": "thumbnails/6f9591c251a2c1289a028bee08468525.png",
    "triangles": 588
+  },
+  "sg90_horn_1": {
+   "agent_notes": "It presses onto the servo's splined shaft and is held by a small screw; leave room for it to swing.",
+   "authors": [
+    "Gafeju",
+    "WladIMirG"
+   ],
+   "bytes": 85272,
+   "category": "mechanical",
+   "description": "Single-arm horn for an SG90 servo.",
+   "display_name": "SG90 servo horn, 1 arm",
+   "git_oid": "05d29d8dbe745d3a3ac23379a807582a81800385",
+   "group": "motors",
+   "path": "Electrical Parts/Servos/SG-90/SG90-1-arm-horn.step",
+   "picture": "shelf_pictures/sg90_horn_1.png",
+   "size_mm": [
+    22.5,
+    8.0,
+    5.0
+   ],
+   "thumb": null,
+   "triangles": 1962
+  },
+  "sg90_horn_2": {
+   "agent_notes": "",
+   "authors": [
+    "Gafeju",
+    "WladIMirG"
+   ],
+   "bytes": 136701,
+   "category": "mechanical",
+   "description": "Two-arm horn for an SG90 servo.",
+   "display_name": "SG90 servo horn, 2 arms",
+   "git_oid": "df57779e9ae563dbcbc314aa52c4d908aac56692",
+   "group": "motors",
+   "path": "Electrical Parts/Servos/SG-90/SG90-2-arms-horn.step",
+   "picture": "shelf_pictures/sg90_horn_2.png",
+   "size_mm": [
+    33.0,
+    8.0,
+    5.0
+   ],
+   "thumb": null,
+   "triangles": 2908
+  },
+  "sg90_horn_4": {
+   "agent_notes": "",
+   "authors": [
+    "Gafeju",
+    "WladIMirG"
+   ],
+   "bytes": 164410,
+   "category": "mechanical",
+   "description": "Cross horn for an SG90 servo.",
+   "display_name": "SG90 servo horn, 4 arms",
+   "git_oid": "98aec0dfc4cdb0e24ed46cb2de77a826b6b34e9e",
+   "group": "motors",
+   "path": "Electrical Parts/Servos/SG-90/SG90-4-arms-horn.step",
+   "picture": "shelf_pictures/sg90_horn_4.png",
+   "size_mm": [
+    35.0,
+    16.99,
+    5.0
+   ],
+   "thumb": null,
+   "triangles": 3948
   },
   "sg90_servo": {
    "agent_notes": "Hold it by its mounting ears (two screws) in a pocket the body's size; its output shaft and horn need room to swing; leave a path for the 3-wire lead.",
@@ -1481,6 +3196,27 @@
    "thumb": null,
    "triangles": 824
   },
+  "sk08": {
+   "agent_notes": "One at each end of each rod, bolted to a flat base, the two in line.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 81426,
+   "category": "mechanical",
+   "description": "Clamp that holds the end of an 8 mm smooth rod, bolted from below.",
+   "display_name": "Rod support SK08 (8 mm)",
+   "git_oid": "6ff557c8c58322191f94b1e2404f0b65afff93f0",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/SK08/SK08-SK08.step",
+   "picture": "shelf_pictures/sk08.png",
+   "size_mm": [
+    42.0,
+    14.0,
+    32.8
+   ],
+   "thumb": null,
+   "triangles": 1312
+  },
   "slide_switch": {
    "agent_notes": "Its lever needs a slot in the wall a little longer than its travel.",
    "authors": [
@@ -1504,6 +3240,30 @@
    ],
    "thumb": null,
    "triangles": 5268
+  },
+  "slide_switch_right_angle": {
+   "agent_notes": "Its lever comes out through a slot in the wall: a slot as long as the lever's travel.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 318378,
+   "category": "electronics",
+   "description": "Small slide switch whose lever sticks out sideways from the board.",
+   "display_name": "Slide switch, SPDT, right angle",
+   "electrical": {
+    "interface": "gpio"
+   },
+   "git_oid": "4cf6960aa8463aa2401d96c26abb65f9055550f0",
+   "group": "controls",
+   "path": "Electronics Parts/Switch/THT/slide-sw-spdt-right-angle.step",
+   "picture": "shelf_pictures/slide_switch_right_angle.png",
+   "size_mm": [
+    10.0,
+    7.54,
+    5.5
+   ],
+   "thumb": null,
+   "triangles": 8292
   },
   "springrc_sm_s4303r": {
    "agent_notes": "Hold it by its four mounting ears; it can drive a wheel directly on its horn.",
@@ -1531,6 +3291,50 @@
    ],
    "thumb": null,
    "triangles": 23894
+  },
+  "standoff_m3_12": {
+   "agent_notes": "Raises a circuit board off a base: screw it into a tapped hole, a nut or an insert, and fix the board on top with an M3 screw.",
+   "authors": [
+    "nicoguaro",
+    "WladIMirG"
+   ],
+   "bytes": 37757,
+   "category": "mechanical",
+   "description": "Hexagonal spacer, M3 thread on one end, M3 socket on the other.",
+   "display_name": "Hex standoff M3, 12 mm (male-female)",
+   "git_oid": "b71d626b99c2a1b62deb0926fd9ab463fb2086a7",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Standoff/Hex-Standoff-M3-12mm-Male-Female.step",
+   "picture": "shelf_pictures/standoff_m3_12.png",
+   "size_mm": [
+    5.5,
+    6.35,
+    18.0
+   ],
+   "thumb": null,
+   "triangles": 610
+  },
+  "standoff_m3_15": {
+   "agent_notes": "Raises a circuit board off a base; stack them for more height.",
+   "authors": [
+    "MrFreez",
+    "WladIMirG"
+   ],
+   "bytes": 36312,
+   "category": "mechanical",
+   "description": "Hexagonal spacer, M3 thread on one end, M3 socket on the other.",
+   "display_name": "Hex standoff M3, 15 mm (male-female)",
+   "git_oid": "f8ddc21aa78d0fe0496cfe9da5b18aa43732636a",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Standoff/Hex-Standoff-M3-15mm-Male-Female.step",
+   "picture": "shelf_pictures/standoff_m3_15.png",
+   "size_mm": [
+    5.5,
+    6.35,
+    21.0
+   ],
+   "thumb": null,
+   "triangles": 610
   },
   "stepper_28byj48": {
    "agent_notes": "Mount it by its two ears; the shaft is off-centre. Leave a path for the 5-wire lead to its driver board.",
@@ -1560,6 +3364,50 @@
    "thumb": null,
    "triangles": 1496
   },
+  "stepper_28byj48_gear": {
+   "agent_notes": "",
+   "authors": [
+    "Gafeju",
+    "WladIMirG"
+   ],
+   "bytes": 528483,
+   "category": "mechanical",
+   "description": "Spur gear for the 28BYJ-48 stepper's flatted shaft.",
+   "display_name": "28BYJ-48 gear",
+   "git_oid": "139c3203656c93b53b6145bcc0b94724046d182f",
+   "group": "motors",
+   "path": "Electrical Parts/Motors/Stepper/28BYJ-48/28BYJ-48_gear_horn.step",
+   "picture": "shelf_pictures/stepper_28byj48_gear.png",
+   "size_mm": [
+    24.0,
+    23.17,
+    7.0
+   ],
+   "thumb": null,
+   "triangles": 2168
+  },
+  "stepper_28byj48_horn": {
+   "agent_notes": "",
+   "authors": [
+    "Gafeju",
+    "WladIMirG"
+   ],
+   "bytes": 64679,
+   "category": "mechanical",
+   "description": "Two-arm horn for the 28BYJ-48 stepper's flatted shaft.",
+   "display_name": "28BYJ-48 horn, 2 arms",
+   "git_oid": "f1d811d67beea92c97b312f770f9b6b251271b04",
+   "group": "motors",
+   "path": "Electrical Parts/Motors/Stepper/28BYJ-48/28BYJ-48_2_arms_horn.step",
+   "picture": "shelf_pictures/stepper_28byj48_horn.png",
+   "size_mm": [
+    39.97,
+    10.0,
+    7.0
+   ],
+   "thumb": null,
+   "triangles": 768
+  },
   "switching_psu": {
    "agent_notes": "MAINS VOLTAGE: cover its terminal block, keep its vents open, and use a proper mains inlet with strain relief.",
    "authors": [
@@ -1584,6 +3432,69 @@
    ],
    "thumb": null,
    "triangles": 86392
+  },
+  "t8_antibacklash_nut": {
+   "agent_notes": "",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 1643093,
+   "category": "mechanical",
+   "description": "Spring-loaded nut for a T8 lead screw that takes up play.",
+   "display_name": "T8 anti-backlash nut",
+   "git_oid": "c5f9cbf5222f149d3ce25034e05b37c152d47651",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/T8_screw_nut/Anti_backlash_nut/T8_antibacklash_nut.step",
+   "picture": "shelf_pictures/t8_antibacklash_nut.png",
+   "size_mm": [
+    21.98,
+    21.99,
+    26.0
+   ],
+   "thumb": null,
+   "triangles": 57798
+  },
+  "t8_bracket": {
+   "agent_notes": "",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 63261,
+   "category": "mechanical",
+   "description": "Bracket that carries the end of a T8 lead screw.",
+   "display_name": "T8 lead-screw end bracket",
+   "git_oid": "dd6ddcf21e031c690a6e281a7903b02589f39fdb",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/T8_housing_bracket/T8_housing_bracket.step",
+   "picture": "shelf_pictures/t8_bracket.png",
+   "size_mm": [
+    34.0,
+    30.0,
+    30.0
+   ],
+   "thumb": null,
+   "triangles": 2216
+  },
+  "t8_flange_nut": {
+   "agent_notes": "Screw its flange to the moving part; leave clearance round the lead screw so it is not forced off-axis.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 675646,
+   "category": "mechanical",
+   "description": "Brass flange nut for a T8 lead screw.",
+   "display_name": "T8 lead-screw flange nut",
+   "git_oid": "ad8902b0df660a69e8d60a7cbd2ef8d315339ee7",
+   "group": "mechanical",
+   "path": "Mechanical Parts/Mountings/T8_screw_nut/Flange_nut/T8_Flange_nut.step",
+   "picture": "shelf_pictures/t8_flange_nut.png",
+   "size_mm": [
+    21.98,
+    21.99,
+    15.0
+   ],
+   "thumb": null,
+   "triangles": 4706
   },
   "tactile_button": {
    "agent_notes": "Bring a plunger or a flexible button in the case down onto it; leave a little travel.",
@@ -1685,6 +3596,31 @@
    "thumb": null,
    "triangles": 2448
   },
+  "terminal_block_6": {
+   "agent_notes": "Its screws reachable, its wire entries facing an opening.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 2026182,
+   "category": "power",
+   "description": "PCB screw terminal block.",
+   "display_name": "Screw terminal block, 6 way",
+   "electrical": {
+    "interface": "power"
+   },
+   "git_oid": "a6fe73da177c9c3a1cc34b7c84835c3e4735e8c5",
+   "group": "connectors",
+   "path": "Electronics Parts/Connectors/power-connectors/pcb-terminal-block-female-1x6.step",
+   "picture": "shelf_pictures/terminal_block_6.png",
+   "size_mm": [
+    8.3,
+    30.6,
+    13.8
+   ],
+   "thumb": null,
+   "triangles": 3384
+  },
   "tft_2_4in": {
    "agent_notes": "A window over the screen area only; mount the board by its holes behind the wall.",
    "authors": [
@@ -1734,6 +3670,48 @@
    "thumb": null,
    "triangles": 988
   },
+  "tnut_2020_m3": {
+   "agent_notes": "",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 261475,
+   "category": "mechanical",
+   "description": "Nut that slides in the 6 mm slot of a 2020 aluminium extrusion.",
+   "display_name": "Sliding T-nut, 2020 slot, M3",
+   "git_oid": "1a6f2a4b4bd91600b3eeee9b88d4dee0865f6854",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/T-nuts/TNut_2020_Slot6_Sliding_M3.step",
+   "picture": "shelf_pictures/tnut_2020_m3.png",
+   "size_mm": [
+    10.0,
+    9.0,
+    4.5
+   ],
+   "thumb": null,
+   "triangles": 3542
+  },
+  "tnut_2020_m5": {
+   "agent_notes": "Slide it in from the end of the extrusion before the end is closed, or use a drop-in T-nut.",
+   "authors": [
+    "Charles Fox"
+   ],
+   "bytes": 177464,
+   "category": "mechanical",
+   "description": "Nut that slides in the 6 mm slot of a 2020 aluminium extrusion.",
+   "display_name": "Sliding T-nut, 2020 slot, M5",
+   "git_oid": "3cd78f459638aeab28596f2fa80119a9a4f95300",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/T-nuts/TNut_2020_Slot6_Sliding_M5.step",
+   "picture": "shelf_pictures/tnut_2020_m5.png",
+   "size_mm": [
+    10.0,
+    9.0,
+    4.5
+   ],
+   "thumb": null,
+   "triangles": 2266
+  },
   "toggle_switch_1p2t": {
    "agent_notes": "Mount it through a panel hole by its threaded bushing and nut.",
    "authors": [
@@ -1757,6 +3735,30 @@
    ],
    "thumb": null,
    "triangles": 1148
+  },
+  "trimmer_multiturn": {
+   "agent_notes": "Leave its adjusting screw reachable with a small screwdriver.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 54256,
+   "category": "electronics",
+   "description": "Small multi-turn trimmer for setting a value once.",
+   "display_name": "Multi-turn trimmer potentiometer (10 kΩ)",
+   "electrical": {
+    "interface": "analog"
+   },
+   "git_oid": "6d30fa0319fd643958618942729c220ef8591ecc",
+   "group": "controls",
+   "path": "Electronics Parts/Rotary resistors/rotary-resistor-M64W103KB40.step",
+   "picture": "shelf_pictures/trimmer_multiturn.png",
+   "size_mm": [
+    9.7,
+    4.7,
+    16.0
+   ],
+   "thumb": null,
+   "triangles": 700
   },
   "tt_gearmotor": {
    "agent_notes": "Hold it by its two through-holes; a TT wheel fits its shaft. Leave a path for its two wires.",
@@ -1903,6 +3905,140 @@
    ],
    "thumb": null,
    "triangles": 6784
+  },
+  "usb_mini_b": {
+   "agent_notes": "Its mouth at a wall; the opening must clear the plug's overmould.",
+   "authors": [
+    "obijuan",
+    "WladIMirG"
+   ],
+   "bytes": 1835133,
+   "category": "electronics",
+   "description": "USB Mini-B socket.",
+   "display_name": "Mini-USB socket",
+   "electrical": {
+    "interface": "usb"
+   },
+   "git_oid": "2e810ee0529c1e0dccb484494f8f0f171110c5e0",
+   "group": "connectors",
+   "path": "Electronics Parts/Connectors/USB-connectors/mini-usb-b-female-smd.step",
+   "picture": "shelf_pictures/usb_mini_b.png",
+   "size_mm": [
+    9.9,
+    5.02,
+    9.51
+   ],
+   "thumb": null,
+   "triangles": 4126
+  },
+  "vslot_2020_50": {
+   "agent_notes": "Frames are built from it with corner brackets and M5 screws in T-nuts; the centre bore takes an M5 tap for end screws.",
+   "authors": [
+    "hasecilu"
+   ],
+   "bytes": 233736,
+   "category": "mechanical",
+   "description": "20 × 20 mm V-slot aluminium profile, a 50 mm piece (cut to length for real).",
+   "display_name": "Aluminium extrusion 2020 V-slot, 50 mm",
+   "git_oid": "aaa49a5089cddb72cb87ebf876f36f64d451eee7",
+   "group": "hardware",
+   "path": "Mechanical Parts/Mountings/2020_V-slot_Al_extrusion/2020x50_V_slot_profile-Part.step",
+   "picture": "shelf_pictures/vslot_2020_50.png",
+   "size_mm": [
+    20.0,
+    50.0,
+    20.0
+   ],
+   "thumb": null,
+   "triangles": 568
+  },
+  "washer_m3": {
+   "agent_notes": "Under a screw head or nut on plastic, it spreads the load.",
+   "authors": [
+    "nachotineo",
+    "WladIMirG"
+   ],
+   "bytes": 12027,
+   "category": "mechanical",
+   "description": "ISO 7091 plain washer for M3.",
+   "display_name": "Flat washer M3",
+   "git_oid": "1c6eeaf2f9b84fc713f160ab6139de18b4a2e189",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Washers/Metric/ISO7091_CLASS_C_M3.step",
+   "picture": "shelf_pictures/washer_m3.png",
+   "size_mm": [
+    7.0,
+    6.98,
+    0.5
+   ],
+   "thumb": null,
+   "triangles": 336
+  },
+  "washer_m3_large": {
+   "agent_notes": "",
+   "authors": [
+    "nachotineo",
+    "WladIMirG"
+   ],
+   "bytes": 12020,
+   "category": "mechanical",
+   "description": "Wide washer for M3: spreads the load on soft or printed parts.",
+   "display_name": "Large flat washer M3 (DIN 9021)",
+   "git_oid": "458a3053fc6cd12b1a219064e579da8ff38dc64a",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Washers/Metric/ISO7093DIN9021_M3FlatWasher.step",
+   "picture": "shelf_pictures/washer_m3_large.png",
+   "size_mm": [
+    9.0,
+    8.97,
+    0.8
+   ],
+   "thumb": null,
+   "triangles": 336
+  },
+  "washer_m4": {
+   "agent_notes": "",
+   "authors": [
+    "nachotineo",
+    "WladIMirG"
+   ],
+   "bytes": 12031,
+   "category": "mechanical",
+   "description": "ISO 7091 plain washer for M4.",
+   "display_name": "Flat washer M4",
+   "git_oid": "fa9c9fa427730ceb11ed9ae57a1eee8a940519e2",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Washers/Metric/ISO7091_CLASS_C_M4.step",
+   "picture": "shelf_pictures/washer_m4.png",
+   "size_mm": [
+    9.0,
+    8.97,
+    0.8
+   ],
+   "thumb": null,
+   "triangles": 336
+  },
+  "washer_m5": {
+   "agent_notes": "",
+   "authors": [
+    "nachotineo",
+    "WladIMirG"
+   ],
+   "bytes": 11978,
+   "category": "mechanical",
+   "description": "ISO 7091 plain washer for M5.",
+   "display_name": "Flat washer M5",
+   "git_oid": "93036d8d2a723bafacddbcf13f63460bf790bdbc",
+   "group": "hardware",
+   "path": "Mechanical Parts/Fasteners/Washers/Metric/ISO7091DIN126_CLASS_C_M5.step",
+   "picture": "shelf_pictures/washer_m5.png",
+   "size_mm": [
+    10.0,
+    9.97,
+    1.0
+   ],
+   "thumb": null,
+   "triangles": 336
   }
  },
  "revision": "f5ca01cdcaa2f69b9295a6382719c2d90628780c",

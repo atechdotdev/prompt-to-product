@@ -119,7 +119,7 @@ class OverlaySheet(unittest.TestCase):
         want = set(TOKEN.findall(self.text)) - BUILT_IN
         self.assertTrue(want, "overlay sheet references no tokens at all")
         for mode in ("Light", "Dark"):
-            path = os.path.join(THEMES, "Atech Atelier %s.yaml" % mode)
+            path = os.path.join(THEMES, "Prompt2Product %s.yaml" % mode)
             with self.subTest(theme=mode):
                 self.assertEqual(sorted(want - yaml_keys(path)), [])
 
@@ -266,7 +266,7 @@ class Icons(unittest.TestCase):
         if not self.sdir:
             self.skipTest("no built tree / upstream Stylesheets dir")
         self.vals = {m: yaml_values(os.path.join(
-            THEMES, "Atech Atelier %s.yaml" % m.capitalize()))
+            THEMES, "Prompt2Product %s.yaml" % m.capitalize()))
             for m in ("light", "dark")}
         self.overlay = body(OVERLAY)
 

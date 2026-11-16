@@ -41,7 +41,7 @@ except ImportError:
     QtWidgets = None
 
 SITE = os.path.join(os.path.dirname(REPO), "studio", "frontend", "src", "lib")
-BUNDLE = "/Applications/Atech Atelier.app/Contents/Resources/bin"
+BUNDLE = "/Applications/Prompt2Product.app/Contents/Resources/bin"
 FC = os.environ.get("ATECH_FREECADCMD") or os.path.join(BUNDLE, "freecadcmd")
 
 
@@ -120,8 +120,10 @@ class TestPlan(unittest.TestCase):
         self.assertIn("Get it made by Atech", rule)
 
     def test_words(self):
-        self.assertIn("Big Kit comes with one", shop.kit_note(1))
-        self.assertIn("Chunky Kit comes with three", shop.kit_note(2))
+        self.assertEqual("It prints on one 3D print voucher.", shop.kit_note(1))
+        self.assertEqual("It prints on 2 3D print vouchers.", shop.kit_note(2))
+        with mock.patch.dict(shop.KIT_VOUCHERS, {"Chunky Kit": 3}):
+            self.assertIn("Free vouchers come with the Chunky Kit with 3.", shop.kit_note(2))
         self.assertIn("no printed parts", shop.kit_note(0))
         self.assertEqual(shop.mailto_url("A b", "c&d"), "mailto:hello@atech.dev?subject=A%20b&body=c%26d")
 

@@ -274,6 +274,19 @@ def stage_at(minutes):
 # speaker robot" is a robot), the fan before the lamp words ("a desk fan
 # with lights" is a fan).
 FORKS = [
+    # R940: ten viral products (2026-11-10), first: a bird feeder camera
+    # before the feeder, a pot with a face before the planter, a flip
+    # timer before the clock's "timer", the duck before the robot words
+    (r'\b(bird ?(feeder|house|box)?[ -]?(cams?|cameras?)|smart bird ?feeders?|bird ?feeders?|bird ?houses?|nest ?box(es)?)\b', 'bird_cam'),
+    (r'\b((plant )?pots? with (a )?faces?|planters? with (a )?faces?|plant ?(pals?|buddy|buddies)|cute planters?|living planters?|talking plant ?pots?|thirsty plants?|kawaii planters?)\b', 'plant_pal'),
+    (r'\b(flip(ping)? (focus )?timers?|pomodoro\w*|focus (cubes?|timers?)|flip cubes?|cube timers?)\b', 'focus_cube'),
+    (r'\b((coffee|pour[- ]?over|barista|espresso|kitchen|food|digital|weighing) scales?|load[- ]?cell)\b', 'coffee_scale'),
+    (r'\b((photo|product|display|360|motori[sz]ed|cake) turntables?|lazy susans?|product spinners?|(rotating|spinning) (platforms?|displays?))\b', 'photo_turntable'),
+    (r'\b((retro|tiny|mini|vintage|crt|gif) (tvs?|televisions?)|televisions?|crt|gif players?|rabbit[- ]ears?)\b', 'tiny_tv'),
+    (r'\b((follower|subscriber|sub|like|fan) (counters?|counts?|displays?)|creator (trophy|trophies|awards?|plaques?)|desk trophy|milestone (plaques?|counters?))\b', 'follower_counter'),
+    (r'\b((giant|big red|huge) (sound )?buttons?|(hype|meme|airhorn|panic|sound|buzzer) buttons?|do not press|game ?show buzzers?|soundboards?)\b', 'hype_button'),
+    (r'\b((rubber )?duck(y|ies|s)?( debugger)?|debug(ging)? ducks?)\b', 'debug_duck'),
+    (r'\b((retro|pixel|toy|kids?\'?|instant|digital|snapshot|8[- ]?bit) cameras?|point[- ]and[- ]shoot)\b', 'retro_camera'),
     # R803: the five Atech-hardware examples, first: a balancing robot and
     # a robot arm before desk_robot's "robot", a motion sensor light before
     # the lamp's "light" ("a night light" stays the bedside lamp), a rover

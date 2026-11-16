@@ -36,7 +36,7 @@ sys.path.insert(0, ADDON)
 
 def _find_fc():
     cands = [os.environ.get("ATECH_FREECADCMD"),
-             os.path.join(REPO, "dist", "build-macos-arm64", "Atech Atelier.app",
+             os.path.join(REPO, "dist", "build-macos-arm64", "Prompt2Product.app",
                           "Contents", "Resources", "bin", "freecadcmd"),
              os.path.join(REPO, "dist", "build", "squashfs-root", "usr", "bin", "freecadcmd"),
              shutil.which("freecadcmd")]

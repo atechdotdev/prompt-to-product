@@ -365,7 +365,7 @@ def _passthrough_env():
     # the folder read-only.
     parts = _user_parts_dir()
     if parts:
-        out["ATELIER_PARTS"] = parts
+        out["P2P_PARTS"] = parts
     # R275: the agent mode reaches check.py (its R270 quality gates read
     # $ATECH_PROMPT_MODE, and env -i / the Job env drop it): without this a
     # user in fast mode (settings "agent_quality" off) got quality gates.
@@ -374,9 +374,9 @@ def _passthrough_env():
 
 
 def _user_parts_dir():
-    """$ATELIER_PARTS, else build.user_parts_dir() when that folder exists;
+    """$P2P_PARTS, else build.user_parts_dir() when that folder exists;
     "" in a bare sandbox."""
-    env = (os.environ.get("ATELIER_PARTS") or "").strip()
+    env = (os.environ.get("P2P_PARTS") or "").strip()
     if env:
         return os.path.abspath(os.path.expanduser(env))
     try:
@@ -699,7 +699,7 @@ def wrapper_script(workspace, extra_path=(), freecadcmd=None, mode=None,
     # FreeCAD on macOS takes its user folders from the account, not $HOME.
     fc_home = ' FREECAD_USER_HOME="$h"' if sys.platform == "darwin" else ""
     return """#!/bin/sh
-# Atech Atelier self-check - written by Atelier, rewritten every turn.
+# Prompt2Product self-check - written by Prompt2Product, rewritten every turn.
 # Builds model.py headless in a sandbox, prints what it measured, writes
 # check.png. The last line is CHECK PASS or CHECK FAIL: <reasons>.
 cd %(ws)s || exit 3

@@ -169,7 +169,7 @@ class Base(unittest.TestCase):
         # test_ws_chat_panel (which imports this file a second time), the
         # other module's tearDownModule put the real HOME back first, and
         # these cases wrote sessions.json and chat-* folders into the real
-        # ~/.local/share/Atech Atelier - then read them in the next run.
+        # ~/.local/share/Prompt2Product - then read them in the next run.
         os.makedirs(os.path.join(_TMP, "home"), exist_ok=True)
         os.environ["HOME"] = os.path.join(_TMP, "home")
         self.tmp = tempfile.mkdtemp(prefix="case-", dir=_TMP)

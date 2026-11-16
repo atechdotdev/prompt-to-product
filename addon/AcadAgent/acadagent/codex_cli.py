@@ -53,7 +53,7 @@ ISOLATION (the R78 promise, as far as Codex can keep it)
 THE SYSTEM PROMPT
     -c developer_instructions="<TOML string>" (measured: it arrives as a
     developer message after Codex's own). An argument, so it is readable in
-    the process list like any argv; it holds Atelier's instructions, never
+    the process list like any argv; it holds Prompt2Product's instructions, never
     what the user typed (that goes on stdin, R35). Longer than
     agent_cli.ARG_LIMIT, it is put in front of the prompt on stdin instead.
 """
@@ -312,7 +312,7 @@ class CodexRun(ClaudeRun):
     def _compose_prompt(self):
         text = super()._compose_prompt()
         if self._sp_on_stdin and self._system_prompt:
-            return ("<atelier_instructions>\n%s\n</atelier_instructions>\n\n%s"
+            return ("<prompt2product_instructions>\n%s\n</prompt2product_instructions>\n\n%s"
                     % (self._system_prompt, text))
         return text
 

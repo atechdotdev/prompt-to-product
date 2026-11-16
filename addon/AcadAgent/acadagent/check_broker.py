@@ -1,7 +1,7 @@
 """check_broker — ./check for agents that run inside their own sandbox (R870).
 
 WHY THIS EXISTS
-    The agent's ./check builds model.py headless under Atelier's own
+    The agent's ./check builds model.py headless under Prompt2Product's own
     isolation (sandbox.wrapper_script: Seatbelt on macOS, bwrap on Linux).
     Claude Code runs ./check directly: its shell is not sandboxed, and the
     allowlist lets it run nothing else. Codex and the Cursor CLI run EVERY
@@ -19,11 +19,11 @@ WHY THIS EXISTS
 
 THE BROKER
     For those engines ./check is a small client (client_script): it drops
-    a request file in <ws>/.atech-check/ and waits. Atelier, outside the
+    a request file in <ws>/.atech-check/ and waits. Prompt2Product, outside the
     agent's sandbox, runs the REAL check - the script text it generated
     and keeps in memory (register), never a file the agent could have
     changed - and writes the output back. The agent stays entirely inside
-    its own sandbox; model.py is built under Atelier's isolation exactly as
+    its own sandbox; model.py is built under Prompt2Product's isolation exactly as
     for Claude Code.
 
     Files are written through a descriptor of .atech-check opened with
@@ -67,34 +67,34 @@ def registered(ws):
 
 
 def client_script(ws, wait_s):
-    """The ./check an agent in its own sandbox runs: ask Atelier for a
+    """The ./check an agent in its own sandbox runs: ask Prompt2Product for a
     check and print its answer. `wait_s`: how long to wait for it."""
     import shlex
     d = os.path.join(os.path.realpath(ws), DIR)
     return """#!/bin/sh
-# Atech Atelier self-check - written by Atelier, rewritten every turn.
-# Asks Atelier to build model.py headless in its sandbox; prints what it
+# Prompt2Product self-check - written by Prompt2Product, rewritten every turn.
+# Asks Prompt2Product to build model.py headless in its sandbox; prints what it
 # measured and writes check.png. The last line is CHECK PASS or
 # CHECK FAIL: <reasons>.
 d=%(d)s
 if [ ! -f "$d/%(alive)s" ]; then
-  echo "CHECK FAIL: Atech Atelier is not taking checks for this chat right now (no reply is running)."
+  echo "CHECK FAIL: Prompt2Product is not taking checks for this chat right now (no reply is running)."
   exit 1
 fi
 id="$(date +%%s)-$$"
 if ! { : > "$d/req-$id.tmp" && mv -f "$d/req-$id.tmp" "$d/req-$id"; }; then
-  echo "CHECK FAIL: could not ask Atech Atelier for a check (cannot write $d)."
+  echo "CHECK FAIL: could not ask Prompt2Product for a check (cannot write $d)."
   exit 1
 fi
 n=0
 while [ ! -f "$d/done-$id" ]; do
   if [ ! -f "$d/%(alive)s" ]; then
-    echo "CHECK FAIL: Atech Atelier stopped the check (the reply ended)."
+    echo "CHECK FAIL: Prompt2Product stopped the check (the reply ended)."
     exit 1
   fi
   n=$((n + 1))
   if [ "$n" -gt %(wait)d ]; then
-    echo "CHECK FAIL: no answer from Atech Atelier after %(wait)d s."
+    echo "CHECK FAIL: no answer from Prompt2Product after %(wait)d s."
     exit 1
   fi
   sleep 1
@@ -258,7 +258,7 @@ class Broker(object):
     def _answer(self, rid):
         text = registered(self.ws)
         if text is None:
-            out = (b"CHECK FAIL: Atech Atelier has no check for this chat "
+            out = (b"CHECK FAIL: Prompt2Product has no check for this chat "
                    b"folder yet (it is written when a reply starts).\n")
             rc = 1
         else:
@@ -281,7 +281,7 @@ class Broker(object):
                     env=self.env, stdin=subprocess.DEVNULL, stdout=fh,
                     stderr=subprocess.STDOUT, start_new_session=True)
             except OSError as exc:
-                return (("CHECK FAIL: Atech Atelier could not run the "
+                return (("CHECK FAIL: Prompt2Product could not run the "
                          "check: %s\n" % exc).encode("utf-8"), 1)
             while self._proc.poll() is None:
                 if self._stop.wait(0.2):

@@ -4,8 +4,8 @@ simready_usd2stl.py, the shipped simready_index.json, the Modules page's
 
     QT_QPA_PLATFORM=offscreen <bundled python> -m unittest -v test_simready_r760
 
-The converter tests need usd-core: $ATELIER_USD_DIR (a folder holding pxr)
-or one importable here; they skip without it. ATELIER_NET_TESTS=1 adds a
+The converter tests need usd-core: $P2P_USD_DIR (a folder holding pxr)
+or one importable here; they skip without it. P2P_NET_TESTS=1 adds a
 real install from the Hub (needs freecadcmd, network; ~1 MB).
 """
 import hashlib
@@ -39,7 +39,7 @@ from test_modules_page_r300 import FC, MODELS  # noqa: E402
 
 
 def _usd_dir():
-    d = os.environ.get("ATELIER_USD_DIR")
+    d = os.environ.get("P2P_USD_DIR")
     if d and os.path.isdir(os.path.join(d, "pxr")):
         return d
     return None
@@ -221,20 +221,20 @@ def Xform "Root"
 '''
 
 
-@unittest.skipIf(USD is None, "usd-core not available (set ATELIER_USD_DIR)")
+@unittest.skipIf(USD is None, "usd-core not available (set P2P_USD_DIR)")
 class TestConverter(unittest.TestCase):
 
     def setUp(self):
         self.d = tempfile.mkdtemp(prefix="r760_usd_")
-        self.env = os.environ.get("ATELIER_USD_DIR")
-        os.environ["ATELIER_USD_DIR"] = USD
+        self.env = os.environ.get("P2P_USD_DIR")
+        os.environ["P2P_USD_DIR"] = USD
 
     def tearDown(self):
         shutil.rmtree(self.d, ignore_errors=True)
         if self.env is None:
-            os.environ.pop("ATELIER_USD_DIR", None)
+            os.environ.pop("P2P_USD_DIR", None)
         else:
-            os.environ["ATELIER_USD_DIR"] = self.env
+            os.environ["P2P_USD_DIR"] = self.env
 
     def test_convert(self):
         src = os.path.join(self.d, "part.usda")
@@ -328,8 +328,8 @@ class TestDialog(FakeIndex, unittest.TestCase):
         self.assertTrue(d.list.isEnabled())
 
 
-@unittest.skipIf(not (os.environ.get("ATELIER_NET_TESTS") and FC and USD),
-                 "set ATELIER_NET_TESTS=1 (needs network, freecadcmd, usd-core)")
+@unittest.skipIf(not (os.environ.get("P2P_NET_TESTS") and FC and USD),
+                 "set P2P_NET_TESTS=1 (needs network, freecadcmd, usd-core)")
 class TestRealInstall(unittest.TestCase):
 
     def test_fuse(self):
@@ -343,8 +343,8 @@ class TestRealInstall(unittest.TestCase):
                      "sp['licence'], am.is_user_part(n)]))\n"
                      % os.path.join(REPO, "projects"))
         try:
-            env = dict(os.environ, ATELIER_PARTS=os.path.join(d, "parts"),
-                       ATELIER_USD_DIR=USD, ATECH_ARTIFACTS=MODELS)
+            env = dict(os.environ, P2P_PARTS=os.path.join(d, "parts"),
+                       P2P_USD_DIR=USD, ATECH_ARTIFACTS=MODELS)
             out = subprocess.run([FC, script], env=env, capture_output=True,
                                  text=True, timeout=900).stdout
         finally:

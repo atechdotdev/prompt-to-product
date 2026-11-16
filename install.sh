@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# Atech Atelier installer for macOS and Linux.
+# Prompt2Product installer for macOS and Linux.
 #
-#   curl -fsSL https://raw.githubusercontent.com/atechdotdev/atech-atelier/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/atechdotdev/prompt2product/main/install.sh | bash
 #
 # Or download this file, read it, and run it:  bash install.sh [options]
 #
@@ -16,9 +16,9 @@
 #        macOS  the app into /Applications (or ~/Applications
 #               when /Applications is not writable). The app's code
 #               signature is verified before it is copied.
-#        Linux  the AppImage into ~/.local/share/atech-atelier/, a launcher
+#        Linux  the AppImage into ~/.local/share/prompt2product/, a launcher
 #               entry and icon for your desktop, and the command
-#               ~/.local/bin/atech-atelier;
+#               ~/.local/bin/prompt2product;
 #   4. checks for Claude Code (the chat runs on it) and tells you what is
 #      missing. It never installs Claude Code unless you say so
 #      (--with-claude, or "y" at the prompt).
@@ -38,20 +38,23 @@
 #   -y, --yes         do not ask questions
 #   -h, --help
 #
-# Environment: ATECH_REPO (default atechdotdev/atech-atelier).
+# Environment: ATECH_REPO (default atechdotdev/prompt2product).
 
 set -euo pipefail
 
 # Everything runs from main(), at the very end: a download cut short can
 # never run half a script.
 main() {
-  REPO="${ATECH_REPO:-atechdotdev/atech-atelier}"
+  REPO="${ATECH_REPO:-atechdotdev/prompt2product}"
   # The product's display name, taken from what is installed: the app in
-  # the disk image, or the AppImage's file name (AtechAtelier-* is "Atech
+  # the disk image, or the AppImage's file name (Prompt2Product-* is
+  # "Prompt2Product"; PromptToProduct-* the name of builds from 10-16 Nov 2026,
+  # "Prompt To Product"; AtechAtelier-* the name up to 0.1.3, "Atech
   # Atelier"; AtechAICAD-* the name 0.1.2 showed, "Atech AI CAD").
-  # Every build carries the same id, APP_ID.
-  PRODUCT="Atech Atelier"
-  APP_ID="dev.atech.Atelier"
+  # Builds since the rename carry APP_ID; earlier ones OLD_APP_IDS.
+  PRODUCT="Prompt2Product"
+  APP_ID="dev.atech.Prompt2Product"
+  OLD_APP_IDS="dev.atech.PromptToProduct dev.atech.Atelier"
   VERSION=""
   FILE=""
   SHA=""
@@ -87,11 +90,11 @@ main() {
                 fi ;;
         *) die "this Mac's processor ($ARCH) is not supported" ;;
       esac
-      ASSET_RE="Atech(Atelier|AICAD)-[0-9][^/\"]*-macOS-$ARCH\\.dmg"
+      ASSET_RE="(Prompt2Product|PromptToProduct|AtechAtelier|AtechAICAD)-[0-9][^/\"]*-macOS-$ARCH\\.dmg"
       ;;
     Linux)
       [ "$ARCH" = x86_64 ] || die "Linux builds are x86_64 only for now (this is $ARCH)"
-      ASSET_RE="Atech(Atelier|AICAD)-[0-9][^/\"]*-x86_64\\.AppImage"
+      ASSET_RE="(Prompt2Product|PromptToProduct|AtechAtelier|AtechAICAD)-[0-9][^/\"]*-x86_64\\.AppImage"
       ;;
     *) die "$OS is not supported (macOS and Linux are)" ;;
   esac
@@ -126,7 +129,7 @@ main() {
     fetch "$URL" "$ASSET" || die "download failed: $URL"
   fi
 
-  case "$NAME" in AtechAtelier-*) PRODUCT="Atech Atelier" ;; AtechAICAD-*) PRODUCT="Atech AI CAD" ;; esac
+  case "$NAME" in Prompt2Product-*) PRODUCT="Prompt2Product" ;; PromptToProduct-*) PRODUCT="Prompt To Product" ;; AtechAtelier-*) PRODUCT="Atech Atelier" ;; AtechAICAD-*) PRODUCT="Atech AI CAD" ;; esac
   printf '%s' "$SHA" | grep -Eq '^[0-9a-f]{64}$' || die "not a sha256: $SHA"
   GOT="$(sha256_of "$ASSET")"
   [ "$GOT" = "$SHA" ] || die "checksum mismatch for $NAME
@@ -162,6 +165,12 @@ cleanup() {
 bundle_id() {  # the CFBundleIdentifier of an .app, or nothing
   [ -f "$1/Contents/Info.plist" ] || return 0
   /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$1/Contents/Info.plist" 2>/dev/null || true
+}
+
+is_our_id() {  # <bundle id> -> 0 for this app's id or one it had before
+  local i
+  for i in "$APP_ID" $OLD_APP_IDS; do [ "$1" = "$i" ] && return 0; done
+  return 1
 }
 
 platform_name() {
@@ -241,10 +250,11 @@ install_macos() {
   dest="$(mac_dest)"
   mkdir -p "$dest"
   local app="$dest/$PRODUCT.app"
-  # Atech Atelier renamed: the old name's app is the same program; replace it.
+  # Renamed (Atech Atelier -> Prompt To Product -> Prompt2Product): an old name's app is the
+  # same program, under its own name or the old id; replace it.
   local old
   for old in "$dest"/*.app; do
-    if [ "$old" != "$app" ] && [ "$(bundle_id "$old")" = "$APP_ID" ]; then
+    if [ "$old" != "$app" ] && is_our_id "$(bundle_id "$old")"; then
       note "Replacing the earlier $(basename "$old")"
       rm -rf "$old" || die "could not remove $old"
     fi
@@ -256,7 +266,7 @@ install_macos() {
   # Copy beside it under a name that is not an .app, then swap: macOS refuses
   # a copy straight to a new *.app path from a process without App Management
   # rights, and an interrupted copy never leaves a half app in place.
-  local stage="$dest/.atech-atelier-install.$$"
+  local stage="$dest/.prompt2product-install.$$"
   rm -rf "$stage"
   ditto "$src" "$stage" || { rm -rf "$stage"; die "could not copy the app to $dest"; }
   if [ -d "$app" ]; then
@@ -270,7 +280,7 @@ install_macos() {
 }
 
 # ------------------------------------------------------------------ Linux
-linux_dest() { echo "${DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/atech-atelier}"; }
+linux_dest() { echo "${DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/prompt2product}"; }
 
 install_linux() {
   local dest data apps icons bin img
@@ -279,11 +289,21 @@ install_linux() {
   apps="$data/applications"
   icons="$data/icons/hicolor/scalable/apps"
   bin="$HOME/.local/bin"
-  img="$dest/AtechAtelier.AppImage"
+  img="$dest/Prompt2Product.AppImage"
   mkdir -p "$dest" "$apps" "$icons" "$bin"
   say "Installing to $img"
   install -m 0755 "$ASSET" "$img.new" && mv -f "$img.new" "$img"
   printf '%s  %s\n' "$GOT" "$NAME" > "$dest/INSTALLED"
+  # Renamed from Atech Atelier and Prompt To Product: take away the old names' launcher, menu entry
+  # and image (the same program). The user's designs are not touched.
+  local o
+  for o in $OLD_APP_IDS; do
+    rm -f "$apps/$o.desktop" "$icons/$o.svg"
+  done
+  rm -f "$bin/atech-atelier" "$data/atech-atelier/AtechAtelier.AppImage" "$data/atech-atelier/INSTALLED"
+  rmdir "$data/atech-atelier" 2>/dev/null || true
+  rm -f "$bin/prompt-to-product" "$data/prompt-to-product/PromptToProduct.AppImage" "$data/prompt-to-product/INSTALLED"
+  rmdir "$data/prompt-to-product" 2>/dev/null || true
 
   # The icon, taken from the image itself (needs no FUSE).
   ( cd "$TMP" && "$img" --appimage-extract "$APP_ID.svg" >/dev/null 2>&1 ) || true
@@ -313,10 +333,10 @@ Categories=Graphics;3DGraphics;Engineering;
 StartupWMClass=$PRODUCT
 MimeType=application/x-extension-fcstd;model/step;model/iges;model/stl;
 DESKTOP
-  printf '#!/bin/sh\nexec %s "$@"\n' "$run" > "$bin/atech-atelier"
-  chmod 0755 "$bin/atech-atelier"
+  printf '#!/bin/sh\nexec %s "$@"\n' "$run" > "$bin/prompt2product"
+  chmod 0755 "$bin/prompt2product"
   command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$apps" >/dev/null 2>&1 || true
-  note "Start it from your applications menu, or run: atech-atelier"
+  note "Start it from your applications menu, or run: prompt2product"
   case ":$PATH:" in *":$bin:"*) ;; *) note "($bin is not on your PATH; the menu entry works anyway.)" ;; esac
   if ! command -v bwrap >/dev/null 2>&1; then
     warn "bubblewrap is not installed: design scripts will run without a sandbox."
@@ -331,7 +351,7 @@ uninstall() {
       local app="" d a
       for d in ${DIR:+"$DIR"} /Applications "$HOME/Applications"; do
         for a in "$d"/*.app; do
-          [ "$(bundle_id "$a")" = "$APP_ID" ] && { app="$a"; break 2; }
+          is_our_id "$(bundle_id "$a")" && { app="$a"; break 2; }
         done
       done
       [ -n "$app" ] || die "no installed app with the id $APP_ID found (pass --dir)"
@@ -346,8 +366,8 @@ uninstall() {
       local data dest
       data="${XDG_DATA_HOME:-$HOME/.local/share}"
       dest="$(linux_dest)"
-      rm -f "$dest/AtechAtelier.AppImage" "$dest/INSTALLED" "$data/applications/$APP_ID.desktop" \
-            "$data/icons/hicolor/scalable/apps/$APP_ID.svg" "$HOME/.local/bin/atech-atelier"
+      rm -f "$dest/Prompt2Product.AppImage" "$dest/INSTALLED" "$data/applications/$APP_ID.desktop" \
+            "$data/icons/hicolor/scalable/apps/$APP_ID.svg" "$HOME/.local/bin/prompt2product"
       rmdir "$dest" 2>/dev/null || true
       say "Removed the app"
       note "Your designs and settings are kept in $data/<app name> and ~/.config/<app name>;"

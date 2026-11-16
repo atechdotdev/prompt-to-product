@@ -2,7 +2,7 @@
 
 WHAT IS PINNED
     check_broker   ./check of an agent in its own sandbox: the client asks,
-                   Atelier runs the REAL check text it keeps in memory, the
+                   Prompt2Product runs the REAL check text it keeps in memory, the
                    answer comes back; a link planted where the answer goes
                    is replaced, never followed; Stop ends a check in flight
                    and the client gives up.
@@ -112,7 +112,7 @@ class TestCheckBroker(_Tmp):
         self.assertIn("CHECK PASS", r.stdout)
 
     def test_runs_the_registered_text_never_the_file(self):
-        """The agent may rewrite ./check; the broker runs what Atelier
+        """The agent may rewrite ./check; the broker runs what Prompt2Product
         registered."""
         self.start("echo REGISTERED\n")
         path = os.path.join(self.ws, "check")
@@ -372,7 +372,7 @@ class TestCodexRun(_FakeCodex):
                              for a in argv))
         with open(self.stdin_path) as fh:
             text = fh.read()
-        self.assertTrue(text.startswith("<atelier_instructions>\n" + sp))
+        self.assertTrue(text.startswith("<prompt2product_instructions>\n" + sp))
         self.assertTrue(text.endswith("make a box"))
 
     def test_view_question_is_read_only_and_resume_comes_last(self):
@@ -604,7 +604,7 @@ class TestCursorRun(_FakeCursor):
         self.assertFalse(run.argv[-1].startswith("-"))
         self.assertIn("-5 mm thinner", run.argv[-1])
         run, _ev, _argv = self.run_turn(sp="RULES")
-        self.assertTrue(run.argv[-1].startswith("<atelier_instructions>\n"
+        self.assertTrue(run.argv[-1].startswith("<prompt2product_instructions>\n"
                                                 "RULES"))
 
     def test_huge_prompt_goes_in_a_private_file_removed_after(self):

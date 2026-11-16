@@ -1,4 +1,4 @@
-"""shell — the Atech Atelier window, laid over FreeCAD's main window.
+"""shell — the Prompt2Product window, laid over FreeCAD's main window.
 
 What it builds while the agent workbench is active (and takes down again on
 deactivate, so other workbenches get FreeCAD's normal chrome). The sidebar
@@ -238,6 +238,16 @@ HOME_QSS = """
 #HomeScroll, #HomeInner {{ background: transparent; border: none; }}
 #BasedOn {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
 #HomeTitle {{ color: {text}; font-family: 'Sen', {UI}; font-size: 22px; font-weight: 700; }}
+#HomeMadeBy {{ color: {muted}; font-family: {UI}; font-size: 11px; }}
+#HomeSiteLabel {{ color: {muted}; font-family: {UI}; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.3px; padding-right: 2px; }}
+#HomeSiteBtn {{
+    background: transparent; color: {text}; border: 1px solid {line}; border-radius: 13px;
+    padding: 0 11px 0 9px; min-height: 26px; max-height: 26px; font-family: {UI};
+    font-size: 12px; font-weight: 500;
+}}
+#HomeSiteBtn:hover {{ background: {hover}; border-color: {line_strong}; }}
+#HomeSiteBtn:focus {{ border-color: {accent}; }}
 #HomeSection {{ color: {muted}; font-family: {UI}; font-size: 11px; font-weight: 600;
     letter-spacing: 0.5px; }}
 #HomeNote {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
@@ -609,7 +619,7 @@ class EmptyView(QtWidgets.QWidget):
         self.refresh_cards()
         self.setStyleSheet(style.qss(EMPTY_QSS))
         self.credit.setText(
-            style.PRODUCT + ', powered by FreeCAD \u00b7 <a href="credits" '
+            style.PRODUCT + ', made by ' + style.MAKER + ', powered by FreeCAD \u00b7 <a href="credits" '
             'style="color:%s; text-decoration:none;">Credits</a>'
             % style.tokens()["accent"])
         pm = style.logo_pixmap(40)
@@ -626,7 +636,9 @@ HOME_RECENT_MAX = 10           # PRD Opening 3: recents, up to 10
 OPEN_EXT = (".fcstd",)
 #: Opened as a NEW project that imports the file (PRD Opening 4).
 IMPORT_EXT = (".step", ".stp", ".stl", ".3mf", ".iges", ".igs", ".brep", ".brp",
-              ".obj")
+              ".obj", ".glb", ".gltf")
+#: R970: FreeCAD has no reader for these: design_import (gltf.py) reads them.
+OWN_READER_EXT = (".glb", ".gltf")
 _PEEK = {}                     # (realpath, mtime, size) -> (thumb bytes, hw)
 
 #: "Start from an example" (PRD Opening 6): agent_kit/examples/<key>.py.
@@ -674,7 +686,13 @@ EXAMPLE_ICONS = {"starter_board": "cpu", "starter_case": "cube",
                  "air_monitor": "sparkles",
                  "motion_light": "moon",
                  "arm_dock": "cpu",
-                 "balance_bot": "bot"}
+                 "balance_bot": "bot",
+                 # R940: ten viral products
+                 "coffee_scale": "ruler", "plant_pal": "tree",
+                 "focus_cube": "focus", "tiny_tv": "monitor",
+                 "retro_camera": "camera", "photo_turntable": "rotate",
+                 "debug_duck": "chat", "follower_counter": "sparkles",
+                 "bird_cam": "camera", "hype_button": "speaker"}
 
 
 def example_entries(kind="product"):
@@ -699,9 +717,44 @@ def example_entries(kind="product"):
             if example_path(k) is not None]
 
 
+def _gallery_count():
+    """R970: how many examples the gallery shows."""
+    try:
+        from . import examples_gallery
+        return len(examples_gallery.entries())
+    except Exception as exc:                           # noqa: BLE001
+        _log("gallery: %r" % (exc,))
+        return 0
+
+
 def starter_entries():
     """R820: Home's "Start simple" row, as example_entries."""
     return example_entries("starter")
+
+
+#: R950: Home's "On atech.dev" row, (key, icon, title, subtitle, path on the
+#: site). The site is shop.SITE, so $ATECH_SITE (staging) is followed.
+SITE_LINKS = (
+    ("community", "sparkles", "Community builds",
+     "See what people made with Prompt2Product, and post yours.", "/community"),
+    ("shop", "cpu", "Board and modules",
+     "The Atech board, modules, kits and 3D print vouchers.", "/modules"),
+    ("docs", "layers", "Docs",
+     "How the board, its ports and every module work.", "/docs"),
+    ("app", "cube", "Prompt2Product",
+     "What's new, the download, and how it all fits together.", "/atelier"),
+)
+
+
+def site_link_entries():
+    """SITE_LINKS with full URLs: (key, icon, title, subtitle, url)."""
+    site = _shop().SITE
+    return [(k, ico, t, sub, site + path) for k, ico, t, sub, path in SITE_LINKS]
+
+
+def site_url(path=""):
+    """A page on atech.dev (or $ATECH_SITE)."""
+    return _shop().SITE + path
 
 
 def open_default(title):
@@ -1193,8 +1246,14 @@ class HomeView(QtWidgets.QWidget):
         tcol = QtWidgets.QVBoxLayout()
         tcol.setSpacing(2)
         tcol.addWidget(self.title)
-        self.based_on = FreeCadBadge(18)
-        tcol.addWidget(self.based_on, 0, QtCore.Qt.AlignLeft)
+        self.made_by = QtWidgets.QLabel(style.MADE_BY)
+        self.made_by.setObjectName("HomeMadeBy")
+        self.made_by.setOpenExternalLinks(False)
+        self.made_by.linkActivated.connect(_open_link)
+        self.made_by.setToolTip("Opens atech.dev")
+        tcol.addWidget(self.made_by)
+        # No "Based on FreeCAD" here (owner, 2026-11-07): the credit the
+        # licence asks for is on Credits and About, linked from this page.
         head.addLayout(tcol)
         head.addStretch(1)
         self.search = QtWidgets.QLineEdit()
@@ -1223,7 +1282,19 @@ class HomeView(QtWidgets.QWidget):
                                  "\u2192 Get it made puts that project's modules "
                                  "and 3D prints in the cart.")
         self.btn_shop.clicked.connect(lambda: _open_link(_shop().SHOP))
+        # R970: bring in a model from anywhere and say what to change
+        self.btn_import = QtWidgets.QPushButton("Import a model\u2026")
+        self.btn_import.setObjectName("HomeBtn")
+        self.btn_import.setCursor(QtCore.Qt.PointingHandCursor)
+        self.btn_import.setAccessibleName("Import a model to change")
+        self.btn_import.setToolTip(
+            "STL, 3MF, GLB, STEP or OBJ from MakerWorld, Printables, "
+            "Thingiverse, Sketchfab, a scanner app or an AI 3D generator. It "
+            "comes in as it is; then say what to change. You can also drop "
+            "the files here.")
+        self.btn_import.clicked.connect(lambda: import_model(self))
         head.addWidget(self.btn_shop)
+        head.addWidget(self.btn_import)
         head.addWidget(self.btn_open)
         # R860: the atech.dev account (the one the board and projects are on)
         try:
@@ -1234,6 +1305,30 @@ class HomeView(QtWidgets.QWidget):
             self.btn_account = None
             _log("account button: %r" % (exc,))
         v.addLayout(head)
+        v.addSpacing(14)
+        # R950: the rest of Atech one click away, a slim row of pills under
+        # the header (not cards at the bottom, under every project and
+        # example, where nobody scrolled to them).
+        site = QtWidgets.QHBoxLayout()
+        site.setSpacing(8)
+        self.sec_site = QtWidgets.QLabel("On atech.dev")
+        self.sec_site.setObjectName("HomeSiteLabel")
+        site.addWidget(self.sec_site)
+        self.site_cards = []
+        for key, ico, title, sub, url in site_link_entries():
+            b = QtWidgets.QPushButton(title)
+            b.setObjectName("HomeSiteBtn")
+            b.setCursor(QtCore.Qt.PointingHandCursor)
+            b.setIconSize(QtCore.QSize(14, 14))
+            b.setToolTip("%s\n%s" % (sub, url))
+            b.setAccessibleName("%s on atech.dev" % title)
+            b.site_key = key
+            b._icon_name = ico
+            b.clicked.connect(lambda _=False, u=url: _open_link(u))
+            site.addWidget(b)
+            self.site_cards.append(b)
+        site.addStretch(1)
+        v.addLayout(site)
         v.addSpacing(22)
 
         self.sec_projects = QtWidgets.QLabel("YOUR PROJECTS")
@@ -1271,6 +1366,7 @@ class HomeView(QtWidgets.QWidget):
         self.ex_grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         v.addLayout(self.ex_grid)
         v.addSpacing(26)
+        v.addSpacing(26)
         c = QtWidgets.QLabel()
         c.setObjectName("EmptyCredit")
         c.setOpenExternalLinks(False)
@@ -1285,12 +1381,20 @@ class HomeView(QtWidgets.QWidget):
                                   "An empty design to build into.")
         self.new_card.clicked.connect(lambda: _new_project())
         self.example_cards = self._entry_cards(example_entries(), "example")
+        # R970: Home shows a short row; every example is in the gallery
+        n_all = _gallery_count()
+        self.all_examples_card = ClickCard(
+            "grid", "All examples",
+            "%d products to start from, with pictures." % n_all if n_all else
+            "Every example product, with pictures.")
+        self.all_examples_card.setAccessibleName("Show all examples")
+        self.all_examples_card.clicked.connect(lambda: show_examples(self))
         self.starter_cards = self._entry_cards(starter_entries(), "starter")
         self.crane_card = ClickCard("cube", "Sample crane",
                                     "Open a measured crane assembly.")
         self.crane_card.clicked.connect(_open_reference)
         self.cards = ([self.new_card] + self.example_cards + [self.crane_card]
-                      + self.starter_cards)
+                      + self.starter_cards + [self.all_examples_card])
         self.project_cards = []
         self.rows = []
         self.source = None
@@ -1362,6 +1466,11 @@ class HomeView(QtWidgets.QWidget):
             if c not in shown:
                 c.setVisible(False)
         ex = list(self.example_cards) + ([self.crane_card] if self._has_crane else [])
+        # R970: one or two rows here, the rest in the gallery
+        room = max(cols * 2 - 1, 3)
+        for c in ex[room:]:
+            c.setVisible(False)
+        ex = ex[:room] + [self.all_examples_card]
         for i, c in enumerate(ex):
             self.ex_grid.addWidget(c, i // cols, i % cols)
             c.setVisible(True)
@@ -1481,15 +1590,18 @@ class HomeView(QtWidgets.QWidget):
         self.setStyleSheet(style.qss(HOME_QSS))
         t = style.tokens()
         link = '<a href="%%s" style="color:%s; text-decoration:none;">%%s</a>' % t["accent"]
+        self.made_by.setText("Made by " + link % (site_url(), style.MAKER))
         self.credit.setText(
-            style.PRODUCT + ', powered by FreeCAD \u00b7 ' + " \u00b7 ".join((
-                link % (_shop().SITE, "atech.dev"),
+            style.PRODUCT + ', made by ' + link % (site_url(), style.MAKER)
+            + ', powered by FreeCAD \u00b7 ' + " \u00b7 ".join((
+                link % (site_url("/community"), "Community"),
                 link % (_shop().SHOP, "Shop"),
+                link % (site_url("/docs"), "Docs"),
+                link % (site_url("/atelier"), "What's new"),
                 link % ("credits", "Credits"))))
         pm = style.logo_pixmap(26)
         if pm is not None:
             self.mark.setPixmap(pm)
-        self.based_on.restyle()
         if self._search_act is not None:
             self.search.removeAction(self._search_act)
         self._search_act = self.search.addAction(
@@ -1497,6 +1609,8 @@ class HomeView(QtWidgets.QWidget):
             QtWidgets.QLineEdit.LeadingPosition)
         for c in self.cards + self.project_cards:
             c.restyle()
+        for b in self.site_cards:
+            b.setIcon(style.icon(b._icon_name, t["text"], 14))
 
 
 class OrbitHint(QtWidgets.QFrame):
@@ -1575,19 +1689,19 @@ class OrbitHint(QtWidgets.QFrame):
 #: sit between the view toggles and Spin, in this order; a key not listed
 #: here goes after them. See register_view_tool().
 TOOL_ORDER = ("measure", "section", "show", "explode", "simulate", "dims", "shape",
-              "part", "colour", "export", "share", "video")
+              "part", "colour", "export", "files", "share", "video")
 _TOOLS = {}
 #: R380: the slot shows two groups, inspect | output, with a thin line
 #: between them. A key in neither group joins the last one.
 #: R701: Show and hide and Exploded view are ways of looking, so they sit
 #: with Measure and Section; Dimensions edits, as Colour does.
 TOOL_GROUPS = (("measure", "section", "show", "explode", "simulate"),
-               ("dims", "colour", "export", "share", "video"))
+               ("dims", "colour", "export", "files", "share", "video"))
 #: R380: the view-bar level (ViewBar.set_level) from which a tool's button
 #: leaves the bar for the "More tools" menu; a key not listed goes at 2.
 #: Measure and Section stay (they also have M and Shift+S).
 TOOL_DROP_LEVEL = {"share": 1, "dims": 1, "explode": 2, "colour": 2,
-                   "export": 2, "measure": 99, "section": 99, "show": 99,
+                   "export": 2, "files": 2, "measure": 99, "section": 99, "show": 99,
                    "simulate": 2, "video": 1, "part": 1}
 #: Lucide "ellipsis", for the More tools button (as navbar adds "save").
 style.PATHS.setdefault("more", '<circle cx="12" cy="12" r="1"/>'
@@ -1684,7 +1798,7 @@ def _w4_restyle(w):
 #: (key, label) of the tools Atech itself puts on the view bar (R380).
 BUILTIN_TOOLS = (("measure", "Measure"), ("section", "Section view"),
                  ("colour", "Colour"), ("explode", "Exploded view"),
-                 ("export", "Export for print"),
+                 ("export", "Print"), ("files", "Export"),
                  ("share", "Save a share image"))
 #: R700/R701: Show and hide (visibility.py) and Dimensions (dimensions.py).
 EDIT_TOOLS = (("show", "Show and hide"), ("dims", "Dimensions"),
@@ -2376,6 +2490,14 @@ class Sidebar(QtWidgets.QWidget):
         brow.setContentsMargins(4, 0, 0, 0)
         brow.addWidget(self.based_on)
         brow.addStretch(1)
+        # R950: "atech.dev" beside it, the maker's site one click away
+        self.site_link = QtWidgets.QLabel()
+        self.site_link.setObjectName("BasedOn")
+        self.site_link.setOpenExternalLinks(False)
+        self.site_link.linkActivated.connect(_open_link)
+        self.site_link.setToolTip("Made by Atech.dev: opens atech.dev")
+        self.site_link.setAccessibleName("atech.dev")
+        brow.addWidget(self.site_link)
         hv.addLayout(brow)
         # R801: the logo is the way Home (all projects), as on a website.
         self.brand.setCursor(QtCore.Qt.PointingHandCursor)
@@ -2710,6 +2832,8 @@ class Sidebar(QtWidgets.QWidget):
         if pm is not None:
             self.brand_mark.setPixmap(pm)
         self.based_on.restyle()
+        self.site_link.setText('<a href="%s" style="color:%s; text-decoration:none;">atech.dev</a>'
+                               % (site_url(), style.tokens()["muted"]))
         self.btn_terminal.setIcon(style.icon("terminal", t["muted"], 16))
         self.btn_settings.setIcon(style.icon("settings", t["muted"], 16))
         self._paint_home_btn()
@@ -3006,7 +3130,11 @@ def open_path(path):
         import FreeCADGui
         doc = FreeCAD.newDocument(_doc_name_for(stem))
         doc.Label = stem
-        FreeCADGui.insert(path, doc.Name)
+        if low.endswith(OWN_READER_EXT):
+            from . import design_import                 # R970: GLB / glTF
+            design_import.add_file(doc, path)
+        else:
+            FreeCADGui.insert(path, doc.Name)
         try:
             doc.recompute()
         except Exception:                              # noqa: BLE001
@@ -3049,7 +3177,8 @@ def adds_to_design():
 
 def drop_paths(paths):
     """Dropped files: projects open; CAD files are added to the open design
-    (R880) or become new projects."""
+    (R880) or - on Home - become a new project you change by asking (R970,
+    import_files; without the chat, plain new projects, R309)."""
     paths = droppable(paths)
     projects = [p for p in paths if p.lower().endswith(OPEN_EXT)]
     files = [p for p in paths if p not in projects]
@@ -3058,7 +3187,80 @@ def drop_paths(paths):
         from . import design_import
         out += [o.Name for o in design_import.add_dropped(files)]
         files = []
+    if files and _import_hook() is not None:
+        r = import_files(files)
+        if r is not None:
+            out.append(r)
+            files = []
     return out + open_paths(projects + files)
+
+
+# ------------------------------------------ R970: import and ask for changes
+#: What "Import a model" opens (MakerWorld, Printables, Thingiverse,
+#: Sketchfab, a scanner app, an AI 3D generator).
+IMPORT_FILTER = ("3D models (*.stl *.3mf *.glb *.gltf *.step *.stp *.obj *.iges "
+                 "*.igs *.brep *.brp *.ply *.off);;All files (*)")
+
+
+def _import_hook():
+    p = chat_panel()
+    hook = getattr(p, "start_from_files", None) if p is not None else None
+    return hook if callable(hook) else None
+
+
+def import_files(paths, title=None):
+    """R970: a NEW project made of the 3D files `paths`, kept as they are,
+    in a chat that asks what to change (panel.start_from_files). Without
+    the chat panel each file opens as its own project (open_paths).
+    Returns the panel's state, the opened documents, or None."""
+    from . import references
+    paths = [p for p in paths if p and os.path.isfile(p)
+             and p.lower().endswith(references.ALL_EXT)
+             and not p.lower().endswith(references.PICTURE_EXT)]
+    if not paths:
+        return None
+    _leave_home()
+    hook = _import_hook()
+    if hook is None:
+        return open_paths(paths) or None
+    try:
+        show_chat()
+    except Exception as exc:                           # noqa: BLE001
+        _log("show chat: %r" % (exc,))
+    try:
+        return hook(paths, title)
+    except Exception as exc:                           # noqa: BLE001
+        _notify("Could not import the file",
+                "The details are in the Report view.", exc)
+        return None
+
+
+def import_model(parent=None):
+    """R970: "Import a model": pick STL, 3MF, GLB, STEP, OBJ files (one or
+    more), then say what to change in the chat."""
+    try:
+        start = os.path.expanduser("~/Downloads")
+        paths, _f = QtWidgets.QFileDialog.getOpenFileNames(
+            parent or _mw(), "Import a model to change", start,
+            IMPORT_FILTER)
+    except Exception as exc:                           # noqa: BLE001
+        _notify("Could not open the file dialog",
+                "The details are in the Report view.", exc)
+        return None
+    if not paths:
+        return None
+    return import_files(paths)
+
+
+def show_examples(parent=None):
+    """R970: the gallery of every example (examples_gallery)."""
+    from . import examples_gallery
+    try:
+        return examples_gallery.show_gallery(parent or _mw())
+    except Exception as exc:                           # noqa: BLE001
+        _notify("Could not show the examples",
+                "The details are in the Report view.", exc)
+        return None
 
 
 class DropFilter(QtCore.QObject):
@@ -3151,7 +3353,15 @@ def open_example(key):
     example and the agent resumes from it. Returns the PendingBuild, the
     panel's result, or None."""
     _leave_home()
-    title = next((t for k, t, _s, _i in EXAMPLES + STARTERS if k == key), key)
+    title = next((t for k, t, _s, _i in EXAMPLES + STARTERS if k == key), None)
+    if title is None:                                   # R970: the gallery's name
+        try:
+            from . import examples_gallery
+            title = next((t for k, t, _l, _c in examples_gallery.CATALOG
+                          if k == key), None)
+        except Exception:                              # noqa: BLE001
+            title = None
+    title = title or key.replace("_", " ").capitalize()
     path = example_path(key)
     if path is None:
         _notify("Example not available",
@@ -3746,8 +3956,17 @@ TOOL_COMMANDS = (
     # R900
     ("Atech_FromMakerWorld", "From MakerWorld\u2026", "Add a model downloaded "
      "from MakerWorld, with its maker and licence", "mwimport"),
+    # R970
+    ("Atech_ImportModel", "Import a model to change\u2026", "A new project "
+     "from STL, 3MF, GLB, STEP or OBJ files, kept as they are: then say what "
+     "to change", "importmodel"),
+    ("Atech_Examples", "Examples\u2026", "Every example product, with "
+     "pictures: start a new project from one", "examples"),
 )
 EXPORT_COMMANDS = (
+    # R920
+    ("Atech_Print", "Print\u2026", "Make print plates for your Bambu Lab "
+     "printer and open them in Bambu Studio, or export a file", "print"),
     ("Atech_ExportForPrint", "Export for print\u2026", "Save STL, 3MF or "
      "STEP files for a 3D printer", "export"),
     ("Atech_ExplodedView", "Exploded view (E)", "Pull the parts apart to "
@@ -3804,10 +4023,18 @@ def run_command_action(key):
         m = _keep_dialog(export_tools.ColourMenu(parent))
         m.popup(QtGui.QCursor.pos())
         return m
-    if key == "export" and click_tool(key):
-        return key
+    if key == "print":
+        # R920: the view bar's Print button (key "export") opens Print
+        if click_tool("export"):
+            return key
+        from . import print_plates
+        return _keep_dialog(print_plates.PrintDialog(parent)).show()
     if key == "dims":
         return _open_dimensions()
+    if key == "importmodel":                           # R970
+        return import_model()
+    if key == "examples":
+        return show_examples()
     if key == "addfile":
         from . import design_import
         return design_import.add_to_active(parent=parent)
@@ -3820,6 +4047,9 @@ def run_command_action(key):
         from . import makerworld
         return _keep_dialog(makerworld.PublishDialog(parent)).show()
     if key == "export":
+        # R940: the view bar's Export button (key "files") opens Export
+        if click_tool("files"):
+            return key
         return _keep_dialog(export_tools.ExportDialog(parent)).show()
     if key == "explode":
         # R720: the same one-click toggle as E and the view bar (a separate
@@ -4811,20 +5041,20 @@ def _icon_dir():
     cands = []
     try:
         import FreeCAD
-        cands.append(os.path.join(FreeCAD.getUserCachePath(), "AtechAtelier",
+        cands.append(os.path.join(FreeCAD.getUserCachePath(), "Prompt2Product",
                                   "icons"))
     except Exception:                                  # noqa: BLE001
         pass
     loc = QtCore.QStandardPaths.writableLocation(
         QtCore.QStandardPaths.CacheLocation)
     if loc:
-        cands.append(os.path.join(loc, "atech-atelier-icons"))
+        cands.append(os.path.join(loc, "prompt2product-icons"))
     for d in cands:
         if _private_dir(d):
             _ICON_DIR[:] = [d]
             return d
     import tempfile
-    d = tempfile.mkdtemp(prefix="atech-atelier-icons-")
+    d = tempfile.mkdtemp(prefix="prompt2product-icons-")
     _ICON_DIR[:] = [d]
     return d
 

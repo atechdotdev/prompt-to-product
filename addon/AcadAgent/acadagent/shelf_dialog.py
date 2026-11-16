@@ -1,7 +1,7 @@
 """shelf_dialog - "Off-the-shelf parts..." on the Modules page.
 
 Browse the curated off-the-shelf parts (Arduino, Raspberry Pi, servos,
-batteries, switches, sensors... from the FreeCAD Parts Library, CC BY 3.0),
+batteries, switches, sensors, screws, bearings... from the FreeCAD Parts Library, CC BY 3.0),
 see one's picture, measured size, wiring and authors, and install it into
 the user's own parts. projects/shelf.py does the work: download, blob-id
 check, STEP meshed in a child freecadcmd, user_parts.import_part.
@@ -67,27 +67,32 @@ def ShelfDialog(parent=None, on_done=None, shelf=None, freecadcmd=None):
         def _say(self, text, frac):
             self.progress.emit(text, -1.0 if frac is None else float(frac))
 
-    d = export_tools._tool_dialog(QtWidgets.QDialog, parent, "Off-the-shelf parts")
+    # R980: the same dialog shows the KiCad components (projects/kicad3d.py),
+    # which carry their own words; the off-the-shelf parts' are the default
+    title = getattr(shelf, "TITLE", "Off-the-shelf parts")
+    d = export_tools._tool_dialog(QtWidgets.QDialog, parent, title)
     d.resize(760, 540)
     lay = QtWidgets.QVBoxLayout(d)
     lay.setContentsMargins(20, 16, 20, 16)
     lay.setSpacing(8)
-    t = QtWidgets.QLabel("Off-the-shelf parts", d)
+    t = QtWidgets.QLabel(title, d)
     t.setObjectName("ToolTitle")
     lay.addWidget(t)
-    sub = QtWidgets.QLabel(
+    sub = QtWidgets.QLabel(getattr(
+        shelf, "INTRO",
         "Boards, sensors, motors, batteries, buttons, displays and connectors you "
         "can buy, as real 3D models. An installed part joins your parts; the agent "
-        "designs around it.", d)
+        "designs around it."), d)
     sub.setObjectName("ToolMuted")
     sub.setWordWrap(True)
     lay.addWidget(sub)
 
     row = QtWidgets.QHBoxLayout()
     d.query = QtWidgets.QLineEdit(d)
-    d.query.setPlaceholderText("Search: arduino, servo, battery, button…")
+    d.query.setPlaceholderText(getattr(
+        shelf, "SEARCH_HINT", "Search: arduino, servo, button, M3 screw, bearing…"))
     d.query.setClearButtonEnabled(True)
-    d.query.setAccessibleName("Search off-the-shelf parts")
+    d.query.setAccessibleName("Search " + title.lower())
     row.addWidget(d.query, 1)
     d.group = QtWidgets.QComboBox(d)
     d.group.setAccessibleName("Kind of part")
@@ -99,7 +104,7 @@ def ShelfDialog(parent=None, on_done=None, shelf=None, freecadcmd=None):
 
     body = QtWidgets.QHBoxLayout()
     d.list = QtWidgets.QListWidget(d)
-    d.list.setAccessibleName("Off-the-shelf parts")
+    d.list.setAccessibleName(title)
     body.addWidget(d.list, 3)
     side = QtWidgets.QVBoxLayout()
     d.thumb = QtWidgets.QLabel(d)
@@ -131,7 +136,8 @@ def ShelfDialog(parent=None, on_done=None, shelf=None, freecadcmd=None):
     d.status.setTextFormat(QtCore.Qt.PlainText)
     lay.addWidget(d.status)
     btns = QtWidgets.QHBoxLayout()
-    credit = QtWidgets.QLabel("Models from the FreeCAD Parts Library, CC BY 3.0", d)
+    credit = QtWidgets.QLabel(getattr(
+        shelf, "CREDIT", "Models from the FreeCAD Parts Library, CC BY 3.0"), d)
     credit.setObjectName("ToolMuted")
     btns.addWidget(credit)
     btns.addStretch(1)
@@ -213,7 +219,8 @@ def ShelfDialog(parent=None, on_done=None, shelf=None, freecadcmd=None):
             bits.append("Wiring: %s" % wiring)
         bits.append("download %.1f MB" % (e.get("bytes", 0) / 1e6))
         if e.get("authors"):
-            bits.append("By %s · CC BY 3.0" % ", ".join(e["authors"]))
+            bits.append("By %s · %s" % (", ".join(e["authors"]),
+                                         getattr(shelf, "LICENCE", "CC BY 3.0")))
         d.info.setText("\n".join(b for b in bits if b))
         has = getattr(shelf, "has_picture", lambda x: bool(x.get("thumb")))(e)
         d.thumb.setText("…" if has else "No picture")

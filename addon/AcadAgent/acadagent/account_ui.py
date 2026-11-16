@@ -52,7 +52,7 @@ class AccountButton(QtWidgets.QPushButton):
         if self.flow is not None:
             self.setText("Waiting for the browser…")
             self.setAccessibleName("Signing in: waiting for the browser")
-            self.setToolTip("Connect Atech Atelier on the atech.dev page that opened. "
+            self.setToolTip("Connect Prompt2Product on the atech.dev page that opened. "
                             "Click for more.")
         elif self.acct.signed_in():
             u = self.acct.user
@@ -87,7 +87,8 @@ class AccountButton(QtWidgets.QPushButton):
             m.addAction("Your account on atech.dev", lambda: self.opener(shop.SITE + "/account"))
             m.addAction("Builds on atech.dev", lambda: self.opener(shop.SITE + "/community"))
             m.addAction("Atech shop", lambda: self.opener(shop.SHOP))
-            m.addAction("About Atech Atelier", lambda: self.opener(shop.SITE + "/atelier"))
+            m.addAction("Docs on atech.dev", lambda: self.opener(shop.SITE + "/docs"))
+            m.addAction("About Prompt2Product", lambda: self.opener(shop.SITE + "/atelier"))
             m.addSeparator()
             m.addAction("Sign out", self.sign_out)
         self._menu = m

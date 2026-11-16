@@ -1,6 +1,6 @@
-# Contributing to Atech Atelier
+# Contributing to Prompt2Product
 
-Atech Atelier is FreeCAD 1.1.3 with the Atech design-agent workbench built
+Prompt2Product is FreeCAD 1.1.3 with the Atech design-agent workbench built
 in. It ships as one Linux x86_64 AppImage. This guide covers how the
 repository is laid out, how to build and test it, and the rules that keep
 the build honest.
@@ -85,7 +85,7 @@ it can't list your home folder, reach the network or rewrite `./check`:
 
 ```bash
 ./branding/build_macos.sh --app-only --brand-from-repo
-ATECH_FREECADCMD="$PWD/dist/build-macos-$(uname -m)/Atech Atelier.app/Contents/Resources/bin/freecadcmd" \
+ATECH_FREECADCMD="$PWD/dist/build-macos-$(uname -m)/Prompt2Product.app/Contents/Resources/bin/freecadcmd" \
     python3 -m unittest -v addon/AcadAgent/tests/test_macos.py
 ```
 
@@ -164,7 +164,7 @@ By contributing you agree that your contribution is licensed under the same
 terms as the file you change:
 
 - Atech's code (everything outside `models/`, except the third-party files
-  below): GNU LGPL v3 or later with a credit term, see `LICENSE` and
+  below): GNU GPL v3 or later with a credit term, see `LICENSE` and
   `LICENSE-ATTRIBUTION.md`.
 - Module models and `presets.yaml` in `models/`: CC BY-NC 4.0, see
   `LICENSE-models.md`.
@@ -173,5 +173,5 @@ terms as the file you change:
   bundled components are listed with their licences in
   `branding/third_party/NOTICE.third_party` and `CREDITS.md`.
 
-FreeCAD itself is LGPL-2.1-or-later. Atech Atelier is not endorsed by,
+FreeCAD itself is LGPL-2.1-or-later. Prompt2Product is not endorsed by,
 affiliated with, or a product of the FreeCAD project.

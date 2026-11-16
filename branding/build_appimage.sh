@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# build_appimage.sh — assemble the Atech Atelier AppImage from an upstream
+# build_appimage.sh — assemble the Prompt2Product AppImage from an upstream
 # FreeCAD AppImage plus our branding and our addon.
 #
 # We compile no FreeCAD source (ADR-003 §2, "own the distribution"). The build
 # adds files, removes FreeCAD's own desktop entry, and rewrites AppRun; the
-# exact list is MEASURED at the end (usr/share/doc/atech-atelier/ATECH_CHANGES.txt).
+# exact list is MEASURED at the end (usr/share/doc/prompt2product/ATECH_CHANGES.txt).
 #
 # Usage:
 #   ./build_appimage.sh [-i upstream.AppImage] [-o out.AppImage] [--tree-only]
@@ -14,8 +14,9 @@
 #
 #   -i FILE          upstream AppImage. Default: $ATECH_UPSTREAM_APPIMAGE, else
 #                    downloaded from the pinned URL in upstream.env into
-#                    ${XDG_CACHE_HOME:-~/.cache}/atech-atelier-build/ (a copy
-#                    already in the old atech-studio-build/ cache is reused).
+#                    ${XDG_CACHE_HOME:-~/.cache}/prompt2product-build/ (a copy
+#                    already in the old atech-atelier-build/ or atech-studio-build/ cache
+#                    is reused).
 #                    Either way its sha256 must match upstream.env.
 #   --build-dir DIR  where to extract (default dist/build). It is WIPED.
 #   --artifacts DIR  the Atech module library checkout (models/presets.yaml,
@@ -31,7 +32,7 @@
 #                    is never repacked.
 #
 # Release (ADR-006). The version comes from VERSION at the repository root and
-# is stamped into the file name (dist/AtechAtelier-<version>-x86_64.AppImage),
+# is stamped into the file name (dist/Prompt2Product-<version>-x86_64.AppImage),
 # the desktop entries, the metainfo and ATECH_CHANGES. Variables:
 #   APPIMAGETOOL       path to appimagetool; default: appimagetool on PATH.
 #                      This script never downloads it. Absent -> the tree is
@@ -76,12 +77,12 @@ CRANE_FROM=""
 TREE_ONLY=0
 MCP_GUARD=0
 DEV_UNLICENSED=0
-APP_ID="dev.atech.Atelier"            # ADR-006
-PRODUCT="Atech Atelier"               # ADR-005
-DOC_NAME="atech-atelier"              # usr/share/doc/<DOC_NAME>/
+APP_ID="dev.atech.Prompt2Product"            # ADR-006
+PRODUCT="Prompt2Product"               # ADR-005
+DOC_NAME="prompt2product"              # usr/share/doc/<DOC_NAME>/
 GH_OWNER="atechdotdev"                # PROPOSED public repo (ADR-006)
-GH_REPO="atech-atelier"
-DEFAULT_UPDATE_INFO="gh-releases-zsync|$GH_OWNER|$GH_REPO|latest|AtechAtelier-*x86_64.AppImage.zsync"
+GH_REPO="prompt2product"   # the GitHub repo keeps its name
+DEFAULT_UPDATE_INFO="gh-releases-zsync|$GH_OWNER|$GH_REPO|latest|Prompt2Product-*x86_64.AppImage.zsync"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -105,11 +106,13 @@ echo "$PRODUCT $VERSION — branded AppImage build"
 
 # ------------------------------------------------------ 0. the pinned upstream
 if [[ -z "$UPSTREAM" ]]; then
-  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/atech-atelier-build"
+  CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/prompt2product-build"
   UPSTREAM="$CACHE/$(basename "$UPSTREAM_URL")"
   # A copy cached under the product's previous name is the same pinned file.
-  OLD_CACHED="${XDG_CACHE_HOME:-$HOME/.cache}/atech-studio-build/$(basename "$UPSTREAM_URL")"
-  [[ ! -f "$UPSTREAM" && -f "$OLD_CACHED" ]] && UPSTREAM="$OLD_CACHED"
+  for old in atech-atelier-build atech-studio-build; do
+    OLD_CACHED="${XDG_CACHE_HOME:-$HOME/.cache}/$old/$(basename "$UPSTREAM_URL")"
+    [[ ! -f "$UPSTREAM" && -f "$OLD_CACHED" ]] && UPSTREAM="$OLD_CACHED"
+  done
   if [[ ! -f "$UPSTREAM" ]]; then
     mkdir -p "$CACHE"
     say "downloading" "$UPSTREAM_URL"
@@ -146,7 +149,9 @@ bad = ["%s=%r (want %r)" % (k, val.get(k), product)
 if val.get("DesktopFileName") != app_id:
     bad.append("DesktopFileName=%r (want %r)" % (val.get("DesktopFileName"), app_id))
 bad += ["%s carries the previous name: %r" % (k, v) for k, v in val.items()
-        if "Atech Studio" in v or "atech-studio" in v]
+        if any(o in v for o in ("Atech Studio", "atech-studio", "Atech Atelier",
+                                "atech-atelier", "dev.atech.Atelier", "Prompt To Product",
+                                "prompt-to-product", "PromptToProduct"))]
 for b in bad:
     print("  branding.xml: " + b, file=sys.stderr)
 sys.exit(1 if bad else 0)
@@ -168,17 +173,17 @@ for f in "$PRESETS" "$BOARD_GLB" "$ASSEMBLY_MD" \
   [[ -f "$f" ]] || fail "required input missing: $f
   (module library: pass --artifacts DIR or set ATECH_ARTIFACTS)"
 done
-# Licences (ADR-006, R722): code LGPL-3.0-or-later with a credit term (root
-# LICENSE, the verbatim LGPL v3 text, LICENSE.GPL-3.0, LICENSE-ATTRIBUTION.md), models CC BY-NC 4.0 (root LICENSE-models.md), plus the NOTICE.
-LICENSE_FILES=(LICENSE LICENSE.GPL-3.0 LICENSE-ATTRIBUTION.md LICENSE-models.md NOTICE)
+# Licences (ADR-006): code GPL-3.0-or-later with a credit term (root
+# LICENSE, the verbatim GPL v3 text, LICENSE-ATTRIBUTION.md), models CC BY-NC 4.0 (root LICENSE-models.md), plus the NOTICE.
+LICENSE_FILES=(LICENSE LICENSE-ATTRIBUTION.md LICENSE-models.md NOTICE)
 if [[ "$DEV_UNLICENSED" != 1 ]]; then
   for f in "${LICENSE_FILES[@]}"; do
     [[ -f "$REPO/$f" ]] || fail "root $f is missing (ADR-006 names it as a release
   file). For a local development build pass --dev-unlicensed."
   done
-  grep -q 'GNU LESSER GENERAL PUBLIC LICENSE' "$REPO/LICENSE" \
+  grep -q '^ *GNU GENERAL PUBLIC LICENSE' "$REPO/LICENSE" \
     && grep -q 'Version 3, 29 June 2007' "$REPO/LICENSE" \
-    || fail "root LICENSE is not the LGPL v3 text (R722)"
+    || fail "root LICENSE is not the GPL v3 text"
   grep -q 'section 7(b)' "$REPO/LICENSE-ATTRIBUTION.md" \
     || fail "root LICENSE-ATTRIBUTION.md lacks the credit term (R722)"
   grep -q 'CC BY-NC 4.0' "$REPO/LICENSE-models.md" \
@@ -202,7 +207,7 @@ python3 "$HERE/tree_changes.py" snapshot "$ROOT" "$BUILD/upstream_manifest.json"
 say "upstream snapshot" "$(python3 -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "$BUILD/upstream_manifest.json") files"
 
 # An empty HOME for every freecadcmd we run, so nothing reads or writes the
-# builder's own FreeCAD / Atech Atelier profile. Bytecode: MEASURED
+# builder's own FreeCAD / Prompt2Product profile. Bytecode: MEASURED
 # 2026-09-25, every freecadcmd run in the tree writes .pyc files (the embedded
 # interpreter ignores PYTHONDONTWRITEBYTECODE; kept anyway for the day it
 # does not), so prune_pyc removes whatever the upstream image did not have.
@@ -307,10 +312,14 @@ install -m 0644 "$REPO/projects/atech_ports.py" "$REPO/projects/atech_modules.py
   "$REPO/projects/user_parts.py" "$REPO/projects/simready.py" \
   "$REPO/projects/simready_usd2stl.py" "$REPO/projects/simready_index.json" \
   "$REPO/projects/shelf.py" "$REPO/projects/shelf_step2stl.py" "$REPO/projects/shelf_index.json" \
+  "$REPO/projects/kicad3d.py" "$REPO/projects/kicad3d_index.json" \
   "$AA/projects/"
 # R780: the off-the-shelf parts' pictures (drawn by build_shelf_index.py)
 mkdir -p "$AA/projects/shelf_pictures"
 install -m 0644 "$REPO"/projects/shelf_pictures/*.png "$AA/projects/shelf_pictures/"
+# R980: the KiCad components' pictures (drawn by build_kicad3d_index.py)
+mkdir -p "$AA/projects/kicad3d_pictures"
+install -m 0644 "$REPO"/projects/kicad3d_pictures/*.png "$AA/projects/kicad3d_pictures/"
 install -m 0644 "$PRESETS" "$AA/data/models/presets.yaml"
 if [[ -f "$REPO/LICENSE-models.md" ]]; then
   install -m 0644 "$REPO/LICENSE-models.md" "$AA/data/models/LICENSE-models.md"
@@ -455,7 +464,7 @@ fi
 
 # ------------------------------------------------------ 4. desktop integration
 # One reverse-DNS id for the desktop file, the metainfo and the icon (R38,
-# ADR-006: dev.atech.Atelier). Both files are templates in branding/, stamped
+# ADR-006: dev.atech.Prompt2Product). Both files are templates in branding/, stamped
 # by release_meta.py, so the validators below judge exactly what ships.
 DESKTOP_SRC="$HERE/$APP_ID.desktop"
 METAINFO_SRC="$HERE/$APP_ID.metainfo.xml"
@@ -568,7 +577,7 @@ else
   WRITTEN_OFFER="None. Instead of a written offer, the corresponding source is distributed with this release (see \"Source distributed with this release\" above)."
 fi
 cat > "$DOC/SOURCE_OFFER.txt" <<OFFER
-Atech Atelier — where to get the source code
+Prompt2Product — where to get the source code
 ============================================
 
 This image contains FreeCAD and the 325 other packages it bundles
@@ -585,14 +594,14 @@ Source distributed with this release
   The complete corresponding source of every copyleft (GPL, LGPL, MPL, EPL)
   component in this image is published next to this AppImage, on the same
   release page it is downloaded from:
-    https://github.com/atechdotdev/atech-atelier/releases/tag/v$VERSION
+    https://github.com/atechdotdev/prompt2product/releases/tag/v$VERSION
   Files there: freecad_source_1.1.3.tar.gz (FreeCAD's own source archive),
   copyleft-sources-part*.tar (each bundled copyleft package's upstream
   source plus its conda-forge recipe and patches), the AppImage runtime's
   sources (type2-runtime, libfuse, squashfuse), SOURCES.md (what is where,
   with sha256 of every file) and SHA256SUMS-source. Atech's own source is
   the release's "Source code" archive and the repository
-  https://github.com/atechdotdev/atech-atelier at tag v$VERSION.
+  https://github.com/atechdotdev/prompt2product at tag v$VERSION.
 
 FreeCAD
   The FreeCAD part of this image is the official release, with FreeCAD's
@@ -630,7 +639,7 @@ Atech's additions
   The files Atech added or changed are listed, measured against the
   upstream image, in usr/share/doc/$DOC_NAME/ATECH_CHANGES.txt. Their
   source is the Python and data files installed in this image. Atech's code
-  is licensed LGPL-3.0-or-later with a credit term (usr/share/doc/$DOC_NAME/LICENSE,
+  is licensed GPL-3.0-or-later with a credit term (usr/share/doc/$DOC_NAME/LICENSE,
   LICENSE-ATTRIBUTION.md); the Atech
   module models and presets.yaml are CC BY-NC 4.0
   (usr/share/doc/$DOC_NAME/LICENSE-models.md).
@@ -667,7 +676,7 @@ else
 fi
 {
   cat <<NOTICE
-Atech Atelier — changes relative to upstream FreeCAD
+Prompt2Product — changes relative to upstream FreeCAD
 ====================================================
 
 Version          $VERSION
@@ -676,7 +685,7 @@ Upstream image   $UPSTREAM_URL
   sha256         $UPSTREAM_SHA256
   FreeCAD        tag $FREECAD_TAG, commit $FREECAD_COMMIT
   version string ${UPSTREAM_VER:-unknown}
-Built by         branding/build_appimage.sh from the Atech Atelier sources
+Built by         branding/build_appimage.sh from the Prompt2Product sources
                  (commit $(git -C "$REPO" rev-parse HEAD 2>/dev/null || echo unknown)$(git -C "$REPO" diff --quiet HEAD 2>/dev/null || echo ", with uncommitted changes"))
 Module library   $(basename "$ARTIFACTS") @ $ART_REV
 FreeCADMCP       $MCP_COMMIT + ${#MCP_SERIES[@]} Atech patch(es)
@@ -687,7 +696,7 @@ FreeCAD: (C) 2001-2026 FreeCAD contributors (started by Jürgen Riegel in
 2001). FreeCAD is free and open-source software licensed under the terms of
 LGPL2+ license (the GNU LGPL version 2 or any later version,
 usr/share/doc/FreeCAD/LICENSE.html; its source files mostly carry SPDX
-LGPL-2.1-or-later). Atech Atelier is NOT endorsed by, affiliated with, or a
+LGPL-2.1-or-later). Prompt2Product is NOT endorsed by, affiliated with, or a
 product of the FreeCAD project or the FreeCAD Project Association.
 
 FreeCAD's program files are unmodified: no FreeCAD source file is patched or
@@ -702,7 +711,7 @@ AppRun is MODIFIED: an environment snapshot is inserted at the top (it
 records the caller's values of the variables AppRun exports, as
 ATECH_PRE_APPRUN_<NAME>; source apprun_env.py). Before the final launch line
 two blocks are inserted: a one-time profile copy from the product's previous
-name ("Atech Studio") to "Atech Atelier" (source apprun_migrate_block.sh), and
+name ("Atech Studio") to "Prompt2Product" (source apprun_migrate_block.sh), and
 an agent-backend lifecycle block (start/adopt on launch, reap on exit; source
 apprun_agent_block.sh). FreeCAD's launch line itself is unchanged.
 

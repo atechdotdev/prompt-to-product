@@ -23,7 +23,7 @@ Each block has a sabotage test: the wiring broken on purpose, the check
 seen to fail.
 
     cd addon/AcadAgent/tests && QT_QPA_PLATFORM=offscreen \\
-      ".../Atech Atelier.app/Contents/Resources/bin/python" \\
+      ".../Prompt2Product.app/Contents/Resources/bin/python" \\
       -m unittest test_integration_r380 -v
 """
 import os
@@ -94,7 +94,7 @@ class TestR380ViewBarTools(Case):
     # R810/R811: Simulate after Exploded view, Make assembly video last.
     # R885: Edit part (part_edit.py) after Edit shapes.
     KEYS = ["measure", "section", "show", "explode", "simulate", "dims", "shape",
-            "part", "colour", "export", "share", "video"]
+            "part", "colour", "export", "files", "share", "video"]
 
     def test_six_tools_in_order_with_names_and_icons(self):
         bar = self.bar()
@@ -104,7 +104,7 @@ class TestR380ViewBarTools(Case):
         self.assertEqual(names, ["Measure", "Section view", "Show and hide",
                                  "Exploded view", "Simulate", "Dimensions",
                                  "Edit shapes", "Edit part", "Colour",
-                                 "Export for print", "Save a share image",
+                                 "Print", "Export", "Save a share image",
                                  "Make assembly video"])
         for w in bar.tools():
             self.assertEqual(w.objectName(), "VBtn")
@@ -140,7 +140,7 @@ class TestR380ViewBarTools(Case):
         return (lv[0][1] == [] and not lv[0][2]
                 and lv[1][1] == ["dims", "part", "share", "video"] and lv[1][2]
                 and lv[2][1] == ["explode", "simulate", "dims", "shape", "part",
-                                 "colour", "export", "share", "video"]
+                                 "colour", "export", "files", "share", "video"]
                 and all(a > b for a, b in zip(widths, widths[1:])))
 
     def test_narrow_bar_moves_tools_into_more_tools(self):
@@ -236,7 +236,7 @@ class TestR381ContextMenu(Case):
                   "Atech_Section"):
             self.assertIn(c, root)
         sub = dict(wb.menus)[self.shell.EXPORT_MENU]
-        self.assertEqual(sub, ["Atech_ExportForPrint", "Atech_ExplodedView",
+        self.assertEqual(sub, ["Atech_Print", "Atech_ExportForPrint", "Atech_ExplodedView",
                                "Atech_BillOfMaterials", "Atech_GetItMade",
                                "Atech_PublishMakerWorld", "Atech_PostToAtech",
                                "Atech_ShareImage", "Atech_ReviewSheet"])
@@ -274,8 +274,8 @@ class TestR381ContextMenu(Case):
             wb.ContextMenu("View")
         self.assertIn("Atech_Measure", self.flat(wb))
         # R700 Dimensions..., R850 Get it made..., R861 Post, R880 Add file,
-        # R885 Edit part, R900 From / Publish to MakerWorld
-        self.assertEqual(len(added), 15)
+        # R885 Edit part, R900 From / Publish to MakerWorld, R920 Print
+        self.assertEqual(len(added), 16)
         s.uninstall()
         self.assertFalse(hasattr(wb, "ContextMenu"))
 
@@ -305,7 +305,13 @@ class TestR381ContextMenu(Case):
             w = bar._tool_widgets[k]
             w.clicked.disconnect()
             w.clicked.connect(lambda _=False, k=k: hits.append(k))
-        s.run_command_action("export")
+        # R920: Print presses the bar's Print button; Export for print
+        # opens the export dialog itself
+        s.run_command_action("print")
+        self.assertEqual(hits, ["export"])
+        with mock.patch.object(export_tools, "ExportDialog") as ed:
+            s.run_command_action("export")
+        ed.assert_called_once()
         self.assertEqual(hits, ["export"])
         # R720: the menu's "Exploded view (E)" toggles like the bar and E
         # (no separate slider window with its own state)

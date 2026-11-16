@@ -69,6 +69,9 @@ KEEP_BOTTOM_SHARE = 0.8         # the current bottom is kept when this big vs th
 BED_TOL = 0.05                     # mm: a facet this close to z=0 lies on the bed
 OVERHANG_FLAG_MM2 = 10.0           # smaller overhang areas are noise
 OVERHANG_FLAG_SHARE = 0.01         # ... and so is under 1 % of the surface
+#: R922: a face at 45 deg exactly (a chamfer, a teardrop or drill-point
+#: roof) prints; tessellation tips such faces a hair past the limit
+OVERHANG_TOL_DEG = 0.5
 
 #: R346 PLA density, g/cm3 (PRD W3 default).
 PLA_DENSITY = 1.24
@@ -746,7 +749,7 @@ def write_3mf(items, path):
     w('<?xml version="1.0" encoding="UTF-8"?>\n')
     w('<model unit="millimeter" xml:lang="en-US" '
       'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">\n')
-    w('<metadata name="Application">Atech Atelier</metadata>\n<resources>\n')
+    w('<metadata name="Application">Prompt2Product</metadata>\n<resources>\n')
     if mats:
         w('<basematerials id="1">\n%s\n</basematerials>\n' % "\n".join(mats))
     for k, (name, pts, tris, pindex) in enumerate(objs):
@@ -1002,7 +1005,7 @@ def overhangs(mesh_or_arrays, angle=OVERHANG_DEG, bed_tol=BED_TOL):
         pts, tris = mesh_or_arrays
     else:
         pts, tris = _mesh_arrays(mesh_or_arrays)
-    lim = -math.cos(math.radians(angle))
+    lim = -math.cos(math.radians(angle - OVERHANG_TOL_DEG))
     over = tot = 0.0
     for a, b, c in tris:
         p, q, r = pts[a], pts[b], pts[c]
@@ -1633,6 +1636,10 @@ ICONS = {
                     '<path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
     "image": '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/>'
              '<path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+    # R920: Lucide "printer" (ISC), the view bar's Print
+    "printer": '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>'
+               '<path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/>'
+               '<rect x="6" y="14" width="12" height="8" rx="1"/>',
     "list": '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/>'
             '<path d="M3 12h.01"/><path d="M3 18h.01"/>',
 }
@@ -2149,7 +2156,7 @@ def share_now(parent=None, doc_fn=_active_doc, out_dir=None):
     from . import capture
     try:
         p = capture.share_image(doc_fn(), out_dir=out_dir)
-        return p, "Saved to Pictures > Atech Atelier and copied, ready to paste."
+        return p, "Saved to Pictures > Prompt2Product and copied, ready to paste."
     except Exception as exc:                              # noqa: BLE001
         _log("share image: %r" % (exc,))
         return None, capture.user_message(exc)
@@ -2169,14 +2176,18 @@ def _say(widget, text):
 
 def view_bar_buttons(parent=None, doc_fn=_active_doc, selection_fn=_selected):
     """Factory for the view bar (shell.ViewBar): {"colour", "explode",
-    "export", "share"} -> QPushButton objectName "VBtn" (the view bar's own
+    "export", "files", "share"} -> QPushButton objectName "VBtn" (the view bar's own
     QSS styles them), icon-only, 34 px, accessible names. Call
     restyle_buttons(buttons) from ViewBar.restyle()."""
     from PySide6 import QtCore, QtWidgets
 
     spec = (("colour", "palette", "Colour"),
             ("explode", "explode", "Exploded view"),
-            ("export", "download", "Export for print"),
+            # R920: Print - Bambu Lab plates, or a file to export
+            ("export", "printer", "Print"),
+            # R940: Export - STL, 3MF or STEP files (ExportDialog), its own
+            # button again now that the printer button opens Print
+            ("files", "download", "Export"),
             ("share", "image", "Save a share image"))
     out = {}
     for key, ic, tip in spec:
@@ -2235,8 +2246,17 @@ def view_bar_buttons(parent=None, doc_fn=_active_doc, selection_fn=_selected):
     on_explode_changed(follow)
 
     def export():
-        d = ExportDialog(out["export"].window(), doc_fn, selection_fn)
+        from . import print_plates
+        d = print_plates.PrintDialog(out["export"].window(), doc_fn, selection_fn)
         out["export"]._dlg = d
+        d.show()
+
+    out["files"].setToolTip("Export: save STL, 3MF or STEP files of the "
+                            "design, the selection or each part")
+
+    def files():
+        d = ExportDialog(out["files"].window(), doc_fn, selection_fn)
+        out["files"]._dlg = d
         d.show()
 
     def share():
@@ -2244,7 +2264,7 @@ def view_bar_buttons(parent=None, doc_fn=_active_doc, selection_fn=_selected):
         _say(out["share"], msg)
 
     for key, fn in (("colour", colour), ("explode", explode), ("export", export),
-                    ("share", share)):
+                    ("files", files), ("share", share)):
         out[key].clicked.connect(lambda _=False, f=fn: _guard(f))
     return out
 
@@ -2331,6 +2351,12 @@ def menu_actions(parent=None, doc_fn=_active_doc, selection_fn=_selected):
         return a
 
     keep = {}
+
+    def print_():
+        from . import print_plates
+        keep["print"] = print_plates.PrintDialog(parent, doc_fn, selection_fn)
+        keep["print"].show()
+    add("Print...", print_)
     add("Export for print...", lambda: keep.__setitem__(
         "export", ExportDialog(parent, doc_fn, selection_fn)) or keep["export"].show())
     add("Exploded view (E)", lambda: toggle_explode(doc_fn()))

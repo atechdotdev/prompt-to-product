@@ -1,4 +1,4 @@
-# Atech Atelier: public repository ignore rules.
+# Prompt2Product: public repository ignore rules.
 
 # Python
 __pycache__/
@@ -61,3 +61,8 @@ Thumbs.db
 *.log
 chat-*/
 addon/AcadAgent/tests/eval/runs/
+
+# Local eval runs (transcripts carry personal paths), stray slicer output
+docs/verification/eval/
+/result.json
+addon/AcadAgent/tests/gui/Unnamed*.FCStd

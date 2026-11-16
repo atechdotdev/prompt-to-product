@@ -10,7 +10,7 @@ WHERE THEY LIVE
         <parts dir>/stl/<name>.stl    the mesh every fit and seat check uses
         <parts dir>/source/<file>     the file the user imported, kept as-is
 
-    parts_dir() is $ATELIER_PARTS when set (the sandboxed build child gets it
+    parts_dir() is $P2P_PARTS when set (the sandboxed build child gets it
     from the parent: its own home is a scratch folder), else
     <FreeCAD user data>/parts.
 
@@ -44,7 +44,7 @@ try:
 except ImportError:                      # FreeCAD bundles it; be explicit if not
     yaml = None
 
-PARTS_ENV = "ATELIER_PARTS"
+PARTS_ENV = "P2P_PARTS"
 PARTS_FILE = "parts.yaml"
 FORMAT = 1
 
@@ -75,7 +75,7 @@ class PartError(RuntimeError):
 # ------------------------------------------------------------- location
 def parts_dir(environ=None):
     """The user parts folder (it may not exist yet), or None when neither
-    $ATELIER_PARTS nor FreeCAD's user data folder is known."""
+    $P2P_PARTS nor FreeCAD's user data folder is known."""
     environ = os.environ if environ is None else environ
     env = (environ.get(PARTS_ENV) or "").strip()
     if env:
@@ -140,7 +140,7 @@ def _write(entries, d):
     for name, sp in sorted(entries.items()):
         sp = {k: v for k, v in sp.items() if k != "user"}
         clean[name] = sp
-    head = ("# Parts imported into Atech Atelier (not Atech modules).\n"
+    head = ("# Parts imported into Prompt2Product (not Atech modules).\n"
             "# Same schema as the Atech library's presets.yaml; dimensions_mm is\n"
             "# measured from the mesh. Edit the notes freely; re-import to change\n"
             "# the geometry.\n")

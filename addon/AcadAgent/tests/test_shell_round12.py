@@ -1,6 +1,6 @@
 """Round-12 WS W2 (home + navigation), headless: R300-R310.
 
-    R300  macOS-safe chrome: the wordmark ("Atech Atelier"), Terminal and
+    R300  macOS-safe chrome: the wordmark ("Prompt2Product"), Terminal and
           Settings move into the sidebar head where the native menu bar
           draws no corner widgets; the R280 hardware switch is really built
           (shell.py used navbar without importing it at module level).
@@ -27,7 +27,7 @@ Each block has a sabotage test: the fix broken on purpose, the check seen
 to fail.
 
     cd addon/AcadAgent/tests && QT_QPA_PLATFORM=offscreen \\
-      ".../Atech Atelier.app/Contents/Resources/bin/python" \\
+      ".../Prompt2Product.app/Contents/Resources/bin/python" \\
       -m unittest test_shell_round12 -v
 """
 import inspect
@@ -54,7 +54,7 @@ OWN = "User parameter:BaseApp/Preferences/Mod/AcadAgent"
 RECENT = "User parameter:BaseApp/Preferences/RecentFiles"
 REPO = os.path.abspath(os.path.join(F.ADDON, "..", ".."))
 FREECADCMD = os.environ.get("ATECH_FREECADCMD") or os.path.join(
-    REPO, "dist", "build-macos-arm64", "Atech Atelier.app", "Contents",
+    REPO, "dist", "build-macos-arm64", "Prompt2Product.app", "Contents",
     "Resources", "bin", "freecadcmd")
 
 
@@ -146,7 +146,7 @@ class TestR300Chrome(Case):
         F.pump(30)
         body = s._S["body"]
         self.assertTrue(body.brand.isVisible())
-        self.assertEqual(body.brand_word.text(), "Atech Atelier")
+        self.assertEqual(body.brand_word.text(), "Prompt2Product")
         for b, name in ((body.btn_terminal, "Terminal"),
                         (body.btn_settings, "Settings")):
             self.assertTrue(b.isVisible(), name)
@@ -172,7 +172,7 @@ class TestR300Chrome(Case):
         self.assertFalse(body.brand_mark.isVisible())
         self.assertFalse(body.btn_terminal.isVisible())
         word = s._S["topbar"]["left"].findChild(QtWidgets.QLabel, "Wordmark")
-        self.assertEqual(word.text(), "Atech Atelier")
+        self.assertEqual(word.text(), "Prompt2Product")
         gear = [b for b, n in s._S["topbar"]["btns"] if n == "settings"][0]
         self.assertIsNotNone(gear.menu(), "the top-bar gear opens the menu")
 
@@ -597,10 +597,10 @@ class TestR305OrbitHint(Case):
 class TestR306Theme(Case):
     def test_dark_choice_moves_freecads_theme(self):
         st, g = self.style, self.fc.ParamGet(MAINWIN)
-        g.SetString("Theme", "Atech Atelier Light")
+        g.SetString("Theme", "Prompt2Product Light")
         g.SetString("StyleSheet", "AtechLight.qss")
         self.assertEqual(st.apply_theme_choice("dark", reload=True), "dark")
-        self.assertEqual(g.GetString("Theme"), "Atech Atelier Dark")
+        self.assertEqual(g.GetString("Theme"), "Prompt2Product Dark")
         self.assertEqual(g.GetString("StyleSheet"), "AtechDark.qss")
         self.assertIn(("Std_ReloadStyleSheet",), self.ran)
         self.assertEqual(st.mode(), "dark")
@@ -614,7 +614,7 @@ class TestR306Theme(Case):
 
     def test_system_follows_the_os(self):
         st, g = self.style, self.fc.ParamGet(MAINWIN)
-        g.SetString("Theme", "Atech Atelier Light")
+        g.SetString("Theme", "Prompt2Product Light")
         self.fc.ParamGet(OWN).SetString(st.THEME_KEY, "system")
         with mock.patch.object(st, "system_mode", lambda: "dark"):
             self.assertEqual(st.mode(), "dark")
@@ -623,11 +623,11 @@ class TestR306Theme(Case):
         with mock.patch.object(st, "system_mode", lambda: "light"):
             self.shell._on_color_scheme()
             self.assertEqual(self.shell._S["mode"], "light")
-            self.assertEqual(g.GetString("Theme"), "Atech Atelier Light")
+            self.assertEqual(g.GetString("Theme"), "Prompt2Product Light")
 
     def test_unchosen_keeps_the_old_rule(self):
         g = self.fc.ParamGet(MAINWIN)
-        g.SetString("Theme", "Atech Atelier Dark")
+        g.SetString("Theme", "Prompt2Product Dark")
         with mock.patch.object(self.style, "system_mode", lambda: "light"):
             self.assertEqual(self.style.mode(), "dark")
 
@@ -641,7 +641,7 @@ class TestR306Theme(Case):
 
     def test_sabotage_without_the_system_branch_mode_ignores_the_os(self):
         st = self.style
-        self.fc.ParamGet(MAINWIN).SetString("Theme", "Atech Atelier Light")
+        self.fc.ParamGet(MAINWIN).SetString("Theme", "Prompt2Product Light")
         self.fc.ParamGet(OWN).SetString(st.THEME_KEY, "system")
         with mock.patch.object(st, "system_mode", lambda: "dark"), \
                 mock.patch.object(st, "theme_choice", lambda: ""):
@@ -848,9 +848,9 @@ class TestR308Home(Case):
         home = self.shell.HomeView()
         keys = [c.example_key for c in home.example_cards]
         self.assertEqual(keys, ["toy_car", "desk_robot", "smart_speaker"])
-        self.assertEqual(home.title.text(), "Atech Atelier")
+        self.assertEqual(home.title.text(), "Prompt2Product")
         home.restyle()
-        self.assertTrue(home.credit.text().startswith("Atech Atelier"))
+        self.assertTrue(home.credit.text().startswith("Prompt2Product"))
 
     def test_home_is_the_empty_state(self):
         mdi = self.mw.centralWidget()

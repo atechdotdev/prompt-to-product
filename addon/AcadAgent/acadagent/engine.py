@@ -183,7 +183,7 @@ def available(name=None):
                            "in Agent Settings (%s)."
                            % (mod.PRODUCT, mod.configured_path()))
         return False, ("%s is not installed, or not where Atech "
-                       "Atelier looks. Install it with\n    %s\nthen run "
+                       "Prompt2Product looks. Install it with\n    %s\nthen run "
                        "`%s` in a terminal to sign in. Instructions: "
                        "%s. If it is installed somewhere else, set its path "
                        "in Agent Settings."

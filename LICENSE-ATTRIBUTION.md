@@ -1,17 +1,21 @@
 # Additional terms: credit Atech and FreeCAD
 
 Atech's code (the Atech workbench in `addon/AcadAgent`, the branding and the
-build scripts) is open source: you may use, study, change and share it,
-including commercially, under the **GNU Lesser General Public License,
-version 3 or (at your option) any later version** (`LICENSE`, which builds on
-the GNU GPL version 3 in `LICENSE.GPL-3.0`).
+build scripts) is free and open source: you may use, study, change and share
+it, including commercially, under the **GNU General Public License, version 3
+or (at your option) any later version** (`LICENSE`).
+
+The GPL is a copyleft licence. If you distribute this software, or any work
+based on it (a modified version, or a program that includes or is derived from
+Atech's code), you must release that whole work under the same GPL, with its
+complete source code, so that everyone who receives it gets the same freedoms
+you did. You cannot build on Atech's code and keep your version closed.
 
 Copyright (c) 2026 Atech.
 
-As section 7 of the GNU GPL v3 allows (the LGPL v3 includes that section),
-the following additional terms apply to Atech's code. They are part of its
-licence. They do not limit what you may do with the software; they say how
-you credit where it came from.
+As section 7 of the GNU GPL v3 allows, the following additional terms apply
+to Atech's code. They are part of its licence. They do not limit what you may
+do with the software; they say how you credit where it came from.
 
 ## 1. Credit Atech and FreeCAD (section 7(b))
 
@@ -21,7 +25,7 @@ service that gives users a copy, you must keep this notice, legible and
 unchanged, in the Appropriate Legal Notices your work shows (such as its
 About, Credits or Licences screen) and in its documentation:
 
-> Based on Atech Atelier by Atech (https://studio.atech.dev),
+> Based on Prompt2Product by Atech (https://studio.atech.dev),
 > built on FreeCAD (https://www.freecad.org).
 
 You must also keep the copyright and licence notices in the source files,
@@ -30,13 +34,13 @@ You must also keep the copyright and licence notices in the source files,
 ## 2. Say what you changed (section 7(c))
 
 A modified version must be marked as changed, in a reasonable way, and must
-not be presented as the original Atech Atelier or as made, endorsed or
+not be presented as the original Prompt2Product or as made, endorsed or
 supported by Atech.
 
 ## 3. Names and logos (section 7(e))
 
-These terms grant no right to use the names "Atech", "Atech Atelier" or
-"Atech Atelier" or Atech's logos, except to give the credit in term 1.
+These terms grant no right to use the names "Atech", "Prompt2Product" or
+"Prompt2Product" or Atech's logos, except to give the credit in term 1.
 The FreeCAD name and logo belong to the FreeCAD Project Association (FPA);
 use them only as the FPA's rules allow (https://wiki.freecad.org/License).
 
@@ -46,6 +50,6 @@ use them only as the FPA's rules allow (https://wiki.freecad.org/License).
   the GNU LGPL version 2 or any later version). See `NOTICE` and `CREDITS.md`.
 - **The Atech board and module 3D models** are licensed separately, under
   CC BY-NC 4.0 (`LICENSE-models.md`).
-- **Releases up to and including 0.1.2** were published under the GNU LGPL
-  v2.1 or later without these terms; copies of those releases keep that
-  licence.
+- **Earlier releases keep the licence they were published under:** up to
+  and including 0.1.2, the GNU LGPL v2.1 or later without these terms; 0.1.3,
+  the GNU LGPL v3 or later with these terms.

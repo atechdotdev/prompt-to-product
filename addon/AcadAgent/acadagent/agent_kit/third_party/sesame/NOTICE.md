@@ -8,13 +8,13 @@ https://github.com/seunyboyxu/New_Spyder at commit
 (sha256 b6ae8936df90d85d4d6f6b24ea53bd387bd0508da2090fdbc535227d5feb9be0).
 
 Licence: Apache License 2.0 (LICENSE in this folder). They are not covered
-by Atech Atelier's own licence.
+by Prompt2Product's own licence.
 
 ## Changes made
 
 `projects/import_sesame.py` made these files from the STEP:
 
-- moved the whole assembly into Atech Atelier's frame (Z up, the robot
+- moved the whole assembly into Prompt2Product's frame (Z up, the robot
   facing -Y, the body centred, the lowest foot on z = 0);
 - fused each servo's pieces into one solid and left out pieces under
   100 mm³ (case screw heads, the label film, cable stubs);

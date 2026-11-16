@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""run_eval - build-quality benchmark for the Atech Atelier agent.
+"""run_eval - build-quality benchmark for the Prompt2Product agent.
 
 Answers ONE question with numbers: when a user types a request into the
 Studio chat, how often does real, valid, correctly-sized geometry come out,
@@ -26,8 +26,8 @@ WHAT IS PRODUCTION AND WHAT IS NOT
       - build: acadagent.build.apply() on a fresh document (fc_build.py).
       - fix loop (panel._on_claude_done/_run_build/_send_fix): after a turn,
         if model.py changed, build it; a failed build sends
-        "The script failed when Atech Atelier ran it:\\n<err[-3000:]>" and a
-        build whose build.failures() is non-empty sends "Atech Atelier built it,
+        "The script failed when Prompt2Product ran it:\\n<err[-3000:]>" and a
+        build whose build.failures() is non-empty sends "Prompt2Product built it,
         but the measurement check failed: <bad>. Each body must be one valid
         solid." - each + "\\nFix model.py and write it again." - on the same
         session (--resume), at most MAX_FIX_ATTEMPTS times (the panel's
@@ -1306,7 +1306,7 @@ def restore_checkpoint(ws, ck):
 def rollback_note(ck, failed, why):
     """R450: the line that starts the level after a rollback, so the agent
     knows model.py is not what it left."""
-    return ("Atelier restored model.py and intent.json to the passing build "
+    return ("Prompt2Product restored model.py and intent.json to the passing build "
             "of LEVEL %d: LEVEL %d did not end on a passing build (%s). "
             "Start this level from that build." % (ck["level"], failed, why))
 
@@ -1584,9 +1584,9 @@ def run_prompt(item, out_root, render=True):
             res["outcome"] = PHASE_PREFIX[phase] + "harness_crash"
             break
         if not b["ok"]:
-            fix = "The script failed when Atech Atelier ran it:\n%s" % (b.get("error") or "")[-3000:]
+            fix = "The script failed when Prompt2Product ran it:\n%s" % (b.get("error") or "")[-3000:]
         elif b.get("failures"):
-            fix = ("Atech Atelier built it, but the measurement check failed: %s. Each body "
+            fix = ("Prompt2Product built it, but the measurement check failed: %s. Each body "
                    "must be one valid solid." % b["failures"])
         else:
             if res["first_ok_build_s"] is None:

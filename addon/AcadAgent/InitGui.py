@@ -1,7 +1,7 @@
 """AcadAgent — an AI agent workbench living inside FreeCAD.
 
 Registers the workbench (shown to users as "Atech") and, on activation,
-mounts the Atech Atelier shell. Geometry NEVER comes from this panel: it
+mounts the Prompt2Product shell. Geometry NEVER comes from this panel: it
 writes a model script and the build measures what it made.
 """
 import os as _os
@@ -29,7 +29,7 @@ except Exception:                                      # noqa: BLE001
 class AcadAgentWorkbench(Workbench):  # noqa: F821 - injected by FreeCAD
     # User-facing names (R27). The class name and command ids stay: they are
     # internal keys FreeCAD persists (last workbench, shortcuts).
-    MenuText = "Atech"
+    MenuText = "Prompt2Product"
     ToolTip = "Describe a part to the agent; it builds and measures it"
 
     def Initialize(self):

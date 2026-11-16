@@ -4,7 +4,7 @@ Modules page's "Add off-the-shelf part..." dialog).
 
     QT_QPA_PLATFORM=offscreen <bundled python> -m unittest -v test_shelf_r780
 
-The mesher test needs freecadcmd (ATECH_FREECADCMD). ATELIER_NET_TESTS=1
+The mesher test needs freecadcmd (ATECH_FREECADCMD). P2P_NET_TESTS=1
 adds a real install from GitHub (network; one small part).
 """
 import io
@@ -277,8 +277,8 @@ class TestDialog(FakeIndex, unittest.TestCase):
         self.assertEqual(sdlg.wiring_text(None), "")
 
 
-@unittest.skipIf(not (os.environ.get("ATELIER_NET_TESTS") and FC),
-                 "set ATELIER_NET_TESTS=1 (needs network and freecadcmd)")
+@unittest.skipIf(not (os.environ.get("P2P_NET_TESTS") and FC),
+                 "set P2P_NET_TESTS=1 (needs network and freecadcmd)")
 class TestRealInstall(unittest.TestCase):
 
     def test_aa_battery(self):
@@ -293,7 +293,7 @@ class TestRealInstall(unittest.TestCase):
                      "shelf.installed()]))\n"
                      % (os.path.join(REPO, "projects"), FC))
         try:
-            env = dict(os.environ, ATELIER_PARTS=os.path.join(d, "parts"),
+            env = dict(os.environ, P2P_PARTS=os.path.join(d, "parts"),
                        ATECH_ARTIFACTS=MODELS)
             out = subprocess.run([FC, script], env=env, capture_output=True,
                                  text=True, timeout=900).stdout

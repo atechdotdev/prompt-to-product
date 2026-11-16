@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Drive the REAL Atech app (Cocoa) through one scenario and collect results.
 
-    python3 app_driver.py scn_smoke.py [--app ".../Atech Atelier.app"]
+    python3 app_driver.py scn_smoke.py [--app ".../Prompt2Product.app"]
                           [--out DIR] [--timeout 180] [--profile DIR]
                           [--keep-open]
 

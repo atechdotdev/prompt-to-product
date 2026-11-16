@@ -1,6 +1,8 @@
-# Atech Atelier
+# Prompt2Product
 
-*Atech Atelier, powered by FreeCAD.*
+*Prompt2Product, made by Atech.dev, powered by FreeCAD.*
+
+(Formerly Atech Atelier.)
 
 <p align="center">
   <a href="https://atech.dev">
@@ -17,7 +19,7 @@
     </picture>
   </a>
   <br>
-  <sub>Made by <a href="https://atech.dev">Atech</a> &nbsp;·&nbsp; based on <a href="https://www.freecad.org">FreeCAD</a></sub>
+  <sub>Made by <a href="https://atech.dev">Atech.dev</a> &nbsp;·&nbsp; based on <a href="https://www.freecad.org">FreeCAD</a></sub>
 </p>
 
 <p align="center">
@@ -25,10 +27,12 @@
   <a href="#common-questions">Common questions</a> ·
   <a href="https://discord.gg/B6kuhUW27S">Discord</a> ·
   <a href="mailto:hello@atech.dev">hello@atech.dev</a> ·
+  <a href="https://atech.dev/atelier">What it makes</a> ·
+  <a href="https://atech.dev/community">Community builds</a> ·
   <a href="https://atech.dev">atech.dev</a>
 </p>
 
-Atech Atelier is a CAD app you talk to. Describe a part in plain language,
+Prompt2Product is a CAD app you talk to. Describe a part in plain language,
 such as *"a 40 mm cube with a 10 mm hole through the middle"*, and the agent
 writes a FreeCAD script, runs it, **measures** the result and shows it in the
 3D view. The volumes and sizes it reports are measured off the solid. The
@@ -63,7 +67,7 @@ modules that sit where they really go.
   [atech.dev](https://atech.dev) cart, then send the ready-to-print files to
   Atech.
 
-Atech Atelier is the official FreeCAD 1.1.3 release, with FreeCAD's program
+Prompt2Product is the official FreeCAD 1.1.3 release, with FreeCAD's program
 files unmodified (no FreeCAD source patched or recompiled), plus the Atech
 workbench, theme and module library. Atech changes only the launcher
 (`AppRun`), the icon and the desktop/AppStream entries, and adds a FreeCAD
@@ -71,17 +75,17 @@ branding file; `ATECH_CHANGES.txt` lists every change. It comes as a macOS
 app (Apple silicon and Intel) and a Linux AppImage (x86_64), installed with
 one command, and nothing is installed system-wide.
 
-> Atech Atelier is built on FreeCAD ((C) 2001-2026 FreeCAD contributors,
+> Prompt2Product is built on FreeCAD ((C) 2001-2026 FreeCAD contributors,
 > licensed "LGPL2+": the GNU LGPL version 2 or any later version). It is not
 > endorsed by, affiliated with, or a product of the FreeCAD project or the
 > FreeCAD Project Association.
 >
 > FreeCAD itself is free: you can download it from
 > [freecad.org](https://www.freecad.org) and use it on its own. The FreeCAD
-> inside Atech Atelier is FreeCAD's official release with its program files
+> inside Prompt2Product is FreeCAD's official release with its program files
 > unmodified, and the complete source of FreeCAD and of every copyleft library
 > it bundles is published on each
-> [release page](https://github.com/atechdotdev/atech-atelier/releases).
+> [release page](https://github.com/atechdotdev/prompt2product/releases).
 
 **Status: a preview.** The latest release is 0.1.3: Simulate, starter
 projects, assembly videos, gears that mesh, and the Sesame walker. Expect
@@ -163,7 +167,7 @@ open with **Section view** (Shift+S).
 One command, on macOS or Linux:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/atechdotdev/atech-atelier/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/atechdotdev/prompt2product/main/install.sh | bash
 ```
 
 It finds the newest release for your computer, downloads it and that
@@ -172,8 +176,8 @@ checksum matches**. It needs no `sudo` and installs only for you:
 
 - **macOS**: the app goes into `/Applications` (or `~/Applications`). Its
   code signature is checked before it is copied.
-- **Linux**: the AppImage goes into `~/.local/share/atech-atelier/`, with a
-  menu entry and the command `atech-atelier`.
+- **Linux**: the AppImage goes into `~/.local/share/prompt2product/`, with a
+  menu entry and the command `prompt2product`.
 
 Then it checks for Claude Code (below) and tells you the next step. It does
 not install Claude Code unless you say yes (or pass `--with-claude`).
@@ -188,7 +192,7 @@ must have `SHA256SUMS` next to it), `--uninstall`, `--help`.
 - **macOS** 11 (Big Sur) or later, on Apple silicon or Intel, **or Linux** x86_64
   with a desktop session.
 - **Claude Code**, Anthropic's command-line agent, installed and signed in.
-  The chat runs on it, and Atech Atelier does not include it. Claude Code
+  The chat runs on it, and Prompt2Product does not include it. Claude Code
   needs a Claude account that includes it; see Anthropic's setup page
   (<https://code.claude.com/docs/en/setup>) for which plans do.
   Or, instead, **Codex** (OpenAI) or the **Cursor CLI**: see
@@ -207,16 +211,16 @@ script can still reach.
 
 ### Download by hand
 
-From the [Releases page](https://github.com/atechdotdev/atech-atelier/releases),
+From the [Releases page](https://github.com/atechdotdev/prompt2product/releases),
 download the file for your computer and `SHA256SUMS`:
 
 | computer | file |
 |---|---|
-| Mac with Apple silicon (M1 and later) | `AtechAtelier-<version>-macOS-arm64.dmg` |
-| Mac with an Intel processor | `AtechAtelier-<version>-macOS-x86_64.dmg` |
-| Linux x86_64 | `AtechAtelier-<version>-x86_64.AppImage` |
+| Mac with Apple silicon (M1 and later) | `Prompt2Product-<version>-macOS-arm64.dmg` |
+| Mac with an Intel processor | `Prompt2Product-<version>-macOS-x86_64.dmg` |
+| Linux x86_64 | `Prompt2Product-<version>-x86_64.AppImage` |
 
-(The files keep the earlier name, Atech Atelier, for now. 0.1.1 and earlier
+(Releases up to 0.1.3 name the files `AtechAtelier-<version>-…`. 0.1.1 and earlier
 are Linux only.)
 
 **macOS**: check the download, then open the disk image and drag the app to
@@ -239,7 +243,7 @@ chmod +x Atech*-x86_64.AppImage
 ./Atech*-x86_64.AppImage
 ```
 
-Atech Atelier opens on its own workbench. The sidebar has a project picker at the
+Prompt2Product opens on its own workbench. The sidebar has a project picker at the
 top (open, recent and new projects), then **3D CAD** (the chat with the agent)
 and **Atech modules** (the board). The app comes with ready-made example
 projects (24 of them: a toy car, a desk robot, a 4WD rover, a video doorbell,
@@ -279,7 +283,7 @@ Check it with:
 claude auth status
 ```
 
-Atech Atelier uses this same sign-in. It never asks for your password or an
+Prompt2Product uses this same sign-in. It never asks for your password or an
 API key.
 
 If you skip either step, the chat tells you what is missing and shows the
@@ -312,7 +316,7 @@ What differs from Claude Code:
 - The agent runs inside **Codex's or Cursor's own sandbox**: it can change
   files only in the chat's folder and has no network, but unlike with
   Claude Code it **can read other files** on your computer.
-- The design check (`./check`) is run by Atech Atelier for the agent, in
+- The design check (`./check`) is run by Prompt2Product for the agent, in
   the same design sandbox as always (the agent's sandbox cannot run it).
 - Codex runs without your own `~/.codex/config.toml`, rules, plugins and
   connectors. The Cursor CLI also uses **your own Cursor MCP servers and
@@ -383,30 +387,30 @@ so send) files outside the chat's folder; see
 own conversation history is kept under `~/.codex/` or `~/.cursor/`.
 
 **Stored on your computer** (Linux paths; on macOS, `~/.local/share/Atech AI
-CAD/` is `~/Library/Application Support/Atech Atelier/`, `~/.config/Atech AI
-CAD/` is `~/Library/Preferences/Atech Atelier/`, and the cache is under
+CAD/` is `~/Library/Application Support/Prompt2Product/`, `~/.config/Atech AI
+CAD/` is `~/Library/Preferences/Prompt2Product/`, and the cache is under
 `~/Library/Caches/`):
 
 | what | where |
 |---|---|
-| one folder per chat (design script, pictures) | `~/.local/share/Atech Atelier/v1-1/agent/` |
-| the list of agent builds you accepted, and which chat belongs to which document | `~/.local/share/Atech Atelier/v1-1/AcadAgent/`, `.../agent/sessions.json` |
+| one folder per chat (design script, pictures) | `~/.local/share/Prompt2Product/v1-1/agent/` |
+| the list of agent builds you accepted, and which chat belongs to which document | `~/.local/share/Prompt2Product/v1-1/AcadAgent/`, `.../agent/sessions.json` |
 | the design script of every document the agent built into | inside that `.FCStd` file, wherever you save it |
 | Agent Settings (engine, model, budget, `claude` path) | `~/.config/acadagent/settings.json` |
-| app preferences (theme, layout) | `~/.config/Atech Atelier/` and `~/.config/Atech/` |
-| cache | `~/.cache/Atech Atelier/` |
+| app preferences (theme, layout) | `~/.config/Prompt2Product/` and `~/.config/Atech/` |
+| cache | `~/.cache/Prompt2Product/` |
 | Claude Code's own conversation history | `~/.claude/` (managed by Claude Code) |
 
 Chat folders are kept until you delete them: **Agent Settings → Clear old chat
-workspaces**. To reset Atech Atelier completely, close it and delete the
+workspaces**. To reset Prompt2Product completely, close it and delete the
 folders above.
 
 Your normal FreeCAD installation, its settings and its addons are not
-touched: Atech Atelier keeps its own profile.
+touched: Prompt2Product keeps its own profile.
 
 ## Common questions
 
-**Do I need Atech hardware to use Atech Atelier?**
+**Do I need Atech hardware to use Prompt2Product?**
 No. It is a full CAD app on its own. The Atech board and modules are built in
 for when you want to design around them.
 
@@ -436,24 +440,27 @@ macOS (Apple silicon and Intel, macOS 11 or later) and Linux x86_64. The
 same one-line installer works on both, and nothing is installed system-wide.
 
 **Is it free and open source?**
-Yes. Atech's code is open source under the LGPL v3 (or later): anyone may use,
+Yes. Atech's code is open source under the GPL v3 (or later): anyone may use,
 change and share it, also commercially, as long as they credit Atech and
-FreeCAD. FreeCAD is LGPL2+. The Atech board and module 3D models are
+FreeCAD, and anything they build on it and share is released as open source
+under the GPL too. FreeCAD is LGPL2+. The Atech board and module 3D models are
 CC BY-NC 4.0. See [Licences](#licences). The chat needs a
 Claude account that includes Claude Code.
 
-**Is this the app that was called Atech AI CAD?**
-Yes. Version 0.1.2 showed the name Atech AI CAD inside the app; from 0.1.3
-it is Atech Atelier everywhere again. The app, its profile folders and your
-projects never changed name, so nothing needs moving. (On first start it
-also copies an old Atech Studio profile across.)
+**Is this the app that was called Atech Atelier?**
+Yes. Atech Atelier became Prompt To Product and is now Prompt2Product (and version 0.1.2 showed the
+name Atech AI CAD inside the app). On first start the app copies your
+chats, trusted builds, parts library and macros from the old profile folder
+(Prompt To Product, Atech Atelier, or the older Atech Studio), which it never changes; on
+Linux the launcher copies the whole profile, settings included. The
+installer replaces an installed Atech Atelier app.
 
 **How do I reach the team?**
 Join the [Atech Discord](https://discord.gg/B6kuhUW27S) to meet other Atech
 builders, show what you made and get help. You can always mail anyone on the
 team (see [atech.dev](https://atech.dev)), or write to
 [hello@atech.dev](mailto:hello@atech.dev). Bugs and feature requests are also
-welcome as [GitHub issues](https://github.com/atechdotdev/atech-atelier/issues).
+welcome as [GitHub issues](https://github.com/atechdotdev/prompt2product/issues).
 
 ## Troubleshooting
 
@@ -476,7 +483,7 @@ from your distribution (Ubuntu 24.04: `sudo apt install libfuse2t64`; Ubuntu
 22.04: `sudo apt install libfuse2`), or run without FUSE:
 
 ```bash
-./AtechAtelier-*-x86_64.AppImage --appimage-extract-and-run
+./Prompt2Product-*-x86_64.AppImage --appimage-extract-and-run
 ```
 
 **The chat says Claude Code is not found.** Check `claude --version` in a
@@ -498,38 +505,41 @@ app.
 
 ## Licences
 
-Atech Atelier contains parts under different licences. Each applies only to
+Prompt2Product contains parts under different licences. Each applies only to
 its own files.
 
 | what | licence | text |
 |---|---|---|
-| Atech's code: the Atech workbench (`addon/AcadAgent`), the branding and build scripts | **LGPL-3.0-or-later**, with one added term: anyone who shares or sells it, or a product built on it, must credit Atech and FreeCAD | [`LICENSE`](LICENSE), [`LICENSE-ATTRIBUTION.md`](LICENSE-ATTRIBUTION.md) |
+| Atech's code: the Atech workbench (`addon/AcadAgent`), the branding and build scripts | **GPL-3.0-or-later** (copyleft: anything built on it and shared must also be GPL, with its source), with one added term: anyone who shares or sells it, or a product built on it, must credit Atech and FreeCAD | [`LICENSE`](LICENSE), [`LICENSE-ATTRIBUTION.md`](LICENSE-ATTRIBUTION.md) |
 | Atech board and module 3D models, and `presets.yaml` | **CC BY-NC 4.0**: share and adapt for non-commercial purposes, crediting Atech, keeping the notices, linking the licence and saying if you changed them | [`LICENSE-models.md`](LICENSE-models.md) |
 | FreeCAD and the libraries it bundles | their own licences (FreeCAD: "LGPL2+", the GNU LGPL version 2 or any later version, per its `LICENSE.html`; its source files mostly carry LGPL-2.1-or-later) | FreeCAD's list: `share/doc/FreeCAD/ThirdPartyLibraries.html`; every package: `packages.txt` (Linux: at the image root; macOS: `Contents/packages.txt`); texts: `share/doc/<package>/`, `share/licenses/`, `site-packages/*.dist-info/` in the app |
-| third-party components Atech added (FreeCADMCP, Lucide, Feather, the AppImage type-2 runtime and the libraries it statically links), theme files derived from FreeCAD's own, and licence texts Atech adds for bundled libraries that lacked them | their own licences | `share/doc/atech-atelier/third_party/` in the app |
+| third-party components Atech added (FreeCADMCP, Lucide, Feather, the AppImage type-2 runtime and the libraries it statically links), theme files derived from FreeCAD's own, and licence texts Atech adds for bundled libraries that lacked them | their own licences | `share/doc/prompt2product/third_party/` in the app |
 
-**Building on Atech Atelier?** You are welcome to, commercially too. Keep this
-line in your app's About or Credits screen and in your documentation
+**Building on Prompt2Product?** You are welcome to, commercially too, as long
+as you release your work as open source under the GPL v3 (or later), with its
+complete source code, just as Atech's code is. Keep this line in your app's
+About or Credits screen and in your documentation
 ([`LICENSE-ATTRIBUTION.md`](LICENSE-ATTRIBUTION.md) has the exact terms):
 
-> Based on Atech Atelier by Atech (https://studio.atech.dev),
+> Based on Prompt2Product by Atech (https://studio.atech.dev),
 > built on FreeCAD (https://www.freecad.org).
 
-Releases up to 0.1.2 were LGPL-2.1-or-later without this term.
+Releases up to 0.1.2 were LGPL-2.1-or-later without this term; 0.1.3 was
+LGPL-3.0-or-later with it.
 
-Inside the app, `share/doc/atech-atelier/` also holds `CREDITS.md`,
+Inside the app, `share/doc/prompt2product/` also holds `CREDITS.md`,
 `SOURCE_OFFER.txt` (where to get the source) and `ATECH_CHANGES.txt` (every
 file Atech added or changed compared with the upstream FreeCAD image, measured
-file by file). On a Mac that folder is in `Atech Atelier.app/Contents/Resources/`
+file by file). On a Mac that folder is in `Prompt2Product.app/Contents/Resources/`
 (right-click the app, **Show Package Contents**). On Linux it is in `usr/`
 inside the AppImage; to browse it without running the app, run
-`./AtechAtelier-*-x86_64.AppImage --appimage-extract` and look under
+`./Prompt2Product-*-x86_64.AppImage --appimage-extract` and look under
 `squashfs-root/usr/share/doc/`.
 
 **Source code.** Atech's own source is this repository. The complete
 corresponding source of FreeCAD and of every bundled copyleft (GPL, LGPL, MPL,
 EPL) library is attached to each
-[release](https://github.com/atechdotdev/atech-atelier/releases):
+[release](https://github.com/atechdotdev/prompt2product/releases):
 `freecad_source_<version>.tar.gz`, the `copyleft-sources-*.tar` files (each
 library's upstream source plus its build recipe and patches) and `SOURCES.md`,
 which says what is where.
@@ -542,7 +552,7 @@ The FreeCAD logo is a registered trademark (Benelux) of the FreeCAD Project
 Association AISBL (FPA), which holds the rights over commercial use of the
 FreeCAD name and logo. We use the FreeCAD name and the official, unaltered
 FreeCAD wordmark (top of this page, from the FPA's logo kit) only to say that
-Atech Atelier is built on FreeCAD and to link to freecad.org, as the FPA's
+Prompt2Product is built on FreeCAD and to link to freecad.org, as the FPA's
 [brand guidelines](https://fpa.freecad.org/handbook/process/logo.html) and
 FreeCAD's [licence page](https://wiki.freecad.org/License) allow. It is not
 Atech's logo. These licences do not grant any right to use the names "Atech" or "Atech
@@ -550,7 +560,7 @@ AI CAD" or the Atech logos except to describe where the software comes from.
 
 ## Credits
 
-Atech Atelier stands on FreeCAD. Thank you to the FreeCAD project and its
+Prompt2Product stands on FreeCAD. Thank you to the FreeCAD project and its
 community for the modeller, the geometry kernel integration and the whole
 application this is built on, and to the people behind Open CASCADE, Qt,
 Coin3D, Python and the many other open-source projects FreeCAD brings with it.
@@ -569,7 +579,7 @@ FreeCAD itself is not recompiled.
 
 ```bash
 ./branding/build_appimage.sh --tree-only   # build and verify the app folder
-./branding/build_appimage.sh               # ...and pack it into dist/AtechAtelier-<version>-x86_64.AppImage
+./branding/build_appimage.sh               # ...and pack it into dist/Prompt2Product-<version>-x86_64.AppImage
 dist/build/squashfs-root/AppRun            # run the built folder directly
 ```
 
@@ -580,7 +590,7 @@ valid):
 
 ```bash
 ./branding/build_macos.sh --app-only       # build, verify, sign and smoke-test the .app
-./branding/build_macos.sh                  # ...and the disk image dist/AtechAtelier-<version>-macOS-<arch>.dmg
+./branding/build_macos.sh                  # ...and the disk image dist/Prompt2Product-<version>-macOS-<arch>.dmg
 ```
 
 Without a Developer ID the app is ad-hoc signed. Set `ATECH_MAC_SIGN_IDENTITY`

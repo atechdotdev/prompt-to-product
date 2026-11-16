@@ -45,7 +45,7 @@ try:
 except ImportError:                                    # no Qt here
     navbar = None
 
-APP_BIN = os.path.join(REPO, "dist", "build-macos-arm64", "Atech Atelier.app",
+APP_BIN = os.path.join(REPO, "dist", "build-macos-arm64", "Prompt2Product.app",
                        "Contents", "Resources", "bin")
 FREECADCMD = os.path.join(APP_BIN, "freecadcmd")
 
@@ -415,18 +415,18 @@ class TestStoreFilesystem(StoreCase):
     def test_r364_cleanup_only_empty_transient_folders(self):
         root = os.path.join(self.tmp, "Cache")
         for i in range(5):
-            os.makedirs(os.path.join(root, "Atech Atelier_Doc_%d" % i))
-        with open(os.path.join(root, "Atech Atelier_Doc_0", "rec.xml"),
+            os.makedirs(os.path.join(root, "Prompt2Product_Doc_%d" % i))
+        with open(os.path.join(root, "Prompt2Product_Doc_0", "rec.xml"),
                   "w") as fh:
             fh.write("recovery")
         os.makedirs(os.path.join(root, "Other_Doc_1"))
-        n = ps.cleanup_transient_dirs(root, prefix="Atech Atelier_Doc_",
+        n = ps.cleanup_transient_dirs(root, prefix="Prompt2Product_Doc_",
                                       keep=[os.path.join(
-                                          root, "Atech Atelier_Doc_4")])
+                                          root, "Prompt2Product_Doc_4")])
         self.assertEqual(n, 3)
         self.assertEqual(sorted(os.listdir(root)),
-                         ["Atech Atelier_Doc_0", "Atech Atelier_Doc_4",
-                          "Other_Doc_1"])
+                         ["Other_Doc_1", "Prompt2Product_Doc_0",
+                          "Prompt2Product_Doc_4"])
 
     def test_r367_duplicate_rename_trash_closed_files(self):
         p = make_fcstd(os.path.join(self.folder, "lamp.FCStd"), uid="u-l")

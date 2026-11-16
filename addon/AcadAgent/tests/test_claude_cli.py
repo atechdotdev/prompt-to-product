@@ -197,7 +197,7 @@ TOOL_USE = [
     {"type": "system", "subtype": "init", "session_id": "s-tool"},
     {"type": "assistant", "message": {"content": [
         {"type": "tool_use", "name": "Write",
-         "input": {"file_path": "/home/u/Atech Atelier/agent/chat-1/model.py",
+         "input": {"file_path": "/home/u/Prompt2Product/agent/chat-1/model.py",
                    "content": "import Part\n"}},
         {"type": "tool_use", "name": "Bash",
          "input": {"command": "ls   -la\n  /tmp"}},
@@ -724,7 +724,7 @@ class TestSummarise(unittest.TestCase):
     def test_known_keys(self):
         s = cli._summarise
         self.assertEqual(s({"command": "echo  hi\n there"}), "echo hi there")
-        self.assertEqual(s({"file_path": "/a/Atech Atelier/x/model.py"}), "model.py")
+        self.assertEqual(s({"file_path": "/a/Prompt2Product/x/model.py"}), "model.py")
         self.assertEqual(s({"path": "/a/b/"}), "b")
         self.assertEqual(s({"pattern": "*.py"}), "*.py")
 

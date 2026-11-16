@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------- agent backend
-# Atech Atelier is a desktop app: double-click and everything comes up; close the
+# Prompt2Product is a desktop app: double-click and everything comes up; close the
 # window and nothing is left running. That second half is what this block buys.
 #
 # It works because the last line of this script is NOT an exec. The bash wrapper
@@ -17,7 +17,7 @@
 ATECH_AGENT_HOST="${ATECH_AGENT_HOST:-127.0.0.1}"
 ATECH_AGENT_PORT="${ATECH_AGENT_PORT:-4096}"
 ATECH_AGENT_BIN="${ATECH_AGENT_BIN:-$HOME/.npm-global/bin/opencode}"
-ATECH_AGENT_LOGDIR="${XDG_DATA_HOME:-$HOME/.local/share}/Atech Atelier/v1-1"
+ATECH_AGENT_LOGDIR="${XDG_DATA_HOME:-$HOME/.local/share}/Prompt2Product/v1-1"
 ATECH_AGENT_PID=""
 
 # Probe with bash's own /dev/tcp so this needs no python — and NEVER with
@@ -59,7 +59,7 @@ if atech_port_open; then
     # _adopt refuses another account's listener, one that fails the health
     # call, or any foreign one under ATECH_AGENT_ADOPT=0). Announcing an
     # adoption here, before that check, contradicted the addon's own notice.
-    echo "[atech] ${ATECH_AGENT_HOST}:${ATECH_AGENT_PORT} is already in use; AppRun starts no backend (Atech Atelier checks that listener itself)" >&2
+    echo "[atech] ${ATECH_AGENT_HOST}:${ATECH_AGENT_PORT} is already in use; AppRun starts no backend (Prompt2Product checks that listener itself)" >&2
 elif [ "$ATECH_AGENT_AUTOSTART" != "0" ] && [ "$ATECH_AGENT_AUTOSTART" != "false" ]; then
     if [ -x "$ATECH_AGENT_BIN" ]; then
         mkdir -p "$ATECH_AGENT_LOGDIR"

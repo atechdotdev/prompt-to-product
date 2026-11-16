@@ -83,7 +83,7 @@ class TestPure(unittest.TestCase):
             {"part": "Lid", "steps": [{"op": "fillet", "edges": "all",
                                        "radius": 1, "m": [0] * 16}]}]}))
         self.assertEqual(ok[0][0], "Lid")
-        self.assertNotIn("m", ok[0][1][0])          # Atelier sets the frame
+        self.assertNotIn("m", ok[0][1][0])          # Prompt2Product sets the frame
         for bad in ("{", "[]", json.dumps({"edits": [{"steps": []}]}),
                     json.dumps({"edits": [{"part": "A", "steps": [{"op": "rm -rf"}]}]}),
                     json.dumps({"edits": [{"part": "A", "steps": [

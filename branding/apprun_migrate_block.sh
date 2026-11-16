@@ -1,8 +1,11 @@
 # ------------------------------------------------- user-data migration (ADR-005)
 # FreeCAD names the user's data and config folders after branding.xml's
-# ExeName. The product was called "Atech Studio" before 2026-10-03 and is
-# "Atech Atelier" now, so without this block an existing user would start with
-# an empty profile and their chats, settings and macros would be left behind.
+# ExeName. The product was called "Atech Studio" before 2026-10-03, "Atech
+# Atelier" until 2026-11-10, "Prompt To Product" until 2026-11-16, and is
+# "Prompt2Product" now, so without this
+# block an existing user would start with an empty profile and their chats,
+# settings and macros would be left behind. The newest earlier name that has
+# a folder is copied from (ATECH_OLD_NAMES, newest first).
 #
 # Rules (ADR-005): COPY, never move -- the old folders stay exactly as they
 # were, so going back to an older build still works. Only when the NEW folder
@@ -15,7 +18,9 @@
 # Inside the COPY (never the old folder) two kinds of string are rewritten in
 # user.cfg / system.cfg: absolute paths into the old folders, and the theme
 # name, which was renamed with the product ("Atech Studio Light/Dark" ->
-# "Atech Atelier Light/Dark"); a profile naming a theme that no longer ships
+# "Atech Atelier Light/Dark" -> "Prompt To Product Light/Dark" ->
+# "Prompt2Product Light/Dark"); a profile
+# naming a theme that no longer ships
 # would silently lose its colours.
 #
 # ATECH_MIGRATE=0 turns the block off.
@@ -57,23 +62,32 @@ atech_rewrite_file() {  # <file> <from> <to> [<from> <to> ...]
 }
 
 if [ "${ATECH_MIGRATE:-1}" != "0" ]; then
-    ATECH_OLD_NAME="Atech Studio"
-    ATECH_NEW_NAME="Atech Atelier"
+    ATECH_OLD_NAMES="Prompt To Product|Atech Atelier|Atech Studio"
+    ATECH_NEW_NAME="Prompt2Product"
     _data="${XDG_DATA_HOME:-$HOME/.local/share}"
     _conf="${XDG_CONFIG_HOME:-$HOME/.config}"
-    atech_migrate_tree "$_data/$ATECH_OLD_NAME" "$_data/$ATECH_NEW_NAME"
-    _migrated_data=$?
-    atech_migrate_tree "$_conf/$ATECH_OLD_NAME" "$_conf/$ATECH_NEW_NAME"
-    _migrated_conf=$?
-    if [ "$_migrated_data" = 0 ] || [ "$_migrated_conf" = 0 ]; then
-        for _cfg in "$_conf/$ATECH_NEW_NAME"/*/user.cfg "$_conf/$ATECH_NEW_NAME"/*/system.cfg \
-                    "$_data/$ATECH_NEW_NAME"/*/user.cfg "$_data/$ATECH_NEW_NAME"/*/system.cfg; do
-            atech_rewrite_file "$_cfg" \
-                "$_data/$ATECH_OLD_NAME/" "$_data/$ATECH_NEW_NAME/" \
-                "$_conf/$ATECH_OLD_NAME/" "$_conf/$ATECH_NEW_NAME/" \
-                ">$ATECH_OLD_NAME Light<" ">$ATECH_NEW_NAME Light<" \
-                ">$ATECH_OLD_NAME Dark<" ">$ATECH_NEW_NAME Dark<"
-        done
-    fi
-    unset _data _conf _migrated_data _migrated_conf _cfg _old _new _tmp _f _txt _orig
+    _migrated_data=1; _migrated_conf=1
+    _ifs="$IFS"; IFS="|"
+    for ATECH_OLD_NAME in $ATECH_OLD_NAMES; do
+        IFS="$_ifs"
+        # The newest earlier name that has a profile is the one copied.
+        [ -d "$_data/$ATECH_OLD_NAME" ] || [ -d "$_conf/$ATECH_OLD_NAME" ] || continue
+        atech_migrate_tree "$_data/$ATECH_OLD_NAME" "$_data/$ATECH_NEW_NAME"
+        _migrated_data=$?
+        atech_migrate_tree "$_conf/$ATECH_OLD_NAME" "$_conf/$ATECH_NEW_NAME"
+        _migrated_conf=$?
+        if [ "$_migrated_data" = 0 ] || [ "$_migrated_conf" = 0 ]; then
+            for _cfg in "$_conf/$ATECH_NEW_NAME"/*/user.cfg "$_conf/$ATECH_NEW_NAME"/*/system.cfg \
+                        "$_data/$ATECH_NEW_NAME"/*/user.cfg "$_data/$ATECH_NEW_NAME"/*/system.cfg; do
+                atech_rewrite_file "$_cfg" \
+                    "$_data/$ATECH_OLD_NAME/" "$_data/$ATECH_NEW_NAME/" \
+                    "$_conf/$ATECH_OLD_NAME/" "$_conf/$ATECH_NEW_NAME/" \
+                    ">$ATECH_OLD_NAME Light<" ">$ATECH_NEW_NAME Light<" \
+                    ">$ATECH_OLD_NAME Dark<" ">$ATECH_NEW_NAME Dark<"
+            done
+        fi
+        break
+    done
+    IFS="$_ifs"
+    unset _data _conf _migrated_data _migrated_conf _cfg _old _new _tmp _f _txt _orig _ifs
 fi

@@ -1,5 +1,5 @@
 """Build projects/simready_index.json: what is in NVIDIA's SimReady dataset
-(huggingface.co/datasets/nvidia/simready-assets, CC BY 4.0), so Atelier
+(huggingface.co/datasets/nvidia/simready-assets, CC BY 4.0), so Prompt2Product
 can search and size its assets without downloading them.
 
     PYTHONPATH=<dir with usd-core> python projects/build_simready_index.py [--workers 16]
@@ -7,7 +7,7 @@ can search and size its assets without downloading them.
 For every asset folder at one pinned dataset revision it reads ONLY the root
 layer (about 20 KB; payloads are not composed) for its SimReady_Metadata:
 extents, mass, type, Wikidata id, licence. The extents are converted to
-millimetres in Atelier's frame (Y up, see simready.to_library_extents) and
+millimetres in Prompt2Product's frame (Y up, see simready.to_library_extents) and
 are the dataset's own numbers; the installed part is measured again from its
 mesh. Re-run to pick up a newer dataset revision.
 """

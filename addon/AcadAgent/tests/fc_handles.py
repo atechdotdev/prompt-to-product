@@ -6,7 +6,7 @@ getObjectInfo, getCameraNode, the scene graph and the pivy event callbacks -
 and a real Coin camera (orthographic or perspective) doing the projection.
 Mouse presses, moves and releases go in as real Coin events through the
 registered callbacks, so hit testing, drag planes, snapping, the resize /
-move / turn on release and the undo steps all run as in Atelier.
+move / turn on release and the undo steps all run as in Prompt2Product.
 
 Prints HANDLES_RESULT=<json>.
 

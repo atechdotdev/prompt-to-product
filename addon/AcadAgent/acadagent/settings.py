@@ -61,7 +61,7 @@ DEFAULTS = {
     "agent_quality": "quality",
     # R730: after each final build that lands cleanly, a ~25 s assembly /
     # promo video of the design (promo_video.py), saved to
-    # ~/Movies/Atech Atelier/. On by default.
+    # ~/Movies/Prompt2Product/. On by default.
     "assembly_video": True,
     # R730: one short Claude reply styles each video (title, tagline, an
     # environment that suits the product, captions); off = a keyword pick.
