@@ -1190,7 +1190,52 @@ class ModulesPage(QtWidgets.QWidget):
         self.btn_buy.clicked.connect(self._buy)
         self.btn_buy.hide()             # shown by refresh once a module is on
         head.addWidget(self.btn_buy)
+        # R962: the wiring diagram in place of the board map (one checkable
+        # button: a second pill control would stack two of them)
+        self.btn_wiring = QtWidgets.QPushButton("Wiring")
+        self.btn_wiring.setObjectName("MGhost")
+        self.btn_wiring.setCheckable(True)
+        self.btn_wiring.setCursor(QtCore.Qt.PointingHandCursor)
+        self.btn_wiring.setAccessibleName("Wiring diagram: which port each module uses")
+        self.btn_wiring.setToolTip("Which port each module uses, plugged in or by "
+                                   "cable, and what powers the board")
+        self.btn_wiring.toggled.connect(self._toggle_wiring)
+        self.wiring_panel = None
+        self._wiring_key = None
+        try:
+            from . import wiring_view
+            self._wiring_ok = wiring_view.wiring_mod() is not None
+        except Exception as exc:                       # noqa: BLE001
+            _log("wiring view: %r" % (exc,))
+            self._wiring_ok = False
+        self.btn_wiring.setVisible(self._wiring_ok)
+        head.addWidget(self.btn_wiring)
         lay.addLayout(head)
+
+        # R1002/R1004: the electrical engineer suite and Make it (from the
+        # design to the product in hand), one row under the header
+        suite = QtWidgets.QHBoxLayout()
+        suite.setContentsMargins(0, 0, 0, 2)
+        suite.setSpacing(6)
+        self.btn_electrical = QtWidgets.QPushButton("Electrical suite")
+        self.btn_electrical.setObjectName("MGhost")
+        self.btn_electrical.setCursor(QtCore.Qt.PointingHandCursor)
+        self.btn_electrical.setAccessibleName("Electrical suite: schematic, ports, power, "
+                                              "rule checks, firmware and bring-up")
+        self.btn_electrical.setToolTip("Schematic, ports, power budget, rule checks, "
+                                       "firmware and bring-up")
+        self.btn_electrical.clicked.connect(self._open_electrical)
+        self.btn_make = QtWidgets.QPushButton("Make it")
+        self.btn_make.setObjectName("MGhost")
+        self.btn_make.setCursor(QtCore.Qt.PointingHandCursor)
+        self.btn_make.setAccessibleName("Make it: from the design to the product in hand")
+        self.btn_make.setToolTip("Electronics, firmware, parts, print, assembly and the "
+                                 "product pack, step by step")
+        self.btn_make.clicked.connect(self._open_make_it)
+        suite.addWidget(self.btn_electrical)
+        suite.addWidget(self.btn_make)
+        suite.addStretch(1)
+        lay.addLayout(suite)
 
         # R301: the board moved (or a cabled module did) and modules no
         # longer match it: say so, and offer to put every one back.
@@ -1221,7 +1266,11 @@ class ModulesPage(QtWidgets.QWidget):
 
         self.map = BoardMap()
         self.map.picked.connect(self.pick)
-        lay.addWidget(self.map)
+        # R962: the board map or the Wiring view (the map keeps its state)
+        self.map_stack = QtWidgets.QStackedWidget()
+        self.map_stack.setObjectName("MMapStack")
+        self.map_stack.addWidget(self.map)
+        lay.addWidget(self.map_stack)
 
         self.on_label = QtWidgets.QLabel("ON THE BOARD")
         self.on_label.setObjectName("MSection")
@@ -1529,6 +1578,9 @@ class ModulesPage(QtWidgets.QWidget):
         self._unavailable = msg
         for w in (self.map, self.btn_check, self.port_title, self.port_sub):
             w.setVisible(msg is None)
+        self.btn_wiring.setVisible(msg is None and self._wiring_ok)
+        if msg is not None and self.btn_wiring.isChecked():
+            self.btn_wiring.setChecked(False)
         if msg is not None:
             self.on_label.hide()
             # Through _hide_verdicts so the kept result goes too: a restyle
@@ -1655,6 +1707,71 @@ class ModulesPage(QtWidgets.QWidget):
             len(occ), "" if len(occ) == 1 else "s") if occ else
             "No modules on the board yet")
         self._sync_panel(occ)
+        self._sync_wiring(doc)
+
+    # ------------------------------------------------------------ R962 wiring
+    def show_wiring(self):
+        """Show the Wiring view (the Atech menu's Wiring diagram...)."""
+        if self._wiring_ok and self._unavailable is None:
+            self.btn_wiring.setChecked(True)
+            return True
+        return False
+
+    def _toggle_wiring(self, on):
+        if on and self.wiring_panel is None:
+            from . import wiring_view
+            self.wiring_panel = wiring_view.WiringPanel()
+            self.map_stack.addWidget(self.wiring_panel)
+        cur = self.wiring_panel if on else self.map
+        # the hidden page must not set the stack's height
+        for w in (self.map, self.wiring_panel):
+            if w is not None:
+                pol = QtWidgets.QSizePolicy.Preferred if w is cur else \
+                    QtWidgets.QSizePolicy.Ignored
+                w.setSizePolicy(QtWidgets.QSizePolicy.Preferred, pol)
+        self.map_stack.setCurrentWidget(cur)
+        self.map_stack.updateGeometry()
+        self._wiring_key = None
+        if on:
+            try:
+                doc = self._current()
+            except Exception:                          # noqa: BLE001
+                doc = None
+            self._sync_wiring(doc)
+
+    def _sync_wiring(self, doc):
+        """Rebuild the wiring from the document while the view is shown,
+        only when the wiring changed (refresh() ticks every 1.5 s)."""
+        if self.wiring_panel is None or not self.btn_wiring.isChecked():
+            return
+        try:
+            from . import wiring_view
+            aw = wiring_view.wiring_mod()
+            atech = aw.modules_from_doc(doc) if doc is not None else None
+            fw_on = False
+            try:
+                from . import build
+                fw_on = bool(build.firmware_on())
+            except Exception:                          # noqa: BLE001
+                fw_on = False
+            mods = (atech or {}).get("modules") or []
+            key = (getattr(doc, "Name", None), getattr(doc, "Label", None), fw_on,
+                   tuple(sorted((m["module"], tuple(m["ports"]), m.get("joint"),
+                                 tuple((c.get("port"), c.get("length"), c.get("state"))
+                                       for c in m.get("cables") or []))
+                                for m in mods)))
+            if key == self._wiring_key:
+                return
+            self._wiring_key = key
+            names = {n: (sp or {}).get("display_name") or n
+                     for n, sp in (self._specs or {}).items()}
+            w = aw.build(atech, names=names, reserved=self._reserved,
+                         firmware_on=fw_on, project=getattr(doc, "Label", "") or "",
+                         made=time.strftime("%Y-%m-%d %H:%M"))
+            fname = getattr(doc, "FileName", "") or ""
+            self.wiring_panel.set_wiring(w, os.path.dirname(fname) if fname else None)
+        except Exception as exc:                       # noqa: BLE001
+            _log("wiring: %r" % (exc,))
 
     @staticmethod
     def _joint(o):
@@ -2609,6 +2726,24 @@ class ModulesPage(QtWidgets.QWidget):
                 display_name(n, self._specs) for n in unsold if n != shop.BOARD)
         self.btn_buy.setToolTip(tip)
 
+    def _open_electrical(self):
+        """R1002: the electrical engineer suite for this design."""
+        try:
+            from . import electrical_suite
+            return electrical_suite.open_suite(self._current(), "overview", self.window())
+        except Exception as exc:                          # noqa: BLE001
+            _log("electrical suite: %r" % (exc,))
+            return None
+
+    def _open_make_it(self):
+        """R1004: Make it for this design."""
+        try:
+            from . import product_view
+            return product_view.open_make_it(self._current(), self.window())
+        except Exception as exc:                          # noqa: BLE001
+            _log("make it: %r" % (exc,))
+            return None
+
     def _buy(self):
         """R850: the Get it made window (modules, prints, vouchers); the
         cart link at once when it cannot open."""
@@ -2740,3 +2875,6 @@ class ModulesPage(QtWidgets.QWidget):
         if self._ports and self._unavailable is None:
             self.refresh()
         self.map.update()
+        if self.wiring_panel is not None:
+            self._wiring_key = None
+            self.wiring_panel.restyle()

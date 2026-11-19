@@ -63,7 +63,7 @@ import zipfile
 
 sys.dont_write_bytecode = True
 
-MANIFEST_VERSION = 3            # default_projects.py re-installs when this grows
+MANIFEST_VERSION = 4            # default_projects.py re-installs when this grows (R990: 4, the ten new products reach existing installs)
 THUMB_PX = 512
 THUMB = "thumbnails/Thumbnail.png"
 GUI_XML = "GuiDocument.xml"
@@ -106,6 +106,17 @@ CURATED = (
     ('follower_counter', 'Follower counter'),
     ('bird_cam', 'Bird feeder cam'),
     ('hype_button', 'Hype button'),
+    ('fortune_ball', 'Fortune ball'),
+    # R990: ten more products (2026-11-17)
+    ('cloud_lamp', 'Cloud lamp'),
+    ('on_air_sign', 'On air sign'),
+    ('theremin', 'Air theremin'),
+    ('piggy_bank', 'Coin counter pig'),
+    ('starter_jar', 'Sourdough monitor'),
+    ('dice_tower', 'Dice tower'),
+    ('cat_wand', 'Cat wand toy'),
+    ('drum_pad', 'Drum pad'),
+    ('pill_box', 'Pill reminder'),
 )
 #: R820: the starter projects - small, simple starting points (Home's
 #: "Start simple" row), built and checked like the products above but never
@@ -216,6 +227,26 @@ BLURBS = {
         ['Make the roof steeper', 'Make the seed hopper bigger']),
     'hype_button': ('A giant red sound button: an 86 mm domed cap in a chrome collar on a hazard-striped pedestal, a glowing ring round it, and a speaker that fires an airhorn every time you slap it.',
         ['Make the cap even bigger', 'Add a volume knob']),
+    'cloud_lamp': ("A puffy frosted cumulus that glows all over, held up by a yellow lightning bolt. A microphone in the base hears your music and flashes the cloud's LEDs like lightning, with a mode key and a little bolt-shaped status light beside it.",
+        ['Make the cloud bigger', 'Make the bolt blue']),
+    'on_air_sign': ('A retro broadcast-studio light box: big white ON AIR letters on a red frosted panel in a chrome bezel, which lights up by itself when its microphone hears you speak; a FORCE key turns it on by hand. It stands on a brushed foot or hangs on the wall from two keyholes.',
+        ['Make the sign wider', 'Change the panel to blue']),
+    'theremin': ('A mid-century walnut desk theremin: hold your hand over the brass sensor eye beside the chrome pitch mast and the height sets the note, shown on a glowing seven-note strip. A big brass speaker grille, a chrome volume knob and a loop antenna complete the classic silhouette.',
+        ['Make the mast taller', 'Give it a cream front panel']),
+    'piggy_bank': ('A glossy pink piggy bank that sees each coin fall past a sensor under its slot, shows your total on a screen in its side and oinks through its nose. The coins drop into a walled-off chamber you can watch through a side window and empty through a twist-lock plug in the belly.',
+        ['Make the pig chubbier', 'Give it a gold coin slot']),
+    'starter_jar': ("A wooden smart lid that locks onto a glass jar with a quarter turn. A distance sensor looks down through a glass window to track how far your starter rises, and the screen shows the rise % and when it peaked, and a vent under the lid tracks the kitchen's temperature.",
+        ['Make the jar taller', 'Give the lid a walnut finish']),
+    'dice_tower': ('A crenellated stone keep that tumbles your dice down two baffles and out under a portcullis into a felt-lined courtyard tray. A light gate in the gateway counts every die, the gold shield shows the count and a hidden speaker plays a fanfare.',
+        ['Make the tower taller', 'Give the banner a blue dragon colour']),
+    'cat_wand': ('A motion-triggered cat toy: a cream cat head with ears, a red collar and a brass bell turns on a low sage pebble and swings a feather wand when its PIR eye sees the cat walk by. The N20 motor and its 76:12 gear train are sealed inside the base, and a pause key sits on the front.',
+        ['Make the wand longer', 'Give the head tabby stripes']),
+    'drum_pad': ('A tabletop finger-drum pad: four big rubber pads in red, amber, blue and green over a glowing frosted grid, a knurled chrome kit/volume dial and a speaker grille on a raised control column, and USB-C at the back. Each pad presses its own button, with real travel to a stop.',
+        ['Make the pads bigger', 'Make the body white']),
+    'pill_box': ('A seven-day pill organiser with pastel sliding lids, one per day, in front of a raised console. A screen shows the next dose, a frosted capsule glows and a chime sounds when it is time, and a big coral TAKEN key confirms. The electronics are sealed away from the pills.',
+        ['Make the day cups deeper', 'Give the lids hinges instead']),
+    'fortune_ball': ('A glossy midnight-blue fortune ball with a gold-ringed crystal window: shake it and the answer appears on the screen inside, whispered through a grille, while it rests in a gold seat ring on a black stand. Gold moon, constellation and question mark inlays; USB-C hidden underneath.',
+        ['Make the window bigger', 'Give the ball a purple finish']),
     'sesame_atech': ('Sesame, the open-source walking robot, refitted for Atech: its own frame, legs and eight servos unchanged, and a new deck and lid that carry the Atech board over the legs, with the screen as its face, an IMU for heading and USB-C at the back.',
         ['Make the lid taller with a carry handle', 'Give the face a smoked visor and a bezel']),
     "starter_board": ("The Atech board lying flat in a printed tray, nothing "
@@ -272,6 +303,16 @@ SUMMARIES = {
     'follower_counter': 'A desk trophy with your live follower count.',
     'bird_cam': 'A bird feeder that photographs every visitor.',
     'hype_button': 'A giant red button that plays airhorns.',
+    'fortune_ball': 'A midnight-blue ball that answers when you shake it.',
+    'cloud_lamp': 'A glowing cloud on a lightning bolt that flashes to music.',
+    'on_air_sign': 'A studio ON AIR light that glows when you talk.',
+    'theremin': 'A walnut theremin you play by waving over it.',
+    'piggy_bank': 'A chunky pink pig that counts every coin.',
+    'starter_jar': 'A smart jar lid that watches your starter rise.',
+    'dice_tower': 'A castle keep that counts and announces every roll.',
+    'cat_wand': 'A cat-eared turret that waves a feather wand at your cat.',
+    'drum_pad': 'Four big rubber pads that play real drum sounds.',
+    'pill_box': "A weekly pill box that glows when it's time.",
     'sesame_atech': 'The Sesame walking robot with an Atech board and screen.',
     "starter_board": "The Atech board in a tray, ready for your modules.",
     "starter_case": "The board in a screwed case, a button and a light.",

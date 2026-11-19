@@ -431,7 +431,7 @@ class TestSettings(Base):
             self.assertNotIn("DRAFT", text.upper())
         self.assertGreaterEqual(cfgmod.PRIVACY_NOTICE_VERSION, 2)
         for needle in ("Anthropic", "summary of the open document",
-                       "Add view", "Ask about this view", "~/.claude",
+                       "Add view", "Add screenshot to context", "~/.claude",
                        cfgmod.chat_workspace_root(), cfgmod.CONFIG_PATH):
             self.assertIn(needle, body)
 
@@ -441,7 +441,7 @@ class TestSettings(Base):
         with open(os.path.join(ADDON, "acadagent", "panel.py"), encoding="utf-8") as fh:
             self.assertIn('self._ghost("Add view"', fh.read())
         with open(os.path.join(ADDON, "acadagent", "shell.py"), encoding="utf-8") as fh:
-            self.assertIn('ASK_TEXT = "Ask about this view"', fh.read())
+            self.assertIn('ASK_TEXT = "Add screenshot to context"', fh.read())
 
     def test_draft_acknowledgement_is_asked_again(self):
         # Acknowledging the draft (v1) is not consent to the final text.

@@ -30,17 +30,28 @@ CATEGORIES = (NEW, ROBOTS, HOME, DESK, FUN, SENSE, MORE)
 
 #: (example key, title, one line, category). Order = the gallery's order.
 CATALOG = (
-    # R940: the ten viral products
-    ("hype_button", "Hype button", "A giant red button that plays airhorns.", NEW),
-    ("debug_duck", "Debug duck", "A rubber duck that listens to your bugs and quacks.", NEW),
-    ("plant_pal", "Plant pal", "A planter with a face that pouts when it is thirsty.", NEW),
-    ("tiny_tv", "Tiny TV", "A tiny walnut TV with rabbit ears that plays GIFs.", NEW),
-    ("focus_cube", "Focus cube", "A flip timer: the number on top sets the minutes.", NEW),
-    ("retro_camera", "Pixel camera", "A toy camera that takes pixel-art photos.", NEW),
-    ("bird_cam", "Bird feeder cam", "A bird feeder that photographs every visitor.", NEW),
-    ("follower_counter", "Follower counter", "A desk trophy with your live follower count.", NEW),
-    ("coffee_scale", "Coffee scale", "A pour-over scale with a floating platform and a timer.", NEW),
-    ("photo_turntable", "Photo turntable", "A geared 360 turntable for product videos.", NEW),
+    # R990: ten more products, the newest
+    ("cloud_lamp", "Cloud lamp", "A glowing cloud on a lightning bolt that flashes to music.", NEW),
+    ("on_air_sign", "On air sign", "A studio ON AIR light that glows when you talk.", NEW),
+    ("theremin", "Air theremin", "A walnut theremin you play by waving over it.", NEW),
+    ("piggy_bank", "Coin counter pig", "A chunky pink pig that counts every coin.", NEW),
+    ("starter_jar", "Sourdough monitor", "A smart jar lid that watches your starter rise.", NEW),
+    ("dice_tower", "Dice tower", "A castle keep that counts and announces every roll.", NEW),
+    ("cat_wand", "Cat wand toy", "A cat-eared turret that waves a feather wand at your cat.", NEW),
+    ("drum_pad", "Drum pad", "Four big rubber pads that play real drum sounds.", NEW),
+    ("pill_box", "Pill reminder", "A weekly pill box that glows when it's time.", NEW),
+    ("fortune_ball", "Fortune ball", "A midnight-blue ball that answers when you shake it.", NEW),
+    # R940: the ten viral products (R990: in their own kinds now)
+    ("hype_button", "Hype button", "A giant red button that plays airhorns.", FUN),
+    ("debug_duck", "Debug duck", "A rubber duck that listens to your bugs and quacks.", FUN),
+    ("plant_pal", "Plant pal", "A planter with a face that pouts when it is thirsty.", HOME),
+    ("tiny_tv", "Tiny TV", "A tiny walnut TV with rabbit ears that plays GIFs.", DESK),
+    ("focus_cube", "Focus cube", "A flip timer: the number on top sets the minutes.", DESK),
+    ("retro_camera", "Pixel camera", "A toy camera that takes pixel-art photos.", DESK),
+    ("bird_cam", "Bird feeder cam", "A bird feeder that photographs every visitor.", SENSE),
+    ("follower_counter", "Follower counter", "A desk trophy with your live follower count.", DESK),
+    ("coffee_scale", "Coffee scale", "A pour-over scale with a floating platform and a timer.", HOME),
+    ("photo_turntable", "Photo turntable", "A geared 360 turntable for product videos.", DESK),
     # robots and things that move
     ("toy_car", "Toy car", "A chunky 4x4 with driven wheels and lights.", ROBOTS),
     ("desk_robot", "Desk robot", "A little robot whose face is a screen.", ROBOTS),

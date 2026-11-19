@@ -1010,6 +1010,30 @@ ATECH_CASE = "atech_case.py"
 #: ratios or percentages (the toy car agent spent its level grepping the
 #: checker for them and never designed anything).
 ARCHETYPES = (
+    # R990: ten more products (2026-11-17), first: their words are
+    # specific ("a cloud lamp" before the lamp, "a cat toy" before
+    # the feeder's "cat", "a drum pad" before the giant button's
+    # "sound button").
+    ('cloud lamp', ('cloud lamp', 'thunder cloud', 'storm cloud', 'lightning lamp', 'cloud light', 'rain cloud lamp', 'music reactive light'),
+     'a puffy frosted cloud that glows all over, held up on a stand over a base; the mic grille and a mode key on the base, in front of the cloud'),
+    ('on air sign', ('on air sign', 'on air light', 'recording light', 'studio light', 'busy light', 'do not disturb sign', 'in a meeting light', 'tally light'),
+     'a rounded light box with a frosted red window and big ON AIR letters in a bezel; the mic grille and a key in a chin, a desk foot or keyholes'),
+    ('theremin', ('theremin', 'air instrument', 'hand wave instrument', 'touchless instrument', 'gesture synth', 'wave your hand music', 'distance played instrument'),
+     'a long instrument body with a pitch mast at one end and a loop antenna at the other; the hand sensor looking straight up, a speaker grille and a volume knob'),
+    ('piggy bank', ('piggy bank', 'piggybank', 'coin bank', 'money box', 'savings jar', 'coin counter'),
+     'a chunky pig you know at a glance (snout, ears, legs, curly tail); a coin slot on the back over a sensor, a walled-off coin chamber, the total on a side screen'),
+    ('jar lid', ('sourdough', 'starter jar', 'jar lid', 'smart lid', 'fermentation monitor', 'kombucha', 'levain', 'mason jar'),
+     'a lid pod over a clear jar: the distance sensor looks down through a window at the contents, a vent for the air, the screen on top'),
+    ('dice tower', ('dice tower', 'dice roller', 'rolling tower', 'castle dice tower', 'dice tray', 'dice counter', 'board game tower', 'tabletop dice'),
+     'a tall castle keep with baffles inside and an arched exit into a walled tray; a light gate in the exit counts each die, the count on a shield'),
+    ('cat toy', ('cat toy', 'cat teaser', 'cat wand', 'feather wand', 'teaser wand', 'pet teaser', 'kitten toy', 'interactive cat toy'),
+     'a low round base with a turning head on top that swings a wand with a feather tuft; the motion eye and a pause key on a front facet, the drive sealed inside'),
+    ('drum pad', ('drum pad', 'finger drum', 'drum machine', 'beat pad', 'beat maker', 'sampler pad', 'pad controller', 'mpc'),
+     'a low wedge with a grid of big pads over buttons that press and stop, light glowing between them; a speaker grille and a dial on a control column'),
+    ('pill box', ('pill box', 'pillbox', 'pill organiser', 'pill organizer', 'pill reminder', 'medication reminder', 'medicine box', 'pill dispenser'),
+     'a long tray of seven lidded day cups in front of a raised console: a screen, a glow light and a big TAKEN key; the electronics sealed off from the pills'),
+    ('fortune ball', ('fortune ball', 'magic answer ball', 'shake to answer', 'decision ball', 'crystal ball', 'oracle orb', 'yes no ball'),
+     'a dark ball on a ring stand with a round window where the answer appears; shake it to ask, a whisper through a small grille'),
     # R940: ten viral products (2026-11-10), first: their words are
     # specific ("a bird feeder camera" before the feeder, "a flip focus
     # timer" before the clock's "timer", "a rubber duck" before the

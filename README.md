@@ -58,6 +58,16 @@ modules that sit where they really go.
 - **Build around real hardware.** Place modules on the 14-port Atech board,
   shown as in [Atech Studio](https://studio.atech.dev); each one is checked
   for fit.
+- **From prompt to product.** When a design is done, **Make it** walks you
+  through the rest: electronics, firmware, parts list, print, assembly and
+  ordering. **Make the product pack** saves everything in one folder: print
+  files, STEP, parts list, assembly steps, electrical report, firmware and a
+  one-page `product.html`.
+- **An electrical engineer suite.** Rule checks with fixes, a block
+  schematic, the 14-port map, a 5 V power budget against your supply, a
+  bring-up checklist, and the firmware: Check, Build, **Run without a board**
+  (the Atech SDK's emulator) and **Flash to board**, with the
+  [Atech SDK](https://atech.dev/docs) (`uv tool install atech`).
 - **Get back to your projects anytime.** Click the Atech logo or press
   **Ctrl+0** for Home.
 - **Export** as STEP or STL for printing, or keep the `.FCStd`.
@@ -429,6 +439,13 @@ line(s) to two GPIO pins. Before you power anything, check which pin is which
 on your module. **We are still writing the public wiring guide**, so ask us
 for the pinout of your module on [Discord](https://discord.gg/B6kuhUW27S) or
 at [hello@atech.dev](mailto:hello@atech.dev), and we will send it.
+
+**Can I see how my design is wired?**
+Yes. Open the **Atech modules** page and press **Wiring**: it shows which
+port each module uses, whether it is plugged in or on a cable (and how
+long), and which power modules the design has. **Export wiring…** saves it
+as a PDF, picture or SVG. It is a port-level diagram: until the pin order
+is published it never shows pin numbers or wire colours.
 
 **Does it work offline?**
 The CAD side does: modelling, measuring and exporting all run on your

@@ -116,8 +116,12 @@ def missing_r270(prompt, atech=False, examples=None):
     miss = [n for n, needle in R270_ELEMENTS + (R270_ATECH if atech else [])
             if _flat(needle) not in flat]
     fork = flat[flat.find("START FROM THE CLOSEST PRODUCT EXAMPLE"):]
+    # R990: the rule itself, up to its last words ("never copy its box"),
+    # not a fixed 2000 characters: 46 examples outgrew that window.
+    end = fork.find("its box")
+    fork = fork[:end + 7] if end >= 0 else fork[:2000]
     for name in (disk_product_examples() if examples is None else examples):
-        if name not in fork[:2000]:
+        if name not in fork:
             miss.append("example " + name)
     miss += ["gone: " + g for g in GONE if _flat(g) in flat]
     return miss

@@ -239,7 +239,8 @@ class TestR381ContextMenu(Case):
         self.assertEqual(sub, ["Atech_Print", "Atech_ExportForPrint", "Atech_ExplodedView",
                                "Atech_BillOfMaterials", "Atech_GetItMade",
                                "Atech_PublishMakerWorld", "Atech_PostToAtech",
-                               "Atech_ShareImage", "Atech_ReviewSheet"])
+                               "Atech_ShareImage", "Atech_ReviewSheet",
+                               "Atech_MakeIt", "Atech_Electrical"])
 
     def test_tree_menu_and_other_recipients(self):
         wb = FakeWB()
@@ -274,8 +275,10 @@ class TestR381ContextMenu(Case):
             wb.ContextMenu("View")
         self.assertIn("Atech_Measure", self.flat(wb))
         # R700 Dimensions..., R850 Get it made..., R861 Post, R880 Add file,
-        # R885 Edit part, R900 From / Publish to MakerWorld, R920 Print
-        self.assertEqual(len(added), 16)
+        # R885 Edit part, R900 From / Publish to MakerWorld, R920 Print,
+        # R940 Export, R970 Import a model / Examples, R1002 Electrical, R1004 Make it
+        self.assertEqual(len(added), len(s.TOOL_COMMANDS) + len(s.EXPORT_COMMANDS))
+        self.assertEqual(len(added), 20)
         s.uninstall()
         self.assertFalse(hasattr(wb, "ContextMenu"))
 

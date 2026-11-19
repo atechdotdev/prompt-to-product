@@ -92,6 +92,17 @@ PRODUCTS = {
     'follower_counter.py': ('trophy plaque', 'a live follower counter', None),
     'bird_cam.py': ('bird feeder camera', 'a smart bird feeder camera', None),
     'hype_button.py': ('giant button', 'a giant sound button', None),
+    'fortune_ball.py': ('fortune ball', 'a fortune ball that answers your question when you shake it', None),
+    # R990: ten more products (2026-11-17)
+    'cloud_lamp.py': ('cloud lamp', 'a cloud lamp that flashes lightning to music', None),
+    'on_air_sign.py': ('on air sign', 'an on air sign that lights up when you are talking', None),
+    'theremin.py': ('theremin', 'a theremin you play by waving your hand over it', None),
+    'piggy_bank.py': ('piggy bank', 'a piggy bank that counts your coins', None),
+    'starter_jar.py': ('jar lid', 'a sourdough jar lid that tracks how much your starter rises', None),
+    'dice_tower.py': ('dice tower', 'a dice tower that counts and announces your rolls', None),
+    'cat_wand.py': ('cat toy', 'a cat toy that waves a feather wand when the cat walks by', None),
+    'drum_pad.py': ('drum pad', 'a finger drum pad that plays real drum sounds', None),
+    'pill_box.py': ('pill box', 'a weekly pill box that reminds you to take your pills', None),
 }
 MARKERS = ("# === PARAMETERS (restyle here) ===",
            "# === STAGE A: hardware, shell, every working-face opening, fasteners ===",

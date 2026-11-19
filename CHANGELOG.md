@@ -7,6 +7,94 @@ release may change behaviour.
 
 ## [Unreleased]
 
+### Ten new example products, a landing-page Home (R980, R990)
+
+- **Ten new examples to start from**, each passing ./check at every resize
+  knob's ends, with a gallery picture and a shipped default project: Cloud
+  lamp (flashes lightning to music), On air sign (lights up when you talk),
+  Air theremin (play it by waving your hand), Coin counter pig, Sourdough
+  monitor (a jar lid that tracks the rise), Dice tower (counts and announces
+  rolls), Cat wand toy (waves a feather when the cat walks by), Drum pad,
+  Pill reminder and Fortune ball. They are the gallery's "New"; the ten
+  products from R940 moved to their own kinds. Existing installs get the
+  new default projects on the next start (manifest version 4).
+- **Home is a landing page**: "What will you make?" - describe a product
+  and Make it starts a new project and sends it to the agent - with example
+  ideas, Explore (picture cards of the examples, by kind), Start simple,
+  Your projects (search, bigger thumbnails, Show all), Bring your own model
+  (import, and where to find models) and the credits. It no longer shows the
+  3D view through it.
+- The view bar's "Ask about this view" is now **Add screenshot to context**.
+- The **Exploded view** card is a tidy segmented card under the navigation
+  cube, and never shows unstyled.
+
+### From prompt to product: Make it, and an electrical engineer suite (R1000-R1006)
+
+- **Make it** (the chat's "Ready to make it" card when a design is done, the
+  Atech menu, the Atech modules page, right-click Export and share): the
+  design's road to a product in seven steps (Design, Electronics, Firmware,
+  Parts list, Print, Assemble, Get it made), each with its state and the
+  button that does it.
+- **Make the product pack**: one folder in Documents/Atech Products with
+  the print file (3MF), a STEP, the parts list, assembly steps written from
+  the design, the electrical report (PDF and Markdown), the wiring diagram,
+  the block schematic, the power budget, a connection list and netlist,
+  the firmware's project.yaml, and **product.html**: the whole product on
+  one page that opens in any browser.
+- **Electrical suite**, one window for the design's electronics:
+  - **Overview**: a verdict ("Ready to wire", "Fix first") and rule checks,
+    each with its fix: no power module, a module on a port the Atech SDK
+    refuses (with the free ports that would work), a 2-port module off a
+    pair, ports 8 and 12, a robot arm without a power module, a stepper's
+    own 12-24 V supply, more than 4 PWM motors, stale or missing cables, a
+    power budget over the supply.
+  - **Schematic**: a block schematic. The board, each module's chip and
+    bus (I2C, SPI, I2S, UART, digital) and its Line A/B roles and I2C
+    address, quoted from the Atech SDK.
+  - **Wiring** (below), **Ports** (all 14: what the SDK lets each do, who
+    uses it, its line roles) and **Bring-up** (a first-power-on
+    checklist from the SDK's events and actions, ticked off as you go).
+  - **Power**: the 5 V budget against the supply you pick (computer USB
+    port, USB-C charger), planning figures from chip datasheets where they
+    matter (the ESP32-S3's Wi-Fi bursts, the LED grid, the 3 W speaker
+    amp), your own measured values in their place, and how long a power
+    bank lasts.
+  - **Firmware**: project.yaml from the design (or the one the agent
+    wrote), and the Atech SDK's Check, Build, Run without a board
+    (the SDK's emulator), Flash to board, Board health and Watch events,
+    with the output live. Without the SDK it says how to install it, or
+    lets you pick an `atech` already installed.
+  - **Export**: the report as one PDF, the connection list (CSV), the
+    netlist (JSON) and every drawing as PDF, PNG or SVG.
+- Facts carry their source (Atech SDK, chip datasheet, you). Pin numbers,
+  module currents and wire colours are never invented: they are not
+  published, and the suite says so.
+- `./check` prints one `ELECTRICAL` line on Atech builds (errors,
+  warnings, notes and the power budget); it changes no verdict. The
+  agent's API card says what the suite does and to point the user to
+  Make it when the design is done.
+
+### Wiring diagrams (R960-R963)
+
+- The Atech modules page has a **Wiring** button: a diagram of which port
+  each module uses, plugged in or by cable (with the cable's length), and
+  which power modules the design has, followed by the Atech SDK's cautions
+  in full and a list of what is not known yet. It follows every change to
+  the design while it is open.
+- **Export wiring…** saves it as a one-page PDF, a picture (PNG) or an SVG,
+  ready to print for the bench or to show in a video. **Open large…** shows
+  the full sheet. The Atech menu has **Wiring diagram…**.
+- The diagram is port-level on purpose: each port carries DATA1, DATA2,
+  GND, 3.3 V, 5 V and a rail labelled 12 V, but which pin is which is not
+  published yet, so it never shows pin numbers, wire colours or currents.
+- Ports 8 and 12 are marked where a module other than USB-C uses them,
+  quoting the two sources that call them reserved.
+- `./check` says how each module connects ("plugged in", "by cable 82 mm"),
+  prints a `WIRING power modules:` line, and adds a note when a design has
+  a robot arm (its 12 V rail needs a power module) or a stepper (it needs
+  its own motor supply). The agent's API card tells it to name ports, never
+  pins, and to ask before adding a power jack.
+
 ### Ten new examples, an examples gallery, and import a model to change it
 
 - **Ten new example products**, each with the Atech board and real modules
@@ -71,6 +159,11 @@ release may change behaviour.
 
 ### Fixed
 
+- The KiCad parts list carried a model author's e-mail address from its
+  STEP file, and the release check (no personal data in the app) stopped
+  the build. The author's name stays as the credit; addresses are left out.
+- The Atech SDK's `atech build` could not find PlatformIO when the app ran
+  it: the SDK's own folder now comes first on its PATH.
 - The design check knew only 22 of the agent's 31 product types: the ten
   products added on 10 Nov (coffee scale, flip timer, tiny TV, ...) were
   missing from its table. The check's table now has the same rows, in the

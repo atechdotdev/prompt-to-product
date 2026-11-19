@@ -3602,6 +3602,23 @@ def api_card():
              "socket stands %.1f mm out past the module's pin side." % (
                  CABLE_W, CABLE_T, abs(float(_v(table[1]["insert_dir"]) @ (
                      _v(table[1]["housing_hi"]) - _v(table[1]["housing_lo"]))))))
+    # R960: the app draws a port-level wiring diagram from each build
+    L.append("  WIRING: the app draws a wiring diagram from each build: which port "
+             "each module uses, plugged in or by cable, and the power modules "
+             "(./check prints WIRING power modules: ...). Each port carries DATA1, "
+             "DATA2, GND, 3.3 V, 5 V and a rail labelled 12 V that only a power "
+             "module feeds; which pin is which is not published, so never tell "
+             "the user pin numbers, wire colours or currents: name the port. "
+             "Never add a power jack module on your own; ask the user what "
+             "supply they have.")
+    L.append("  ELECTRICAL: the app's Electrical suite and Make it carry the design "
+             "on to the product: rule checks, the 5 V power budget, the port map, "
+             "a block schematic, firmware (atech validate / build / emulate / "
+             "upload) and the assembly steps. ./check prints one ELECTRICAL line "
+             "(errors, warnings, notes; power). Fix its errors in the design (a "
+             "missing USB-C module, a 2-port module off a pair); its warnings and "
+             "notes are for the user. Pick ports the Atech SDK accepts, so the "
+             "firmware builds; when the design is done, point the user to Make it.")
     L.append("EXAMPLE")
     L.append('  light = ap.seat(doc, "light", 2)')
     L.append('  head, ribbons = ap.cable(doc, "light", 11, ap.module_placement('

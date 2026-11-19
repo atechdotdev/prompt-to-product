@@ -100,6 +100,23 @@ class TestModule(unittest.TestCase):
         self.assertIn("CC BY-SA 4.0", a)
         self.assertIn("LED_D5.0mm.step", a)
 
+    def test_no_email_addresses(self):
+        """verify_tree's personal-data row refuses @gmail.com in the bundle
+        (17 Nov 2026: a STEP header's author address stopped a build); the
+        name stays as the credit."""
+        for key, p in kicad3d.index()["parts"].items():
+            self.assertFalse([a for a in p.get("authors") or () if "@" in a], key)
+        import ast
+        src = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(HERE))),
+                           "projects", "build_kicad3d_index.py")
+        with open(src, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read())
+        fn = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "step_author"]
+        ns = {"re": re}
+        exec(compile(ast.Module(body=fn, type_ignores=[]), src, "exec"), ns)  # noqa: S102
+        head = b"FILE_NAME('x.step','2020',('Rene Poeschl','someone@gmail.com'),('KiCad'),'','','');"
+        self.assertEqual(ns["step_author"](head), ["Rene Poeschl"])
+
     def test_picture_never_outside_its_folder(self):
         idx = kicad3d._INDEX
         kicad3d._INDEX = json.loads(json.dumps(kicad3d.index()))

@@ -259,3 +259,48 @@ R11. **A restyle breaks what a number did not follow.** Every outline,
     (handheld, R425). After a restyle, ./check at the new numbers before
     adding details.
 
+
+## Ten more products (R990) - each of these cost an agent most of an hour
+
+R12. **A cutter that changes with a knob can leave a knife edge at one
+    end only.** Letters inlaid in a panel (on_air_sign.py): the N's acute
+    counters left a 0.5 mm sliver of panel between pocket walls that the
+    wall probe only sampled at WIDTH 230. Close each glyph (offset out and
+    back by ~1 mm, rebuilt as straight facets) before cutting its pocket.
+    Sweep EVERY knob end, not just the base.
+R13. **A sensor that looks into a closed space is sealed.** ./check
+    counts a working face as open only when its rays leave the product.
+    A humidity sensor breathing a closed jar, a ToF across a coin chamber
+    or across a dice chute: give it a real opening to the outside (a vent
+    under an overhang, a clear window, a slot through the far wall)
+    - starter_jar.py, piggy_bank.py, dice_tower.py.
+R14. **A mic under a big part is sealed.** Its rays go straight up: a
+    cloud, a cap or a lid overhead closes it. Put the grille where the sky
+    is clear (cloud_lamp.py: the mic in front of the cloud).
+R15. **Many holes cut straight into one big wall make the overlap check
+    crawl.** A face with 100+ hole loops is slow to tessellate, so every
+    module point falls back to a 40 ms query (46 s). Cut the grille into
+    a separate insert part and drop it into one opening (18 s,
+    dice_tower.py). On a sphere, drill your own ring layout in one cut:
+    cad.speaker_grille on a ball took 80 s (fortune_ball.py: 7 s).
+R16. **A 2-connector module cabled from a side column crosses its
+    ribbons** when it faces outward (plug order and socket order flip).
+    Turn it the other way and U-turn the ribbons into its near edge
+    (fortune_ball.py, dice_tower.py's screen_route), and check the overlap.
+R17. **Overlapping spheres meet at paper-thin creases.** Every blob that
+    touches the floor must reach below it, and every bump's centre must
+    sit deep inside the sphere under it (cloud_lamp.py's DOMES rule).
+R18. **A seam just above a flat belly is a knife-edge rim.** Split a
+    rounded body where the wall is steep (6 mm above the flat,
+    piggy_bank.py), never at the tangent.
+R19. **Round inside corners read as channels.** The clip probe calls a
+    filleted inside corner, a rounded pocket corner or an arc at a filled
+    glyph tip an open "channel" WARNING. Use a chamfer or 3 straight
+    facets (cat_wand.py's USB-C pocket, starter_jar.py's core).
+R20. **The fastening check only knows true cylinders as pins** (radius
+    4 mm or less): a swept pipe end in a socket is not a pin. End it in
+    a real cylinder fused to the pipe (cat_wand.py's wand).
+R21. **The gallery renderer draws everything opaque.** Glass, frosted and
+    smoked parts show as solid colour in the example picture, so light
+    a "glowing" part with colour and make anything inside glass read
+    from its outside (starter_jar.py's ticks and lettering on the jar).

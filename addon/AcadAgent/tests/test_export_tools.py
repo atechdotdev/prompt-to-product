@@ -443,7 +443,8 @@ class Widgets(unittest.TestCase):
                           "Bill of materials...", "Get it made by Atech...", "Post to atech.dev...",
                           "Save share image",
                           "Save review sheet",
-                          "Make assembly video", "Simulate"])
+                          "Make assembly video", "Simulate", "Wiring diagram...",
+                          "Electrical suite...", "Make it..."])
         self.assertIsNotNone(acts[0].menu())
 
 

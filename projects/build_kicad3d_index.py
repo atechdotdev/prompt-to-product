@@ -482,8 +482,10 @@ def step_author(data):
         return []
     groups = re.findall(r"\(([^()]*)\)", m.group(1))
     names = re.findall(r"'([^']*)'", groups[0]) if groups else []
+    # an e-mail address is left out: the name is the credit, and the release
+    # gate (verify_tree's personal-data row) refuses addresses in the bundle
     return [n.strip() for n in names if n.strip() and n.strip().lower() not in
-            ("unknown", "author", "")]
+            ("unknown", "author", "") and "@" not in n]
 
 
 def picture_rel(key):

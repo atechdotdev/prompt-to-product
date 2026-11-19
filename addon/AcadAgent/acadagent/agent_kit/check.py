@@ -1293,6 +1293,7 @@ def main():
     _walls(res, ends, ws)
     _atech_port_check(doc, res)
     _firmware(res, ws)
+    _wiring(res)                                        # R960
     try:
         res["check_cache"] = atech_geom.check_cache_stats()   # R270
         hits = atech_geom.save_check_cache()
@@ -2293,6 +2294,42 @@ def _firmware(res, ws):
             "(reference/%s)" % (atech_firmware.PROJECT, atech_firmware.REFERENCE))
 
 
+def _wiring_mod():
+    """atech_wiring (R960), or None when it cannot be imported: the ATECH
+    lines then print as before."""
+    try:
+        import atech_wiring
+        return atech_wiring
+    except Exception:                                   # noqa: BLE001
+        return None
+
+
+def _wiring(res):
+    """R960: the wiring notes of an Atech build (a robot arm's 12 V rail, a
+    stepper's own supply): NOTES, never warnings or problems - the agent
+    cannot settle them, the user can. Adds nothing else to res."""
+    at = res.get("atech") or {}
+    if not at.get("modules"):
+        return
+    w = _wiring_mod()
+    if w is None:
+        return
+    try:
+        res.setdefault("notes", []).extend(w.notes(at))
+    except Exception as exc:                            # noqa: BLE001
+        res.setdefault("notes", []).append("wiring could not be worked out: %s" % exc)
+
+
+def _electrical_line(at, fw=None):
+    """R1006: one ELECTRICAL line (atech_electrical's rule-check counts and
+    the 5 V budget). Information only: it changes no verdict."""
+    try:
+        import atech_electrical
+        return atech_electrical.check_line(atech_electrical.analyse(at, firmware=fw))
+    except Exception:                                   # noqa: BLE001
+        return None
+
+
 def _fitted_after(doc, res):
     """R137: intent.json "fitted_after" -> the Labels of model.py's parts it
     names (end caps, a lid fitted after the modules). S50: a name model.py
@@ -2421,10 +2458,25 @@ def _say_summary(res):
             f.get("label"), f.get("valid"), f.get("solids"), f.get("volume_mm3"),
             " x ".join("%g" % v for v in f.get("size") or [])))
     at = res.get("atech") or {}
+    wiring = _wiring_mod()
     for m in at.get("modules") or []:
+        # R960: how it connects, inside the one parenthesis
+        how = []
+        if m.get("seeded"):
+            how.append("the user's")
+        if wiring is not None:
+            how.append(wiring.connection_words(m))
         _say("ATECH module %s on port(s) %s%s" % (
             m["label"], ",".join(str(p) for p in m["ports"]),
-            " (the user's)" if m.get("seeded") else ""))
+            " (%s)" % ", ".join(how) if how else ""))
+    if wiring is not None and at.get("modules"):
+        line = wiring.power_line(at)
+        if line:
+            _say(line)
+    if at.get("modules"):
+        line = _electrical_line(at, res.get("firmware"))
+        if line:
+            _say(line)
     fw = res.get("firmware") or {}
     if fw:
         _say("FIRMWARE %s, project.yaml %s; the modules block of this build:"

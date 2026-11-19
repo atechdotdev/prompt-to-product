@@ -368,7 +368,7 @@ class TestR303ViewBar(Case):
         bar = self.bar()
         names = {b.accessibleName() for b in bar.findChildren(QtWidgets.QPushButton)}
         for n in ("Fit all", "Fit selection", "More views", "Perspective",
-                  "Wireframe", "Full-screen 3D", "Spin", "Ask about this view"):
+                  "Wireframe", "Full-screen 3D", "Spin", "Add screenshot to context"):
             self.assertIn(n, names)
 
     def test_rear_left_bottom_reach_the_view(self):

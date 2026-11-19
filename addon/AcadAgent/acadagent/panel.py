@@ -5364,6 +5364,55 @@ class AgentPanel(QtWidgets.QWidget):
             msg = nxt(self._cur.ws) if callable(nxt) else None
             if msg:
                 self._send_level(msg)
+            else:
+                # R1005: the design is done (the last level, or a clean
+                # build): hand over to Make it
+                self._offer_make_it(finished_levels=lvl is not None)
+
+    #: R1005: the hand-over card after a clean build.
+    MAKE_IT_TITLE = "Ready to make it"
+    MAKE_IT_BODY = ("%s is designed and checked. Next: the electronics, the firmware, "
+                    "the print and the assembly steps, one step at a time, or all of "
+                    "it in one product pack.")
+
+    def _offer_make_it(self, finished_levels=False):
+        """R1005: once per chat (and again when the design ladder ends), a
+        notice with Make it and Electrical suite. Returns the Notice or None."""
+        state = self._cur
+        if state is None:
+            return None
+        if getattr(state, "make_it_offered", False) and not finished_levels:
+            return None
+        try:
+            import FreeCAD
+            doc = FreeCAD.ActiveDocument
+        except Exception:                               # noqa: BLE001
+            doc = None
+        if doc is None:
+            return None
+        try:
+            from . import export_tools
+            if not export_tools.agent_parts(doc):
+                return None
+        except Exception:                               # noqa: BLE001
+            return None
+        state.make_it_offered = True
+
+        def make_it():
+            from . import product_view
+            product_view.open_make_it(doc, self.window())
+
+        def electrical():
+            from . import electrical_suite
+            electrical_suite.open_suite(doc, "overview", self.window())
+
+        has_modules = any(getattr(o, "AtechRole", None) == "module" for o in doc.Objects)
+        actions = [("Make it\u2026", make_it)]
+        if has_modules:
+            actions.append(("Electrical suite", electrical))
+        return self.show_notice(self.MAKE_IT_TITLE,
+                                self.MAKE_IT_BODY % (doc.Label or "The design"),
+                                actions=actions)
 
     #: R191: the card line and note when a fix turn leaves model.py as it
     #: was and only intent.json misses remain.

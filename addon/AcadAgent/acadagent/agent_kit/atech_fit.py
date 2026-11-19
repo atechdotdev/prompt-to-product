@@ -274,6 +274,19 @@ def stage_at(minutes):
 # speaker robot" is a robot), the fan before the lamp words ("a desk fan
 # with lights" is a fan).
 FORKS = [
+    # R990: ten more products (2026-11-17), first: a cat toy before the
+    # motion light's "motion-activated", a drum pad before the giant
+    # button's "soundboard", a cloud lamp before the lamp words
+    (r'\b((thunder|storm|rain|lightning|cumulus|fluffy|puffy|cotton)[ -]?clouds?|clouds? (lamps?|lights?|night ?lights?)|(storm|thunder|lightning) (lamps?|lights?))\b', 'cloud_lamp'),
+    (r'\b(on[- ]?air|recording light|studio light|busy light|tally light|do[- ]not[- ]disturb (?:sign|light)|in[- ]a[- ]meeting (?:sign|light))\b', 'on_air_sign'),
+    (r'\b(theremin|air (?:instrument|synth|harp)|touchless (?:instrument|synth)|gesture (?:synth|instrument)|(?:wave|waving) (?:your |my )?hand.{0,40}(?:music|pitch|note|sound|play)|(?:instrument|music|notes?|synth)\b.{0,60}\b(?:wave|waving) (?:your |my )?hands?)', 'theremin'),
+    (r'\b(piggy ?banks?|coin (banks?|counters?|pigs?)|money ?box(es)?|savings (jars?|banks?|pigs?))\b', 'piggy_bank'),
+    (r'\b(sourdough|levain|(sourdough |bread )?starter (jar|monitor|tracker)|(smart|sensor) (jar )?lids?|jar lids?|ferment(ation|ing)? (jar|monitor|lid)s?|kombucha (jar|monitor)s?|mason jar)\b', 'starter_jar'),
+    (r'\bdice\b.*\b(tower|roller|tray|keep|castle)\b|\b(tower|castle)\b.*\bdice\b|\bdice (roller|counter)\b', 'dice_tower'),
+    (r'\b(cat (toys?|teasers?|wands?)|kitt(y|en) toys?|(feather|teaser) (wands?|toys?)|pet teasers?|feather teasers?|wand toys?|(interactive|automatic|motion[- ]?(activated|triggered|sensing)) (cat|kitten|pet) toys?)\b', 'cat_wand'),
+    (r'\b(finger[ -]?drums?|drum[ -]?(pads?|machines?|controllers?)|beat[ -]?(pads?|makers?|machines?)|sampler[ -]?pads?|pad[ -]?controllers?|mpc)\b', 'drum_pad'),
+    (r'\b(pill ?(box|boxes|organi[sz]ers?|reminders?|cases?|dispensers?|trays?)|medication (reminder|organi[sz]er|box)s?|medicine (box|organi[sz]er)s?|(weekly|daily|7[- ]?day) pills?)\b', 'pill_box'),
+    (r'\b(fortune (telling )?ball|magic (answer |8 )?ball|crystal ball|oracle (ball|orb)|decision ball|shake(-| )to(-| )answer|yes[- /]no ball|answer ball)\b', 'fortune_ball'),
     # R940: ten viral products (2026-11-10), first: a bird feeder camera
     # before the feeder, a pot with a face before the planter, a flip
     # timer before the clock's "timer", the duck before the robot words

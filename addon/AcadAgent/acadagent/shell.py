@@ -233,30 +233,19 @@ VIEWBAR_QSS = """
 """
 
 HOME_QSS = """
-#HomeView {{ background: transparent; }}
+#HomeView {{ background: {base}; }}
 #HomeView[dropping="true"] {{ border: 2px dashed {accent}; border-radius: 18px; }}
-#HomeScroll, #HomeInner {{ background: transparent; border: none; }}
+#HomeScroll, #HomeInner, #HomeScroll > QWidget > QWidget {{ background: {base}; border: none; }}
 #BasedOn {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
-#HomeTitle {{ color: {text}; font-family: 'Sen', {UI}; font-size: 22px; font-weight: 700; }}
+#HomeTitle {{ color: {text}; font-family: 'Sen', {UI}; font-size: 17px; font-weight: 700; }}
 #HomeMadeBy {{ color: {muted}; font-family: {UI}; font-size: 11px; }}
-#HomeSiteLabel {{ color: {muted}; font-family: {UI}; font-size: 11px; font-weight: 600;
-    letter-spacing: 0.3px; padding-right: 2px; }}
 #HomeSiteBtn {{
-    background: transparent; color: {text}; border: 1px solid {line}; border-radius: 13px;
-    padding: 0 11px 0 9px; min-height: 26px; max-height: 26px; font-family: {UI};
-    font-size: 12px; font-weight: 500;
+    background: transparent; color: {muted}; border: none; border-radius: 15px;
+    padding: 0 10px; min-height: 30px; max-height: 30px; font-family: {UI};
+    font-size: 13px; font-weight: 500;
 }}
-#HomeSiteBtn:hover {{ background: {hover}; border-color: {line_strong}; }}
-#HomeSiteBtn:focus {{ border-color: {accent}; }}
-#HomeSection {{ color: {muted}; font-family: {UI}; font-size: 11px; font-weight: 600;
-    letter-spacing: 0.5px; }}
-#HomeNote {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
-#HomeSearch {{
-    background: {input_bg}; color: {text}; border: 1px solid {input_border};
-    border-radius: 16px; padding: 6px 12px 6px 4px; min-height: 20px;
-    font-family: {UI}; font-size: 13px;
-}}
-#HomeSearch:focus {{ border-color: {line_strong}; }}
+#HomeSiteBtn:hover {{ background: {hover}; color: {text}; }}
+#HomeSiteBtn:focus {{ color: {text}; }}
 #HomeBtn {{
     background: {panel}; color: {text}; border: 1px solid {line}; border-radius: 16px;
     padding: 0 14px; min-height: 32px; max-height: 32px; font-family: {UI};
@@ -264,20 +253,85 @@ HOME_QSS = """
 }}
 #HomeBtn:hover {{ background: {hover}; border-color: {line_strong}; }}
 #HomeBtn:focus {{ border-color: {accent}; }}
-#ProjectCard {{ background: {panel}; border: 1px solid {line}; border-radius: 16px; }}
-#ProjectCard:hover {{ border-color: {line_strong}; background: {card}; }}
-#ProjectCard:focus, #StartCard:focus {{ border: 1px solid {accent}; }}
-#Thumb {{ background: {bubble}; border-radius: 10px; }}
+#HomeLink {{
+    background: transparent; color: {text}; border: none; padding: 0 4px;
+    min-height: 26px; font-family: {UI}; font-size: 13px; font-weight: 600;
+}}
+#HomeLink:hover {{ color: {accent}; }}
+
+/* hero */
+#Hero {{ background: {panel}; border: 1px solid {line}; border-radius: 28px; }}
+#HeroKicker {{ color: {accent}; font-family: {UI}; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.4px; }}
+#HeroTitle {{ color: {text}; font-family: 'Sen', {UI}; font-size: 40px; font-weight: 700; }}
+#HeroSub {{ color: {muted}; font-family: {UI}; font-size: 15px; }}
+#HeroBox {{ background: {sunken}; border: 1px solid {line_strong}; border-radius: 22px; }}
+#HeroPrompt {{
+    background: transparent; color: {text}; border: none; padding: 0 6px;
+    min-height: 40px; font-family: {UI}; font-size: 15px;
+}}
+#HeroGo {{
+    background: {btn_bg}; color: {btn_text}; border: none; border-radius: 18px;
+    padding: 0 18px; min-height: 36px; max-height: 36px;
+    font-family: {UI}; font-size: 13px; font-weight: 600;
+}}
+#HeroGo:hover {{ background: {btn_bg_hover}; }}
+#HeroGo:disabled {{ background: {line}; color: {dim}; }}
+#Idea {{
+    background: transparent; color: {muted}; border: 1px solid {line}; border-radius: 14px;
+    padding: 0 12px; min-height: 28px; max-height: 28px; font-family: {UI}; font-size: 12px;
+}}
+#Idea:hover {{ color: {text}; border-color: {line_strong}; background: {hover}; }}
+#HeroOr {{ color: {dim}; font-family: {UI}; font-size: 12px; }}
+#HeroTile {{ background: {bubble}; border-radius: 20px; }}
+
+/* sections */
+#HomeH2 {{ color: {text}; font-family: 'Sen', {UI}; font-size: 22px; font-weight: 700; }}
+#HomeH2Sub {{ color: {muted}; font-family: {UI}; font-size: 13px; }}
+#HomeSection {{ color: {text}; font-family: 'Sen', {UI}; font-size: 22px; font-weight: 700; }}
+#HomeNote {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
+#CatChip {{
+    background: transparent; color: {muted}; border: 1px solid {line}; border-radius: 15px;
+    padding: 0 13px; min-height: 30px; max-height: 30px; font-family: {UI};
+    font-size: 12px; font-weight: 500;
+}}
+#CatChip:hover {{ color: {text}; border-color: {line_strong}; }}
+#CatChip:checked {{ background: {btn_bg}; color: {btn_text}; border-color: {btn_bg}; }}
+#HomeSearch {{
+    background: {input_bg}; color: {text}; border: 1px solid {input_border};
+    border-radius: 16px; padding: 6px 12px 6px 4px; min-height: 20px;
+    font-family: {UI}; font-size: 13px;
+}}
+#HomeSearch:focus {{ border-color: {line_strong}; }}
+
+/* cards */
+#ProjectCard {{ background: {panel}; border: 1px solid {line}; border-radius: 18px; }}
+#ProjectCard:hover {{ border-color: {line_strong}; }}
+#ProjectCard:focus, #StartCard:focus, #PicCard:focus {{ border: 1px solid {accent}; }}
+#Thumb {{ background: {bubble}; border-radius: 12px; }}
 #Chip {{
     background: {bubble}; color: {text}; border-radius: 9px; padding: 1px 8px;
     font-family: {UI}; font-size: 10px; font-weight: 600;
 }}
+#PicCard {{ background: {panel}; border: 1px solid {line}; border-radius: 18px; }}
+#PicCard:hover {{ border-color: {line_strong}; }}
+#PicTag {{ color: {accent}; font-family: {UI}; font-size: 11px; font-weight: 600; }}
 #EmptyCredit {{ color: {muted}; font-family: {UI}; font-size: 11px; }}
 #CardTitle {{ color: {text}; font-family: {UI}; font-size: 13px; font-weight: 600; }}
 #CardSub {{ color: {muted}; font-family: {UI}; font-size: 12px; }}
 #CardIcon {{ background: {bubble}; border-radius: 10px; }}
-#StartCard {{ background: {panel}; border: 1px solid {line}; border-radius: 16px; }}
-#StartCard:hover {{ border-color: {line_strong}; background: {card}; }}
+#StartCard {{ background: {panel}; border: 1px solid {line}; border-radius: 18px; }}
+#StartCard:hover {{ border-color: {line_strong}; }}
+
+/* bring your own model */
+#ByoBand {{ background: {panel}; border: 1px solid {line}; border-radius: 24px; }}
+#SrcPill {{
+    background: {sunken}; color: {text}; border: 1px solid {line}; border-radius: 14px;
+    padding: 0 12px; min-height: 28px; max-height: 28px; font-family: {UI};
+    font-size: 12px; font-weight: 500;
+}}
+#SrcPill:hover {{ border-color: {line_strong}; background: {hover}; }}
+#HomeRule {{ background: {line}; min-height: 1px; max-height: 1px; border: none; }}
 """
 
 HINT_QSS = """
@@ -384,7 +438,7 @@ QStatusBar::item {{ border: none; }}
 
 
 # ---------------------------------------------------------------- widgets
-ASK_TEXT = "Ask about this view"
+ASK_TEXT = "Add screenshot to context"
 
 
 def icon_label(text):
@@ -692,7 +746,17 @@ EXAMPLE_ICONS = {"starter_board": "cpu", "starter_case": "cube",
                  "focus_cube": "focus", "tiny_tv": "monitor",
                  "retro_camera": "camera", "photo_turntable": "rotate",
                  "debug_duck": "chat", "follower_counter": "sparkles",
-                 "bird_cam": "camera", "hype_button": "speaker"}
+                 "bird_cam": "camera", "hype_button": "speaker",
+                 "fortune_ball": "sparkles",
+                 "cloud_lamp": "sparkles",
+                 "on_air_sign": "sparkles",
+                 "theremin": "speaker",
+                 "piggy_bank": "sparkles",
+                 "starter_jar": "ruler",
+                 "dice_tower": "cube",
+                 "cat_wand": "sparkles",
+                 "drum_pad": "grid",
+                 "pill_box": "grid"}
 
 
 def example_entries(kind="product"):
@@ -958,8 +1022,8 @@ class ProjectCard(QtWidgets.QFrame):
     an Electronics chip when it holds Atech hardware."""
 
     clicked = QtCore.Signal()
-    W, H = 210, 150
-    THUMB = (186, 72)
+    W, H = 210, 200
+    THUMB = (186, 120)
 
     def __init__(self, row, parent=None):
         super().__init__(parent)
@@ -1194,20 +1258,229 @@ class FreeCadBadge(QtWidgets.QWidget):
         super().mouseReleaseEvent(ev)
 
 
-class HomeView(QtWidgets.QWidget):
-    """Home: shown in the viewport when no project is open (R308).
+#: R980: the hero's example ideas (a click puts one in the prompt box).
+HOME_IDEAS = (
+    "A lamp that wakes me up",
+    "A robot that follows my cat",
+    "A plant pot that says it is thirsty",
+    "A tiny desk arcade",
+)
+#: R980: the hero collage, example keys with a picture.
+HERO_PICTURES = ("hype_button", "debug_duck", "plant_pal", "tiny_tv")
+#: R980: where to find a model to bring in (title, url).
+MODEL_SOURCES = (
+    ("MakerWorld", "https://makerworld.com"),
+    ("Printables", "https://www.printables.com"),
+    ("Thingiverse", "https://www.thingiverse.com"),
+    ("Sketchfab", "https://sketchfab.com/search?features=downloadable&type=models"),
+    ("GrabCAD", "https://grabcad.com/library"),
+    ("McMaster-Carr", "https://www.mcmaster.com"),
+)
 
-    The header (mark, product name, search, Open file), the project grid
-    ("New project" first, then saved projects newest first, from
-    projects_store.list_projects() or FreeCAD's recent files), "Start from
-    an example" cards, and the credit line. Files dropped on it open.
+
+def _gallery_rows():
+    """{example key: gallery row} (line, category, picture), {} without it."""
+    try:
+        from . import examples_gallery
+        return {r["key"]: r for r in examples_gallery.entries()}
+    except Exception as exc:                           # noqa: BLE001
+        _log("gallery rows: %r" % (exc,))
+        return {}
+
+
+def _example_picture(key):
+    try:
+        from . import examples_gallery
+        return examples_gallery.picture(key)
+    except Exception:                                  # noqa: BLE001
+        return None
+
+
+def _rounded(pm, w, h, radius, dpr):
+    """pm scaled to fit w x h (logical px), centred on a transparent
+    rounded tile, at the screen's pixel scale."""
+    out = QtGui.QPixmap(int(w * dpr), int(h * dpr))
+    out.fill(QtCore.Qt.transparent)
+    sc = pm.scaled(int(w * dpr), int(h * dpr), QtCore.Qt.KeepAspectRatio,
+                   QtCore.Qt.SmoothTransformation)
+    p = QtGui.QPainter(out)
+    p.setRenderHint(QtGui.QPainter.Antialiasing)
+    p.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+    path = QtGui.QPainterPath()
+    path.addRoundedRect(QtCore.QRectF(0, 0, w * dpr, h * dpr), radius * dpr, radius * dpr)
+    p.setClipPath(path)
+    p.drawPixmap(int((out.width() - sc.width()) / 2),
+                 int((out.height() - sc.height()) / 2), sc)
+    p.end()
+    out.setDevicePixelRatio(dpr)
+    return out
+
+
+class FlowRow(QtWidgets.QLayout):
+    """R980: a row of pills that wraps onto the next line when the page is
+    narrow, each pill at its own width (Qt's flow layout example)."""
+
+    def __init__(self, parent=None, spacing=6):
+        super().__init__(parent)
+        self._items = []
+        self._gap = spacing
+        self.setContentsMargins(0, 0, 0, 0)
+
+    def addItem(self, item):                           # noqa: N802
+        self._items.append(item)
+
+    def addStretch(self, *_a):                         # noqa: N802
+        """Kept for call sites written for QHBoxLayout: nothing to do."""
+
+    def count(self):
+        return len(self._items)
+
+    def itemAt(self, i):                               # noqa: N802
+        return self._items[i] if 0 <= i < len(self._items) else None
+
+    def takeAt(self, i):                               # noqa: N802
+        return self._items.pop(i) if 0 <= i < len(self._items) else None
+
+    def expandingDirections(self):                     # noqa: N802
+        return QtCore.Qt.Orientations()
+
+    def hasHeightForWidth(self):                       # noqa: N802
+        return True
+
+    def heightForWidth(self, w):                       # noqa: N802
+        return self._do(QtCore.QRect(0, 0, w, 0), True)
+
+    def setGeometry(self, rect):                       # noqa: N802
+        super().setGeometry(rect)
+        self._do(rect, False)
+
+    def sizeHint(self):                                # noqa: N802
+        return self.minimumSize()
+
+    def minimumSize(self):                             # noqa: N802
+        size = QtCore.QSize()
+        for it in self._items:
+            size = size.expandedTo(it.minimumSize())
+        return size
+
+    def _do(self, rect, test):
+        x, y, line = rect.x(), rect.y(), 0
+        for it in self._items:
+            w = it.widget()
+            if w is not None and w.isHidden():
+                continue
+            hint = it.sizeHint()
+            if x + hint.width() > rect.right() + 1 and line > 0:
+                x = rect.x()
+                y += line + self._gap
+                line = 0
+            if not test:
+                it.setGeometry(QtCore.QRect(QtCore.QPoint(x, y), hint))
+            x += hint.width() + self._gap
+            line = max(line, hint.height())
+        return y + line - rect.y()
+
+
+class PictureCard(QtWidgets.QFrame):
+    """R980: an example on Home's Explore grid: a big picture, the name,
+    one line and what kind of product it is. Same contract as ClickCard
+    (clicked, set_compact, restyle, example_key, default_title)."""
+
+    clicked = QtCore.Signal()
+    W, H = 210, 262
+    PIC = (186, 150)
+
+    def __init__(self, icon_name, title, sub, picture=None, tag="", parent=None):
+        super().__init__(parent)
+        self.setObjectName("PicCard")
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+        self.setAttribute(QtCore.Qt.WA_Hover, True)
+        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setFixedSize(self.W, self.H)
+        self.setAccessibleName(title)
+        self.setAccessibleDescription(sub)
+        self.category = tag
+        self._icon_name = icon_name
+        self._picture = picture
+        self._compact = False
+        lay = QtWidgets.QVBoxLayout(self)
+        lay.setContentsMargins(12, 12, 12, 14)
+        lay.setSpacing(4)
+        self.pic = QtWidgets.QLabel()
+        self.pic.setObjectName("Thumb")
+        self.pic.setFixedSize(*self.PIC)
+        self.pic.setAlignment(QtCore.Qt.AlignCenter)
+        lay.addWidget(self.pic)
+        lay.addSpacing(6)
+        self.tag = QtWidgets.QLabel(tag)
+        self.tag.setObjectName("PicTag")
+        self.tag.setVisible(bool(tag))
+        lay.addWidget(self.tag)
+        t = QtWidgets.QLabel(title)
+        t.setObjectName("CardTitle")
+        lay.addWidget(t)
+        s = QtWidgets.QLabel(sub)
+        s.setObjectName("CardSub")
+        s.setWordWrap(True)
+        lay.addWidget(s)
+        lay.addStretch(1)
+
+    def set_compact(self, on):
+        """Short card for small viewports, like ClickCard: no picture, no
+        tag, 100 px tall."""
+        on = bool(on)
+        if on == self._compact:
+            return
+        self._compact = on
+        self.pic.setVisible(not on)
+        self.tag.setVisible(bool(self.category) and not on)
+        self.layout().invalidate()
+        self.setFixedSize(self.W, 100 if on else self.H)
+
+    def restyle(self):
+        pm = QtGui.QPixmap(self._picture) if self._picture else QtGui.QPixmap()
+        if pm.isNull():
+            self.pic.setPixmap(style.icon(self._icon_name, style.tokens()["dim"], 30)
+                               .pixmap(30, 30))
+            return
+        self.pic.setPixmap(_rounded(pm, self.PIC[0], self.PIC[1], 12,
+                                    style.pixel_scale()))
+
+    def mouseReleaseEvent(self, ev):                   # noqa: N802
+        if ev.button() == QtCore.Qt.LeftButton and self.rect().contains(ev.pos()):
+            self.clicked.emit()
+        super().mouseReleaseEvent(ev)
+
+    def keyPressEvent(self, ev):                       # noqa: N802
+        if ev.key() in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter,
+                        QtCore.Qt.Key_Space):
+            self.clicked.emit()
+            return
+        super().keyPressEvent(ev)
+
+
+class HomeView(QtWidgets.QWidget):
+    """Home: shown in the viewport when no project is open (R308), laid out
+    as a landing page (R980):
+
+    the top bar (mark, product name, the atech.dev links, Shop, account),
+    the hero ("What will you make?": a prompt that starts a new project
+    and sends it to the agent, example ideas, New / Import / Open, a
+    collage of real products), Explore (picture cards of the examples,
+    by kind, "See all"), Start simple, Your projects ("New project"
+    first, then saved projects newest first, with search), Bring your own
+    model (import, and where to find models), and the credit line. Files
+    dropped on it open.
 
     For the start-card tests of the old EmptyView, `cards` (the action and
     example cards), columns_for() and _layout_cards() keep their meaning."""
 
     MAX_COLS = 5
-    GAP = 12
+    GAP = 16
     MARGIN = 32
+    CARD_W = 210
+    PROJECT_ROWS = 2
 
     def keyPressEvent(self, ev):                       # noqa: N802
         """R801: Esc on Home (opened over a project) goes back to it."""
@@ -1216,10 +1489,36 @@ class HomeView(QtWidgets.QWidget):
             return
         super().keyPressEvent(ev)
 
+    @staticmethod
+    def _h2(title, sub=None):
+        col = QtWidgets.QVBoxLayout()
+        col.setSpacing(3)
+        h = QtWidgets.QLabel(title)
+        h.setObjectName("HomeSection")
+        col.addWidget(h)
+        s = None
+        if sub:
+            s = QtWidgets.QLabel(sub)
+            s.setObjectName("HomeH2Sub")
+            s.setWordWrap(True)
+            col.addWidget(s)
+        return col, h, s
+
+    def _btn(self, text, name="HomeBtn", tip=None, acc=None):
+        b = QtWidgets.QPushButton(text)
+        b.setObjectName(name)
+        b.setCursor(QtCore.Qt.PointingHandCursor)
+        b.setAccessibleName(acc or text)
+        b.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        if tip:
+            b.setToolTip(tip)
+        return b
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("HomeView")
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.setAutoFillBackground(True)
         self.setAcceptDrops(True)
         self.setAccessibleName("Home")
         outer = QtWidgets.QVBoxLayout(self)
@@ -1229,22 +1528,25 @@ class HomeView(QtWidgets.QWidget):
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scroll.viewport().setAutoFillBackground(False)
         inner = QtWidgets.QWidget()
         inner.setObjectName("HomeInner")
+        self.inner = inner
         v = QtWidgets.QVBoxLayout(inner)
+        self.page = v
         m = self.MARGIN
-        v.setContentsMargins(m, 28, m, 24)
+        v.setContentsMargins(m, 18, m, 28)
         v.setSpacing(0)
 
+        # ---- top bar
         head = QtWidgets.QHBoxLayout()
-        head.setSpacing(10)
+        head.setSpacing(6)
         self.mark = QtWidgets.QLabel()
         head.addWidget(self.mark)
+        head.addSpacing(4)
+        tcol = QtWidgets.QVBoxLayout()
+        tcol.setSpacing(0)
         self.title = QtWidgets.QLabel(style.PRODUCT)
         self.title.setObjectName("HomeTitle")
-        tcol = QtWidgets.QVBoxLayout()
-        tcol.setSpacing(2)
         tcol.addWidget(self.title)
         self.made_by = QtWidgets.QLabel(style.MADE_BY)
         self.made_by.setObjectName("HomeMadeBy")
@@ -1255,47 +1557,27 @@ class HomeView(QtWidgets.QWidget):
         # No "Based on FreeCAD" here (owner, 2026-11-07): the credit the
         # licence asks for is on Credits and About, linked from this page.
         head.addLayout(tcol)
+        head.addSpacing(18)
+        # R950/R980: the rest of Atech one click away, as the page's nav
+        self.site_cards = []
+        nav_names = {"app": "What's new", "shop": "Board and modules"}
+        for key, ico, title, sub, url in site_link_entries():
+            b = self._btn(nav_names.get(key, title), "HomeSiteBtn",
+                          "%s\n%s" % (sub, url), "%s on atech.dev" % title)
+            b.site_key = key
+            b._icon_name = ico
+            b.clicked.connect(lambda _=False, u=url: _open_link(u))
+            head.addWidget(b)
+            self.site_cards.append(b)
         head.addStretch(1)
-        self.search = QtWidgets.QLineEdit()
-        self.search.setObjectName("HomeSearch")
-        self.search.setPlaceholderText("Search projects")
-        self.search.setAccessibleName("Search projects")
-        self.search.setClearButtonEnabled(True)
-        self.search.setFixedWidth(220)
-        self._search_act = None
-        self.search.textChanged.connect(self.apply_filter)
-        head.addWidget(self.search)
-        self.btn_open = QtWidgets.QPushButton("Open file\u2026")
-        self.btn_open.setObjectName("HomeBtn")
-        self.btn_open.setCursor(QtCore.Qt.PointingHandCursor)
-        self.btn_open.setAccessibleName("Open file")
-        self.btn_open.setToolTip("Open a .FCStd project, or STEP / STL / 3MF "
-                                 "as a new project. You can also drop files here.")
-        self.btn_open.clicked.connect(lambda: _open_file())
         # R840: the Atech shop, where the modules in a design are bought
-        self.btn_shop = QtWidgets.QPushButton("Atech shop")
-        self.btn_shop.setObjectName("HomeBtn")
-        self.btn_shop.setCursor(QtCore.Qt.PointingHandCursor)
-        self.btn_shop.setAccessibleName("The Atech shop on atech.dev")
-        self.btn_shop.setToolTip("The Atech board, modules, kits and 3D print "
-                                 "vouchers on atech.dev. In a project, Modules "
-                                 "\u2192 Get it made puts that project's modules "
-                                 "and 3D prints in the cart.")
+        self.btn_shop = self._btn(
+            "Atech shop", tip="The Atech board, modules, kits and 3D print "
+            "vouchers on atech.dev. In a project, Modules → Get it made "
+            "puts that project's modules and 3D prints in the cart.",
+            acc="The Atech shop on atech.dev")
         self.btn_shop.clicked.connect(lambda: _open_link(_shop().SHOP))
-        # R970: bring in a model from anywhere and say what to change
-        self.btn_import = QtWidgets.QPushButton("Import a model\u2026")
-        self.btn_import.setObjectName("HomeBtn")
-        self.btn_import.setCursor(QtCore.Qt.PointingHandCursor)
-        self.btn_import.setAccessibleName("Import a model to change")
-        self.btn_import.setToolTip(
-            "STL, 3MF, GLB, STEP or OBJ from MakerWorld, Printables, "
-            "Thingiverse, Sketchfab, a scanner app or an AI 3D generator. It "
-            "comes in as it is; then say what to change. You can also drop "
-            "the files here.")
-        self.btn_import.clicked.connect(lambda: import_model(self))
         head.addWidget(self.btn_shop)
-        head.addWidget(self.btn_import)
-        head.addWidget(self.btn_open)
         # R860: the atech.dev account (the one the board and projects are on)
         try:
             from . import account_ui
@@ -1305,68 +1587,224 @@ class HomeView(QtWidgets.QWidget):
             self.btn_account = None
             _log("account button: %r" % (exc,))
         v.addLayout(head)
-        v.addSpacing(14)
-        # R950: the rest of Atech one click away, a slim row of pills under
-        # the header (not cards at the bottom, under every project and
-        # example, where nobody scrolled to them).
-        site = QtWidgets.QHBoxLayout()
-        site.setSpacing(8)
-        self.sec_site = QtWidgets.QLabel("On atech.dev")
-        self.sec_site.setObjectName("HomeSiteLabel")
-        site.addWidget(self.sec_site)
-        self.site_cards = []
-        for key, ico, title, sub, url in site_link_entries():
-            b = QtWidgets.QPushButton(title)
-            b.setObjectName("HomeSiteBtn")
-            b.setCursor(QtCore.Qt.PointingHandCursor)
-            b.setIconSize(QtCore.QSize(14, 14))
-            b.setToolTip("%s\n%s" % (sub, url))
-            b.setAccessibleName("%s on atech.dev" % title)
-            b.site_key = key
-            b._icon_name = ico
-            b.clicked.connect(lambda _=False, u=url: _open_link(u))
-            site.addWidget(b)
-            self.site_cards.append(b)
-        site.addStretch(1)
-        v.addLayout(site)
         v.addSpacing(22)
 
-        self.sec_projects = QtWidgets.QLabel("YOUR PROJECTS")
-        self.sec_projects.setObjectName("HomeSection")
-        v.addWidget(self.sec_projects)
-        v.addSpacing(10)
-        self.grid = QtWidgets.QGridLayout()
-        self.grid.setSpacing(self.GAP)
-        self.grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        v.addLayout(self.grid)
-        v.addSpacing(8)
-        self.note = QtWidgets.QLabel()
-        self.note.setObjectName("HomeNote")
-        self.note.setWordWrap(True)
-        v.addWidget(self.note)
-        v.addSpacing(22)
-        # R820: small, simple starting points between an empty project and
-        # the finished examples
-        self.sec_starters = QtWidgets.QLabel("START SIMPLE")
-        self.sec_starters.setObjectName("HomeSection")
-        v.addWidget(self.sec_starters)
-        v.addSpacing(10)
-        self.st_grid = QtWidgets.QGridLayout()
-        self.st_grid.setSpacing(self.GAP)
-        self.st_grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        v.addLayout(self.st_grid)
-        self.st_space = QtWidgets.QSpacerItem(0, 22)
-        v.addItem(self.st_space)
-        self.sec_examples = QtWidgets.QLabel("START FROM AN EXAMPLE")
-        self.sec_examples.setObjectName("HomeSection")
-        v.addWidget(self.sec_examples)
-        v.addSpacing(10)
+        # ---- hero
+        self.hero = QtWidgets.QFrame()
+        self.hero.setObjectName("Hero")
+        self.hero.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        hl = QtWidgets.QHBoxLayout(self.hero)
+        hl.setContentsMargins(44, 40, 36, 40)
+        hl.setSpacing(36)
+        left = QtWidgets.QVBoxLayout()
+        left.setSpacing(0)
+        kick = QtWidgets.QLabel("REAL CAD  ·  REAL ELECTRONICS  ·  READY TO PRINT")
+        kick.setObjectName("HeroKicker")
+        left.addWidget(kick)
+        left.addSpacing(10)
+        self.hero_title = QtWidgets.QLabel("What will you make?")
+        self.hero_title.setObjectName("HeroTitle")
+        self.hero_title.setWordWrap(True)
+        left.addWidget(self.hero_title)
+        left.addSpacing(8)
+        hsub = QtWidgets.QLabel(
+            "Describe a product in your own words. The agent designs it in "
+            "FreeCAD around the Atech board and modules, checks it, and "
+            "gets it ready for your printer.")
+        hsub.setObjectName("HeroSub")
+        hsub.setWordWrap(True)
+        left.addWidget(hsub)
+        left.addSpacing(22)
+        box = QtWidgets.QFrame()
+        box.setObjectName("HeroBox")
+        box.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        bl = QtWidgets.QHBoxLayout(box)
+        bl.setContentsMargins(14, 6, 6, 6)
+        bl.setSpacing(8)
+        self.prompt = QtWidgets.QLineEdit()
+        self.prompt.setObjectName("HeroPrompt")
+        self.prompt.setPlaceholderText("A bird feeder that photographs every visitor…")
+        self.prompt.setAccessibleName("Describe what to make")
+        self.prompt.returnPressed.connect(self.make_it)
+        self.prompt.textChanged.connect(self._sync_go)
+        bl.addWidget(self.prompt, 1)
+        self.btn_go = self._btn("Make it", "HeroGo",
+                                "A new project, and the agent starts on it",
+                                "Make it: start a new project from this")
+        self.btn_go.clicked.connect(self.make_it)
+        bl.addWidget(self.btn_go)
+        left.addWidget(box)
+        left.addSpacing(12)
+        ideas = FlowRow()
+        self.idea_btns = []
+        for text in HOME_IDEAS[:3]:
+            b = self._btn(text, "Idea", "Put this idea in the box")
+            b.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            b.clicked.connect(lambda _=False, t=text: self._use_idea(t))
+            ideas.addWidget(b)
+            self.idea_btns.append(b)
+        ideas.addStretch(1)
+        left.addLayout(ideas)
+        left.addSpacing(18)
+        alt = QtWidgets.QHBoxLayout()
+        alt.setSpacing(4)
+        orl = QtWidgets.QLabel("Or")
+        orl.setObjectName("HeroOr")
+        alt.addWidget(orl)
+        self.btn_new = self._btn("New empty project", "HomeLink",
+                                 "An empty design to build into")
+        self.btn_new.clicked.connect(lambda: _new_project())
+        # R970: bring in a model from anywhere and say what to change
+        self.btn_import = self._btn(
+            "Import a model…", "HomeLink",
+            "STL, 3MF, GLB, STEP or OBJ from MakerWorld, Printables, "
+            "Thingiverse, Sketchfab, a scanner app or an AI 3D generator. It "
+            "comes in as it is; then say what to change. You can also drop "
+            "the files here.", "Import a model to change")
+        self.btn_import.clicked.connect(lambda: import_model(self))
+        self.btn_open = self._btn(
+            "Open file…", "HomeLink",
+            "Open a .FCStd project, or STEP / STL / 3MF as a new project. You "
+            "can also drop files here.", "Open file")
+        self.btn_open.clicked.connect(lambda: _open_file())
+        for i, b in enumerate((self.btn_new, self.btn_import, self.btn_open)):
+            if i:
+                dot = QtWidgets.QLabel("·")
+                dot.setObjectName("HeroOr")
+                alt.addWidget(dot)
+            alt.addWidget(b)
+        alt.addStretch(1)
+        left.addLayout(alt)
+        left.addStretch(1)
+        hl.addLayout(left, 3)
+        self.collage = QtWidgets.QWidget()
+        cg = QtWidgets.QGridLayout(self.collage)
+        cg.setContentsMargins(0, 0, 0, 0)
+        cg.setSpacing(12)
+        self.hero_tiles = []
+        for i, key in enumerate(HERO_PICTURES):
+            t = QtWidgets.QLabel()
+            t.setObjectName("HeroTile")
+            t.setFixedSize(150, 150)
+            t.setAlignment(QtCore.Qt.AlignCenter)
+            t.picture = _example_picture(key)
+            t.example_key = key
+            t.setCursor(QtCore.Qt.PointingHandCursor)
+            t.setToolTip("Start from this example")
+            t.installEventFilter(_ClickFilter(
+                lambda k=key: self._start_key(k), t))
+            cg.addWidget(t, i // 2, i % 2)
+            self.hero_tiles.append(t)
+        hl.addWidget(self.collage, 0, QtCore.Qt.AlignVCenter)
+        v.addWidget(self.hero)
+        v.addSpacing(44)
+
+        # ---- explore
+        ehead = QtWidgets.QHBoxLayout()
+        col, self.sec_examples, _s = self._h2(
+            "Explore", "Real products made with the Atech board. Open one as "
+            "your own project and change anything.")
+        ehead.addLayout(col, 1)
+        self.btn_all = self._btn("See all examples  →", "HomeLink",
+                                 acc="Show all examples")
+        self.btn_all.clicked.connect(lambda: show_examples(self))
+        ehead.addWidget(self.btn_all, 0, QtCore.Qt.AlignBottom)
+        v.addLayout(ehead)
+        v.addSpacing(14)
+        self.cat_row = FlowRow()
+        self.cat_group = QtWidgets.QButtonGroup(self)
+        self.cat_group.setExclusive(True)
+        self.cat_btns = {}
+        self._category = None
+        v.addLayout(self.cat_row)
+        v.addSpacing(16)
         self.ex_grid = QtWidgets.QGridLayout()
         self.ex_grid.setSpacing(self.GAP)
         self.ex_grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         v.addLayout(self.ex_grid)
-        v.addSpacing(26)
-        v.addSpacing(26)
+        v.addSpacing(44)
+
+        # ---- start simple
+        col, self.sec_starters, _s = self._h2(
+            "Start simple", "Small first projects to learn the board on.")
+        self.sec_starters.setText("Start simple")
+        self._starters_sub = _s
+        v.addLayout(col)
+        v.addSpacing(14)
+        self.st_grid = QtWidgets.QGridLayout()
+        self.st_grid.setSpacing(self.GAP)
+        self.st_grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        v.addLayout(self.st_grid)
+        self.st_space = QtWidgets.QSpacerItem(0, 44)
+        v.addItem(self.st_space)
+
+        # ---- your projects
+        phead = QtWidgets.QHBoxLayout()
+        phead.setSpacing(10)
+        col, self.sec_projects, _s = self._h2("Your projects")
+        phead.addLayout(col, 1)
+        self.search = QtWidgets.QLineEdit()
+        self.search.setObjectName("HomeSearch")
+        self.search.setPlaceholderText("Search projects")
+        self.search.setAccessibleName("Search projects")
+        self.search.setClearButtonEnabled(True)
+        self.search.setFixedWidth(240)
+        self._search_act = None
+        self.search.textChanged.connect(self.apply_filter)
+        phead.addWidget(self.search, 0, QtCore.Qt.AlignVCenter)
+        v.addLayout(phead)
+        v.addSpacing(14)
+        self.grid = QtWidgets.QGridLayout()
+        self.grid.setSpacing(self.GAP)
+        self.grid.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        v.addLayout(self.grid)
+        v.addSpacing(10)
+        more = QtWidgets.QHBoxLayout()
+        self.btn_more = self._btn("Show all projects", "HomeLink")
+        self.btn_more.clicked.connect(self._toggle_more)
+        more.addWidget(self.btn_more)
+        more.addStretch(1)
+        v.addLayout(more)
+        self._show_all = False
+        self.note = QtWidgets.QLabel()
+        self.note.setObjectName("HomeNote")
+        self.note.setWordWrap(True)
+        v.addWidget(self.note)
+        v.addSpacing(40)
+
+        # ---- bring your own model
+        band = QtWidgets.QFrame()
+        band.setObjectName("ByoBand")
+        band.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        bl = QtWidgets.QHBoxLayout(band)
+        bl.setContentsMargins(32, 28, 32, 28)
+        bl.setSpacing(24)
+        bcol, _h, _s = self._h2(
+            "Bring your own model",
+            "Found something you like? Bring in an STL, 3MF, STEP, OBJ or GLB "
+            "and tell the agent what to change. Good places to look:")
+        srcs = FlowRow()
+        self.source_btns = []
+        for name, url in MODEL_SOURCES:
+            b = self._btn(name, "SrcPill", url, "%s (opens the site)" % name)
+            b.clicked.connect(lambda _=False, u=url: _open_link(u))
+            srcs.addWidget(b)
+            self.source_btns.append(b)
+        srcs.addStretch(1)
+        bcol.addSpacing(10)
+        bcol.addLayout(srcs)
+        bl.addLayout(bcol, 1)
+        self.btn_import2 = self._btn("Import a model…", "HeroGo",
+                                     acc="Import a model to change")
+        self.btn_import2.clicked.connect(lambda: import_model(self))
+        bl.addWidget(self.btn_import2, 0, QtCore.Qt.AlignVCenter)
+        v.addWidget(band)
+        v.addSpacing(36)
+
+        rule = QtWidgets.QFrame()
+        rule.setObjectName("HomeRule")
+        v.addWidget(rule)
+        v.addSpacing(16)
         c = QtWidgets.QLabel()
         c.setObjectName("EmptyCredit")
         c.setOpenExternalLinks(False)
@@ -1380,8 +1818,9 @@ class HomeView(QtWidgets.QWidget):
         self.new_card = ClickCard("file-plus", "New project",
                                   "An empty design to build into.")
         self.new_card.clicked.connect(lambda: _new_project())
-        self.example_cards = self._entry_cards(example_entries(), "example")
-        # R970: Home shows a short row; every example is in the gallery
+        self.example_cards = self._entry_cards(example_entries(), "example",
+                                               pictures=True)
+        # R970: Home shows a short grid; every example is in the gallery
         n_all = _gallery_count()
         self.all_examples_card = ClickCard(
             "grid", "All examples",
@@ -1389,28 +1828,40 @@ class HomeView(QtWidgets.QWidget):
             "Every example product, with pictures.")
         self.all_examples_card.setAccessibleName("Show all examples")
         self.all_examples_card.clicked.connect(lambda: show_examples(self))
+        self.gallery_cards = self._gallery_cards(
+            {c.example_key for c in self.example_cards})
         self.starter_cards = self._entry_cards(starter_entries(), "starter")
         self.crane_card = ClickCard("cube", "Sample crane",
                                     "Open a measured crane assembly.")
         self.crane_card.clicked.connect(_open_reference)
         self.cards = ([self.new_card] + self.example_cards + [self.crane_card]
                       + self.starter_cards + [self.all_examples_card])
+        self._build_categories()
         self.project_cards = []
         self.rows = []
         self.source = None
         self._cols = None
         self._has_crane = None
         self._filter = ""
+        self._sync_go()
         self.refresh_cards()
         self.refresh()
 
     @staticmethod
-    def _entry_cards(rows, what):
-        """A ClickCard per example_entries row: a shipped one opens a fresh
-        copy (open_default), else the example is built (open_example)."""
+    def _entry_cards(rows, what, pictures=False):
+        """A card per example_entries row (PictureCard for the examples,
+        with the gallery's picture, line and kind): a shipped one opens a
+        fresh copy (open_default), else the example is built (open_example)."""
+        gal = _gallery_rows() if pictures else {}
         out = []
         for key, title, sub, ico, shipped in rows:
-            card = ClickCard(ico, title, sub)
+            if pictures:
+                g = gal.get(key, {})
+                card = PictureCard(ico, title, g.get("line") or sub,
+                                   g.get("picture") or _example_picture(key),
+                                   g.get("category", ""))
+            else:
+                card = ClickCard(ico, title, sub)
             card.setAccessibleName("Start from the %s %s" % (title.lower(), what))
             card.example_key = key
             card.default_title = title if shipped else None
@@ -1421,16 +1872,93 @@ class HomeView(QtWidgets.QWidget):
             out.append(card)
         return out
 
+    @staticmethod
+    def _gallery_cards(have):
+        """R980: the gallery's other examples (not already a Home example
+        card) as PictureCards, so Explore shows every kind of product."""
+        try:
+            from . import examples_gallery
+            rows = examples_gallery.entries()
+        except Exception as exc:                       # noqa: BLE001
+            _log("gallery: %r" % (exc,))
+            return []
+        out = []
+        for r in rows:
+            if r["key"] in have:
+                continue
+            card = PictureCard(EXAMPLE_ICONS.get(r["key"], "cube"), r["title"],
+                               r["line"], r.get("picture"), r["category"])
+            card.setAccessibleName("Start from the %s example" % r["title"].lower())
+            card.example_key = r["key"]
+            card.default_title = r.get("shipped")
+            card.clicked.connect(
+                lambda _=False, row=r: _safe(lambda: examples_gallery.start(row)))
+            out.append(card)
+        return out
+
+    def _build_categories(self):
+        cats = []
+        for c in self.example_cards + self.gallery_cards:
+            k = getattr(c, "category", "")
+            if k and k not in cats:
+                cats.append(k)
+        for key, label in [(None, "All")] + [(k, k) for k in cats]:
+            b = self._btn(label.replace("&", "&&"), "CatChip", acc=label)
+            b.setCheckable(True)
+            b.setChecked(key is None)
+            b.clicked.connect(lambda _=False, k=key: self.set_category(k))
+            self.cat_group.addButton(b)
+            self.cat_row.addWidget(b)
+            self.cat_btns[key] = b
+        self.cat_row.addStretch(1)
+        for b in self.cat_btns.values():
+            b.setVisible(len(cats) > 1)
+
+    def set_category(self, key):
+        self._category = key
+        b = self.cat_btns.get(key)
+        if b is not None:
+            b.setChecked(True)
+        self._relayout()
+
+    # -- hero
+    def _sync_go(self, *_a):
+        self.btn_go.setEnabled(bool(self.prompt.text().strip()))
+
+    def _use_idea(self, text):
+        self.prompt.setText(text)
+        self.prompt.setFocus(QtCore.Qt.OtherFocusReason)
+
+    def make_it(self):
+        text = self.prompt.text().strip()
+        if not text:
+            self.prompt.setFocus(QtCore.Qt.OtherFocusReason)
+            return None
+        out = start_from_prompt(text)
+        if out is not None:
+            self.prompt.clear()
+        return out
+
+    def _start_key(self, key):
+        for c in self.example_cards:
+            if c.example_key == key:
+                c.clicked.emit()
+                return
+        open_example(key)
+
     # -- compatibility with the start-card layout (EmptyView, R34)
     def shown_cards(self):
         return [c for c in self.cards
                 if c is not self.crane_card or self._has_crane]
 
     def columns_for(self, width):
-        """As many 210 px cards as fit beside each other (12 px gaps, the
+        """As many 210 px cards as fit beside each other (16 px gaps, the
         page's margins), 1 to MAX_COLS."""
         avail = width - 2 * self.MARGIN + self.GAP
-        return max(1, min(self.MAX_COLS, avail // (210 + self.GAP)))
+        return max(1, min(self.MAX_COLS, avail // (self.CARD_W + self.GAP)))
+
+    def _content_width(self, cols):
+        return cols * self.CARD_W + (cols - 1) * self.GAP
 
     def refresh_cards(self):
         """The sample crane card only when this installation has it (R55)."""
@@ -1451,26 +1979,44 @@ class HomeView(QtWidgets.QWidget):
         self._cols = cols
         self._relayout()
 
+    def _toggle_more(self):
+        self._show_all = not self._show_all
+        self._relayout()
+
     def _relayout(self):
         cols = self._cols or 3
-        for c in self.cards + self.project_cards:
+        for c in self.cards + self.project_cards + self.gallery_cards:
             self.grid.removeWidget(c)
             self.ex_grid.removeWidget(c)
             self.st_grid.removeWidget(c)
-        shown = [self.new_card] + [c for c in self.project_cards
-                                   if self._matches(c)]
+        # your projects: two rows unless searching or "Show all"
+        matching = [c for c in self.project_cards if self._matches(c)]
+        room = len(matching) if (self._filter or self._show_all) \
+            else max(cols * self.PROJECT_ROWS - 1, 1)
+        shown = [self.new_card] + matching[:room]
         for i, c in enumerate(shown):
             self.grid.addWidget(c, i // cols, i % cols)
             c.setVisible(True)
         for c in self.project_cards:
             if c not in shown:
                 c.setVisible(False)
-        ex = list(self.example_cards) + ([self.crane_card] if self._has_crane else [])
-        # R970: one or two rows here, the rest in the gallery
-        room = max(cols * 2 - 1, 3)
-        for c in ex[room:]:
-            c.setVisible(False)
-        ex = ex[:room] + [self.all_examples_card]
+        hidden = len(matching) - (len(shown) - 1)
+        self.btn_more.setVisible(bool(hidden) or (self._show_all and len(matching) > room - 1
+                                                  and not self._filter and len(matching) >= cols * self.PROJECT_ROWS))
+        self.btn_more.setText("Show fewer" if self._show_all else
+                              "Show all %d projects  →" % len(matching))
+        # explore: one kind, or two rows of everything; the rest in the gallery
+        ex = (list(self.example_cards) + list(self.gallery_cards)
+              + ([self.crane_card] if self._has_crane else []))
+        if self._category:
+            ex = [c for c in ex if getattr(c, "category", "") == self._category]
+            keep = ex
+        else:
+            keep = ex[:max(cols * 2 - 1, 3)]
+        for c in self.example_cards + self.gallery_cards + [self.crane_card]:
+            if c not in keep:
+                c.setVisible(False)
+        ex = keep + [self.all_examples_card]
         for i, c in enumerate(ex):
             self.ex_grid.addWidget(c, i // cols, i % cols)
             c.setVisible(True)
@@ -1481,9 +2027,19 @@ class HomeView(QtWidgets.QWidget):
             self.st_grid.addWidget(c, i // cols, i % cols)
             c.setVisible(True)
         self.sec_starters.setVisible(bool(self.starter_cards))
-        self.st_space.changeSize(0, 22 if self.starter_cards else 0)
-        for c in self.cards:
+        if self._starters_sub is not None:
+            self._starters_sub.setVisible(bool(self.starter_cards))
+        self.st_space.changeSize(0, 44 if self.starter_cards else 0)
+        for c in self.cards + self.gallery_cards:
             c.set_compact(cols < 3)
+        # full size: the New project card is as tall as the projects beside
+        # it and All examples as tall as the picture cards (compact: 100 px)
+        if cols >= 3:
+            self.new_card.setFixedSize(ProjectCard.W, ProjectCard.H)
+            self.all_examples_card.setFixedSize(self.CARD_W, PictureCard.H)
+        self.collage.setVisible(cols >= 4)
+        for b in self.site_cards:          # the nav links need the room
+            b.setVisible(cols >= 4)
         self._sync_note(len(shown) - 1)
 
     # -- data
@@ -1497,10 +2053,10 @@ class HomeView(QtWidgets.QWidget):
 
     def _sync_note(self, n_shown):
         if self._filter and not n_shown:
-            txt = "No project matches \u201c%s\u201d." % self.search.text().strip()
+            txt = "No project matches “%s”." % self.search.text().strip()
         elif not self.rows:
-            txt = ("No saved projects yet. Start a new one, open a file or "
-                   "drop it here, or start from an example below.")
+            txt = ("No saved projects yet. Describe one above, start from an "
+                   "example, or drop a file here.")
         else:
             txt = ""
         self.note.setText(txt)
@@ -1549,7 +2105,12 @@ class HomeView(QtWidgets.QWidget):
             pass
 
     def resizeEvent(self, ev):                         # noqa: N802
-        self._layout_cards(self.columns_for(ev.size().width()))
+        w = ev.size().width()
+        cols = self.columns_for(w)
+        # centre the page: the grids' width, the rest as side margins
+        side = max(self.MARGIN, (w - self._content_width(cols)) // 2 - 8)
+        self.page.setContentsMargins(side, 18, side, 28)
+        self._layout_cards(cols)
         super().resizeEvent(ev)
 
     def _set_dropping(self, on):
@@ -1589,11 +2150,14 @@ class HomeView(QtWidgets.QWidget):
         self.refresh_cards()
         self.setStyleSheet(style.qss(HOME_QSS))
         t = style.tokens()
+        pal = self.palette()
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor(t["base"]))
+        self.setPalette(pal)
         link = '<a href="%%s" style="color:%s; text-decoration:none;">%%s</a>' % t["accent"]
         self.made_by.setText("Made by " + link % (site_url(), style.MAKER))
         self.credit.setText(
             style.PRODUCT + ', made by ' + link % (site_url(), style.MAKER)
-            + ', powered by FreeCAD \u00b7 ' + " \u00b7 ".join((
+            + ', powered by FreeCAD · ' + " · ".join((
                 link % (site_url("/community"), "Community"),
                 link % (_shop().SHOP, "Shop"),
                 link % (site_url("/docs"), "Docs"),
@@ -1607,10 +2171,14 @@ class HomeView(QtWidgets.QWidget):
         self._search_act = self.search.addAction(
             style.icon("search", t["dim"], 14),
             QtWidgets.QLineEdit.LeadingPosition)
-        for c in self.cards + self.project_cards:
+        for c in self.cards + self.project_cards + self.gallery_cards:
             c.restyle()
-        for b in self.site_cards:
-            b.setIcon(style.icon(b._icon_name, t["text"], 14))
+        dpr = style.pixel_scale()
+        for tile in self.hero_tiles:
+            pm = QtGui.QPixmap(tile.picture) if tile.picture else QtGui.QPixmap()
+            if not pm.isNull():
+                tile.setPixmap(_rounded(pm, 150, 150, 20, dpr))
+        self.btn_go.setIcon(style.icon("arrow-up", t["btn_text"], 14))
 
 
 class OrbitHint(QtWidgets.QFrame):
@@ -1993,7 +2561,7 @@ class ViewBar(QtWidgets.QFrame):
         self.btn_ask.setObjectName("VPrimary")
         self.btn_ask.setCursor(QtCore.Qt.PointingHandCursor)
         self.btn_ask.setIconSize(QtCore.QSize(14, 14))
-        self.btn_ask.setToolTip("Capture the view and ask the agent about it")
+        self.btn_ask.setToolTip("Take a screenshot of the 3D view and add it to the chat, then ask about it (Ctrl+Shift+A)")
         self.btn_ask.clicked.connect(_ask_view)
         lay.addWidget(self.btn_ask)
         # Dropped last, at level 3, in a very narrow viewport.
@@ -2979,6 +3547,57 @@ def _new_project():
     _new_document()
 
 
+def _prompt_name(text, folder=None):
+    """R980: a project name from the hero prompt: its first few words,
+    "Untitled N" when they cannot be a name or are taken."""
+    from . import projects_store
+    import re
+    words = re.sub(r"[^\w\s-]", " ", text).split()
+    skip = {"a", "an", "the", "make", "me", "build", "design", "i", "want"}
+    while words and words[0].lower() in skip:
+        words.pop(0)
+    name = projects_store.clean_name(" ".join(words[:4]).capitalize())
+    if not name or projects_store.name_problem(name, folder):
+        return projects_store.default_name(folder)
+    return name
+
+
+def start_from_prompt(text):
+    """R980: Home's "What will you make?": a new project named after the
+    prompt, saved into the projects folder, then the prompt goes to the
+    agent in the chat. Returns the document, or None."""
+    text = (text or "").strip()
+    if not text:
+        return None
+    from . import projects_store
+    try:
+        folder = projects_store.ensure_projects_dir()
+        doc = projects_store.create_project(_prompt_name(text, folder), folder)
+    except Exception as exc:                           # noqa: BLE001
+        _notify("Could not create the project",
+                "The details are in the Report view.", exc)
+        return None
+    _leave_home()
+    try:
+        chat = show_chat()
+    except Exception as exc:                           # noqa: BLE001
+        _log("show chat: %r" % (exc,))
+        chat = chat_panel()
+
+    def send():
+        p = chat or chat_panel()
+        ask = getattr(p, "ask", None) if p is not None else None
+        if callable(ask):
+            try:
+                ask(text)
+            except Exception as exc:                   # noqa: BLE001
+                _notify("Could not send it to the agent",
+                        "The details are in the Report view.", exc)
+    # after the new project is the active one, so the chat follows it
+    QtCore.QTimer.singleShot(250, send)
+    return doc
+
+
 # ------------------------------------------------- open / switch (R302)
 def _norm(path):
     try:
@@ -3492,7 +4111,7 @@ SHORTCUTS = (
     ("part", "F", "Edit part: push/pull faces, holes, fillets, hollow",
      "Atech"),
     ("home", "Ctrl+0", "Home: all your projects (Esc goes back)", "Atech"),
-    ("ask", "Ctrl+Shift+A", "Ask about this view", "Atech"),
+    ("ask", "Ctrl+Shift+A", "Add screenshot to context", "Atech"),
     ("full", "Ctrl+Shift+F", "Full-screen 3D (hide the sidebar)", "Atech"),
     ("sheet", "Ctrl+/", "Show these shortcuts", "Atech"),
 )
@@ -3984,6 +4603,11 @@ EXPORT_COMMANDS = (
      "Pictures, also copied", "share"),
     ("Atech_ReviewSheet", "Save a review sheet", "Six views of the model "
      "on one picture", "sheet"),
+    # R1004 / R1002
+    ("Atech_MakeIt", "Make it\u2026", "From the design to the product in hand: "
+     "electronics, firmware, parts, print, assembly and the product pack", "makeit"),
+    ("Atech_Electrical", "Electrical suite\u2026", "Schematic, ports, power budget, "
+     "rule checks, firmware and bring-up for this design", "electrical"),
 )
 EXPORT_MENU = "Export and share"
 _KEEP_DIALOGS = []      # dialogs opened from the menus stay referenced
@@ -4063,6 +4687,12 @@ def run_command_action(key):
     if key == "post":
         from . import post
         return _keep_dialog(post.PostDialog(parent)).show()
+    if key == "makeit":                                # R1004
+        from . import product_view
+        return product_view.open_make_it(_active_doc(), parent)
+    if key == "electrical":                            # R1002
+        from . import electrical_suite
+        return electrical_suite.open_suite(_active_doc(), "overview", parent)
     if key == "share":
         path, msg = export_tools.share_now(parent)
         _say_at_cursor(msg)

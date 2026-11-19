@@ -44,6 +44,9 @@ jobs:
           python -m unittest -v
           test_claude_cli test_engine test_build_apply test_client_parse
           test_eval_harness test_ws_chat_cli test_build_ws
+      - name: Wiring model and drawing (R960-R961, stdlib only)
+        working-directory: addon/AcadAgent/tests
+        run: python -m unittest -v test_wiring_r960
       - name: Style tokens match brand/tokens.py
         # brand/ is the tokens' source; skip (loudly) where it is not checked in.
         run: |
@@ -77,6 +80,12 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: python -m unittest -v test_navbar
+      - name: Wiring view and export (R962, offscreen Qt)
+        working-directory: addon/AcadAgent/tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          ATECH_SDK_CATALOG: snapshot
+        run: python -m unittest -v test_wiring_view_r962
       - name: Chat robustness (real panel, fake claude, offscreen Qt)
         working-directory: addon/AcadAgent/tests
         env:
@@ -142,7 +151,7 @@ jobs:
           python -m unittest -v
           test_claude_cli test_engine test_build_apply test_client_parse
           test_eval_harness test_ws_chat_cli test_build_ws test_agent_kit
-          test_migrate test_macos
+          test_migrate test_macos test_wiring_r960
       - name: Branding helpers
         run: |
           python branding/tests/test_release_meta.py
@@ -161,7 +170,7 @@ jobs:
           python -m pip install numpy
           python -m unittest -v test_navbar test_board_look test_ws_chat_round4 test_ws_chat_round6 \
             test_ws_chat_round7 test_ws_chat_round8 test_ws_chat_round9 \
-            test_ws_chat_round10
+            test_ws_chat_round10 test_wiring_view_r962
 
   # install.sh: lint, then a full install / refuse / uninstall run against a
   # stand-in release on both platforms (branding/tests/test_install.sh).

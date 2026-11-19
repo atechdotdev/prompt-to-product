@@ -92,6 +92,17 @@ PRODUCTS = {
     'follower_counter.py': 'a live follower counter',
     'bird_cam.py': 'a smart bird feeder camera',
     'hype_button.py': 'a giant sound button',
+    'fortune_ball.py': 'a fortune ball that answers your question when you shake it',
+    # R990: ten more products (2026-11-17)
+    'cloud_lamp.py': 'a cloud lamp that flashes lightning to music',
+    'on_air_sign.py': 'an on air sign that lights up when you are talking',
+    'theremin.py': 'a theremin you play by waving your hand over it',
+    'piggy_bank.py': 'a piggy bank that counts your coins',
+    'starter_jar.py': 'a sourdough jar lid that tracks how much your starter rises',
+    'dice_tower.py': 'a dice tower that counts and announces your rolls',
+    'cat_wand.py': 'a cat toy that waves a feather wand when the cat walks by',
+    'drum_pad.py': 'a finger drum pad that plays real drum sounds',
+    'pill_box.py': 'a weekly pill box that reminds you to take your pills',
 }
 PARAMS_MARKER = "# === PARAMETERS (restyle here) ==="
 STAGE_A_MARKER = "# === STAGE A: hardware, shell, every working-face opening, fasteners ==="
@@ -199,6 +210,18 @@ def sweep_points(src):
 
 # ------------------------------------------------------------ the seed features
 FEATURES = {
+    # R990: each product's hero code
+    "fortune_ball.py": ('cable="-X")),', 'def to_window(s):', 'bezel = cad.revolve_profile(bezel_sec)', 'constellation = cad.fuse_one(*pieces).common(layer)'),
+    # R990: each product's hero code
+    "cloud_lamp.py": ('DOMES = [', 'BOLT_PTS = [', 'ap.cable(doc, "light", 3', '"Bolt_Window"'),
+    "on_air_sign.py": ('mic = ap.seat(doc, "microphone", (13, 14))', 'letters["Letter_" + ch] = s', '"usbc", (BX0 + 126.0, USB_Y, Z0 + 20.0), face="-X", cable="-Y"))'),
+    "theremin.py": ('eye = ap.seat(doc, "distance_sensor", 1)', 'MAST_H = 130.0', 'bend = Part.makeTorus(LOOP[1], LOOP[2]', 'NOTES = "C D E F G A B"'),
+    "piggy_bank.py": ('UPRIGHT_SIDE = Rotation(', 'sen = ap.seat(doc, "distance_sensor", 3)', 'walls = [box(PA0, PA1, YA - WALL, YB', 'nostrils.append(f.extrude('),
+    "starter_jar.py": ('ap.cable(doc, "distance_sensor", 3', 'face="-Z", cable="+Y"', '"Glass_Jar"', '"Marker_Band"'),
+    "dice_tower.py": ('ap.cable(doc, "distance_sensor", 9', 'def screen_route(z):', 'keep, grille = insert(keep, cyl(18.0', 'INTENDED_OVERLAPS = [("Die_D6", "Felt"), ("Die_D20", "Felt")]'),
+    "cat_wand.py": ('ap.cable(doc, "pir", 14,', 'cad.spur_gear(M, Z_GEAR, GEAR_T', '"motion": [{"part": "Head"', 'bell = cad.fuse_one(Part.makeSphere(BELL_R, bc)'),
+    "drum_pad.py": ('"covers": {"Pad_1": "button_p3"', 'TRAVEL = 0.8', 'def lattice(z0, z1):', 'dial_cap = cad.knurl('),
+    "pill_box.py": ('DAYS = ("M", "T", "W", "T", "F", "S", "S")', '"covers": {"Key_Taken": "button_p11"}', 'spk = ap.seat(doc, "speaker", (1, 2))', 'panel, glow = insert(panel, zbox(GLOW[0]'),
     # R420: four D-pad switches, a mask window, sculpted grips
     "handheld_console.py": ('ap.seat(doc, "button", n) for n in (1, 2, 9, 10)', "ACTIVE = (25.6",
                             '"Grip_L"', "Z_C = "),

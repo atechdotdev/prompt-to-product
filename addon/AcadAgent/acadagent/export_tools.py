@@ -2403,6 +2403,44 @@ def menu_actions(parent=None, doc_fn=_active_doc, selection_fn=_selected):
         if not shell.click_tool("simulate"):
             _say(None, "Open a design first: there is nothing to simulate.")
     add("Simulate", simulate)
+
+    def wiring():
+        # R962: the Atech modules page's Wiring view
+        from . import shell
+        body = shell._S.get("body")
+        page = getattr(body, "modules_page", None)
+        if body is None or page is None or not hasattr(page, "show_wiring"):
+            _say(None, "Open the sidebar first: the wiring diagram is on its Atech modules page.")
+            return
+        try:
+            if shell.focus_view():
+                shell.set_focus_view(False)
+        except Exception:                                 # noqa: BLE001
+            pass
+        body.show_page(body.PAGE_MODULES)
+        if not page.show_wiring():
+            _say(None, "The wiring diagram is not available in this installation.")
+    add("Wiring diagram...", wiring)
+
+    def electrical():
+        # R1002: the electrical engineer suite
+        d = doc_fn()
+        if d is None:
+            _say(None, "Open a design first: there is no electronics to look at.")
+            return
+        from . import electrical_suite
+        electrical_suite.open_suite(d)
+    add("Electrical suite...", electrical)
+
+    def make_it():
+        # R1004: from the design to the product in hand
+        d = doc_fn()
+        if d is None:
+            _say(None, "Open a design first: there is nothing to make yet.")
+            return
+        from . import product_view
+        product_view.open_make_it(d)
+    add("Make it...", make_it)
     for a in acts:
         a.setObjectName("atech_" + re.sub(r"\W+", "_", a.text().lower()).strip("_"))
     acts[0]._keep = keep

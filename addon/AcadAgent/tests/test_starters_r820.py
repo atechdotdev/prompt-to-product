@@ -112,7 +112,7 @@ class TestHomeStarters(tdp._ShellCase if tdp._ShellCase else unittest.TestCase):
         self.assertEqual([c.default_title for c in home.starter_cards], STARTER_TITLES)
         self.assertEqual([c.default_title for c in home.example_cards],
                          ["Toy car", "Desk robot"])
-        self.assertEqual(home.sec_starters.text(), "START SIMPLE")
+        self.assertEqual(home.sec_starters.text(), "Start simple")
         self.assertFalse(home.sec_starters.isHidden())
         self.assertTrue(all(c in home.cards for c in home.starter_cards))
         got = []

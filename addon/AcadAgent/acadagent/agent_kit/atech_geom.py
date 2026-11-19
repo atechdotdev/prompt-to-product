@@ -6437,6 +6437,16 @@ def _jsonable(v):
 ARCHETYPE_GATES = (
     # build.ARCHETYPES' rows in its order (R802/R803 starter rows and the
     # R940 products have no image gate of their own yet: None).
+    ('cloud lamp', ('cloud lamp', 'thunder cloud', 'storm cloud', 'lightning lamp', 'cloud light', 'rain cloud lamp', 'music reactive light'), None),
+    ('on air sign', ('on air sign', 'on air light', 'recording light', 'studio light', 'busy light', 'do not disturb sign', 'in a meeting light', 'tally light'), None),
+    ('theremin', ('theremin', 'air instrument', 'hand wave instrument', 'touchless instrument', 'gesture synth', 'wave your hand music', 'distance played instrument'), None),
+    ('piggy bank', ('piggy bank', 'piggybank', 'coin bank', 'money box', 'savings jar', 'coin counter'), None),
+    ('jar lid', ('sourdough', 'starter jar', 'jar lid', 'smart lid', 'fermentation monitor', 'kombucha', 'levain', 'mason jar'), None),
+    ('dice tower', ('dice tower', 'dice roller', 'rolling tower', 'castle dice tower', 'dice tray', 'dice counter', 'board game tower', 'tabletop dice'), None),
+    ('cat toy', ('cat toy', 'cat teaser', 'cat wand', 'feather wand', 'teaser wand', 'pet teaser', 'kitten toy', 'interactive cat toy'), None),
+    ('drum pad', ('drum pad', 'finger drum', 'drum machine', 'beat pad', 'beat maker', 'sampler pad', 'pad controller', 'mpc'), None),
+    ('pill box', ('pill box', 'pillbox', 'pill organiser', 'pill organizer', 'pill reminder', 'medication reminder', 'medicine box', 'pill dispenser'), None),
+    ('fortune ball', ('fortune ball', 'magic answer ball', 'shake to answer', 'decision ball', 'crystal ball', 'oracle orb', 'yes no ball'), None),
     ('bird feeder camera', ('bird feeder', 'bird cam', 'bird camera', 'birdhouse', 'bird house', 'nest box', 'feeder camera', 'feeder cam'), None),
     ('flip timer', ('flip timer', 'focus timer', 'focus cube', 'flip cube', 'pomodoro', 'cube timer'), None),
     ('coffee scale', ('coffee scale', 'pour-over scale', 'pour over scale', 'barista scale', 'espresso scale', 'kitchen scale', 'food scale', 'weighing scale'), None),
