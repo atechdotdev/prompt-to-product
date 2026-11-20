@@ -3619,6 +3619,14 @@ def api_card():
              "missing USB-C module, a 2-port module off a pair); its warnings and "
              "notes are for the user. Pick ports the Atech SDK accepts, so the "
              "firmware builds; when the design is done, point the user to Make it.")
+    # R1100: the user's words read into a brief in the workspace
+    L.append("  BRIEF: BRIEF.md in the workspace (when there) is the user's request "
+             "read into parts: the modules asked for and why, the size it must fit, "
+             "power, where it lives, what it should do (when ... it ...), and 'Done "
+             "when' - the acceptance criteria. Design to it. ./check prints BRIEF "
+             "lines: each criterion met or not. A criterion the user's later words "
+             "changed is already updated there. Ask its 'Still open' questions only "
+             "when the answer changes the design; never invent the answer.")
     L.append("EXAMPLE")
     L.append('  light = ap.seat(doc, "light", 2)')
     L.append('  head, ribbons = ap.cable(doc, "light", 11, ap.module_placement('

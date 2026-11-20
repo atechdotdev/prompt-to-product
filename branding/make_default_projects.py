@@ -63,7 +63,7 @@ import zipfile
 
 sys.dont_write_bytecode = True
 
-MANIFEST_VERSION = 4            # default_projects.py re-installs when this grows (R990: 4, the ten new products reach existing installs)
+MANIFEST_VERSION = 5            # default_projects.py re-installs when this grows (R990: 4, the ten new products reach existing installs; R1030: 5)
 THUMB_PX = 512
 THUMB = "thumbnails/Thumbnail.png"
 GUI_XML = "GuiDocument.xml"
@@ -107,6 +107,17 @@ CURATED = (
     ('bird_cam', 'Bird feeder cam'),
     ('hype_button', 'Hype button'),
     ('fortune_ball', 'Fortune ball'),
+    # R1030: ten products in ten kinds (2026-11-20)
+    ('tea_steeper', 'Tea timer'),
+    ('mail_notifier', 'Mailbox flag'),
+    ('hydration_coaster', 'Water reminder'),
+    ('star_projector', 'Star projector'),
+    ('filament_dryer', 'Filament dry box'),
+    ('vinyl_stand', 'Now playing stand'),
+    ('drawing_bot', 'Drawing robot'),
+    ('key_hook', "Who's home key hook"),
+    ('ball_launcher', 'Fetch machine'),
+    ('mole_bop', 'Mole bop game'),
     # R990: ten more products (2026-11-17)
     ('cloud_lamp', 'Cloud lamp'),
     ('on_air_sign', 'On air sign'),
@@ -243,6 +254,26 @@ BLURBS = {
         ['Make the wand longer', 'Give the head tabby stripes']),
     'drum_pad': ('A tabletop finger-drum pad: four big rubber pads in red, amber, blue and green over a glowing frosted grid, a knurled chrome kit/volume dial and a speaker grille on a raised control column, and USB-C at the back. Each pad presses its own button, with real travel to a stop.',
         ['Make the pads bigger', 'Make the body white']),
+    'tea_steeper': ('A counter-top tea timer: a white-and-sage tower stands beside your cup on a weighted foot with a cork coaster. Set the minutes on the cork dial and the stepper-driven arm lowers the bag into the cup, then lifts it out when the countdown on the screen ends. The leaf glows and a chime sounds when it is ready.',
+        ['Make the arm longer for a big mug', 'Give it a wood-look dial']),
+    'mail_notifier': ('A weatherproof green mailbox-shaped box that bolts onto your mailbox roof: a distance sensor looks down into the box, and when a letter lands a motor swings the red flag up and your phone gets told. Arched drip-edge roof, hooded status light and reset key, USB-C in a sheltered pocket, keyhole flange.',
+        ['Make the flag bigger', 'Make it mount on the side of the mailbox']),
+    'hydration_coaster': ("A white coaster puck that weighs your bottle on a load cell and counts the glasses you drink on a little screen. When you haven't lifted the bottle for a while, an aqua halo pulses around the floating seat; press the SIP key to snooze it.",
+        ['Make it fit a wider bottle', 'Add a speaker for a chime']),
+    'star_projector': ('A navy star ball pierced with 150 stars, gold constellations and a crescent moon turns slowly on a cream base, its lights throwing the night sky onto the ceiling. A big soft key turns it on and off, a dial sets the brightness and a speaker in the side plays lullabies.',
+        ["Put my kid's star sign on the ball", 'Make the base pink']),
+    'filament_dryer': ("A sealed box for one 1 kg spool, rolling on four 608 bearings behind a round window with a filament gauge on the glass. A humidity sensor reads the chamber air and a distance sensor under the spool measures how much filament is wound on it, shown on the orange base's screen, with a desiccant drawer underneath.",
+        ['Make it fit two spools', 'Put the screen on the lid']),
+    'vinyl_stand': ('A mid-century walnut ledge that holds your 12-inch album sleeve upright, leaning back in a felt-lined slot. Its brass panel has a screen for the track, a little turntable whose platter hides the microphone that listens to the music, a level-meter light strip that pulses to the beat, and a skip/like key.',
+        ['Make it hold two records', 'Give it a black and brass finish']),
+    'drawing_bot': ('A domed turtle robot on two stepper-driven wheels with a real felt-tip marker standing through its middle, right on the axle, so it turns on the spot about its pen tip. A little cam lifts the pen between strokes; screen eyes look out of a black visor, and a GO key sits on top.',
+        ['Make it hold a thicker marker', 'Give it a cat face']),
+    'key_hook': ("A wall key board for the front door: hang your keys and a sensor under your hook spots them, so your name tag lights up and the little screen says who's home. A PIR wakes it as you walk past, and the oak tray on top holds sunglasses and mail.",
+        ['Add a fourth hook', 'Make it white oak with green hooks']),
+    'ball_launcher': ('A chunky fetch machine: the dog drops a 40 mm ball into the charcoal hopper on top, a sensor sees it fall, and two rubber-tyred flywheels fire it out of a glowing cyan-ringed mouth. A big white start key sits on the deck and the throw count shows on a screen at the back.',
+        ['Make it shoot further', 'Make it smaller for a little dog']),
+    'mole_bop': ('A grassy tabletop reaction game: four frosted moles light up in their burrows and you bop them with the soft red mallet before they hide. A yellow scoreboard sign shows your score, a speaker goes boing, a red GO key starts a round, and the mallet stands in its own holster.',
+        ['Add more moles', 'Make the moles pop up higher']),
     'pill_box': ('A seven-day pill organiser with pastel sliding lids, one per day, in front of a raised console. A screen shows the next dose, a frosted capsule glows and a chime sounds when it is time, and a big coral TAKEN key confirms. The electronics are sealed away from the pills.',
         ['Make the day cups deeper', 'Give the lids hinges instead']),
     'fortune_ball': ('A glossy midnight-blue fortune ball with a gold-ringed crystal window: shake it and the answer appears on the screen inside, whispered through a grille, while it rests in a gold seat ring on a black stand. Gold moon, constellation and question mark inlays; USB-C hidden underneath.',
@@ -313,6 +344,16 @@ SUMMARIES = {
     'cat_wand': 'A cat-eared turret that waves a feather wand at your cat.',
     'drum_pad': 'Four big rubber pads that play real drum sounds.',
     'pill_box': "A weekly pill box that glows when it's time.",
+    'mole_bop': 'Bop four glowing moles before they hide.',
+    'ball_launcher': "An orange drum that fires your dog's ball back out.",
+    'tea_steeper': 'A tower whose arm lifts the tea bag out on time.',
+    'mail_notifier': 'A mailbox box that raises a red flag when post lands.',
+    'hydration_coaster': 'A glowing coaster that reminds you to drink.',
+    'star_projector': 'A star ball that turns and fills the ceiling with stars.',
+    'filament_dryer': 'A dry box that tracks humidity and filament left.',
+    'vinyl_stand': 'A walnut record ledge that hears the song and shows it.',
+    'drawing_bot': 'A turtle robot that draws on paper with a real marker.',
+    'key_hook': "An oak key board whose name tags glow when you're home.",
     'sesame_atech': 'The Sesame walking robot with an Atech board and screen.',
     "starter_board": "The Atech board in a tray, ready for your modules.",
     "starter_case": "The board in a screwed case, a button and a light.",

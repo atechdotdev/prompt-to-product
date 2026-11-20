@@ -25,22 +25,47 @@ HOME = "Home & living"
 DESK = "Desk & creator"
 FUN = "Sound & games"
 SENSE = "Sensors & smart home"
+# R1030: six more kinds, so every example sits with its own sort
+KITCHEN = "Kitchen & food"
+PETS = "Pets"
+OUTDOOR = "Outdoor & garden"
+HEALTH = "Health & fitness"
+KIDS = "Kids & learning"
+MAKER = "Workshop & making"
 MORE = "More"
-CATEGORIES = (NEW, ROBOTS, HOME, DESK, FUN, SENSE, MORE)
+CATEGORIES = (NEW, ROBOTS, HOME, KITCHEN, PETS, OUTDOOR, HEALTH, KIDS, DESK, MAKER,
+              FUN, SENSE, MORE)
+
+#: R1030: the newest examples. "New" is a filter over these, not their
+#: kind: each still sits in its own category (a NEW tag on its card).
+NEW_KEYS = ("tea_steeper", "mail_notifier", "hydration_coaster", 
+            "star_projector", "filament_dryer", "vinyl_stand", "drawing_bot", 
+            "key_hook", "ball_launcher", "mole_bop",)
 
 #: (example key, title, one line, category). Order = the gallery's order.
 CATALOG = (
-    # R990: ten more products, the newest
-    ("cloud_lamp", "Cloud lamp", "A glowing cloud on a lightning bolt that flashes to music.", NEW),
-    ("on_air_sign", "On air sign", "A studio ON AIR light that glows when you talk.", NEW),
-    ("theremin", "Air theremin", "A walnut theremin you play by waving over it.", NEW),
-    ("piggy_bank", "Coin counter pig", "A chunky pink pig that counts every coin.", NEW),
-    ("starter_jar", "Sourdough monitor", "A smart jar lid that watches your starter rise.", NEW),
-    ("dice_tower", "Dice tower", "A castle keep that counts and announces every roll.", NEW),
-    ("cat_wand", "Cat wand toy", "A cat-eared turret that waves a feather wand at your cat.", NEW),
-    ("drum_pad", "Drum pad", "Four big rubber pads that play real drum sounds.", NEW),
-    ("pill_box", "Pill reminder", "A weekly pill box that glows when it's time.", NEW),
-    ("fortune_ball", "Fortune ball", "A midnight-blue ball that answers when you shake it.", NEW),
+    # R1030: ten products in ten kinds, the newest
+    ("tea_steeper", "Tea timer", "A tower whose arm lifts the tea bag out on time.", KITCHEN),
+    ("mail_notifier", "Mailbox flag", "A mailbox box that raises a red flag when post lands.", OUTDOOR),
+    ("hydration_coaster", "Water reminder", "A glowing coaster that reminds you to drink.", HEALTH),
+    ("star_projector", "Star projector", "A star ball that turns and fills the ceiling with stars.", KIDS),
+    ("filament_dryer", "Filament dry box", "A dry box that tracks humidity and filament left.", MAKER),
+    ("vinyl_stand", "Now playing stand", "A walnut record ledge that hears the song and shows it.", HOME),
+    ("drawing_bot", "Drawing robot", "A turtle robot that draws on paper with a real marker.", ROBOTS),
+    ("key_hook", "Who's home key hook", "An oak key board whose name tags glow when you're home.", SENSE),
+    ("ball_launcher", "Fetch machine", "An orange drum that fires your dog's ball back out.", PETS),
+    ("mole_bop", "Mole bop game", "Bop four glowing moles before they hide.", FUN),
+    # R990: ten more products
+    ("cloud_lamp", "Cloud lamp", "A glowing cloud on a lightning bolt that flashes to music.", HOME),
+    ("on_air_sign", "On air sign", "A studio ON AIR light that glows when you talk.", DESK),
+    ("theremin", "Air theremin", "A walnut theremin you play by waving over it.", FUN),
+    ("piggy_bank", "Coin counter pig", "A chunky pink pig that counts every coin.", KIDS),
+    ("starter_jar", "Sourdough monitor", "A smart jar lid that watches your starter rise.", KITCHEN),
+    ("dice_tower", "Dice tower", "A castle keep that counts and announces every roll.", FUN),
+    ("cat_wand", "Cat wand toy", "A cat-eared turret that waves a feather wand at your cat.", PETS),
+    ("drum_pad", "Drum pad", "Four big rubber pads that play real drum sounds.", FUN),
+    ("pill_box", "Pill reminder", "A weekly pill box that glows when it's time.", HEALTH),
+    ("fortune_ball", "Fortune ball", "A midnight-blue ball that answers when you shake it.", FUN),
     # R940: the ten viral products (R990: in their own kinds now)
     ("hype_button", "Hype button", "A giant red button that plays airhorns.", FUN),
     ("debug_duck", "Debug duck", "A rubber duck that listens to your bugs and quacks.", FUN),
@@ -48,9 +73,9 @@ CATALOG = (
     ("tiny_tv", "Tiny TV", "A tiny walnut TV with rabbit ears that plays GIFs.", DESK),
     ("focus_cube", "Focus cube", "A flip timer: the number on top sets the minutes.", DESK),
     ("retro_camera", "Pixel camera", "A toy camera that takes pixel-art photos.", DESK),
-    ("bird_cam", "Bird feeder cam", "A bird feeder that photographs every visitor.", SENSE),
+    ("bird_cam", "Bird feeder cam", "A bird feeder that photographs every visitor.", OUTDOOR),
     ("follower_counter", "Follower counter", "A desk trophy with your live follower count.", DESK),
-    ("coffee_scale", "Coffee scale", "A pour-over scale with a floating platform and a timer.", HOME),
+    ("coffee_scale", "Coffee scale", "A pour-over scale with a floating platform and a timer.", KITCHEN),
     ("photo_turntable", "Photo turntable", "A geared 360 turntable for product videos.", DESK),
     # robots and things that move
     ("toy_car", "Toy car", "A chunky 4x4 with driven wheels and lights.", ROBOTS),
@@ -64,15 +89,15 @@ CATALOG = (
     # home
     ("bedside_lamp", "Bedside lamp", "A turned column lamp with a frosted globe.", HOME),
     ("motion_light", "Motion night light", "A wall pebble night light with a frosted moon and PIR eye.", HOME),
-    ("smart_planter", "Smart planter", "A desk planter with a readout and an inner pot.", HOME),
-    ("pet_feeder", "Pet feeder", "A hopper feeder with a rotary dispenser and a bowl.", HOME),
+    ("smart_planter", "Smart planter", "A desk planter with a readout and an inner pot.", OUTDOOR),
+    ("pet_feeder", "Pet feeder", "A hopper feeder with a rotary dispenser and a bowl.", PETS),
     ("photo_frame", "Photo frame", "A wood photo frame on a kickstand, a screen in its mat.", HOME),
     ("alarm_clock", "Alarm clock", "A clock radio leaning back on a wedge foot.", HOME),
     ("desk_fan", "Desk fan", "A guarded fan head on a stem, motor-driven.", HOME),
     # desk and creator
     ("macro_pad", "Macro pad", "A wedge keypad with big keys, a label screen and a dial.", DESK),
     ("desk_organizer", "Desk organizer", "A tray with pen cups, a phone dock and a display.", DESK),
-    ("desk_buddy", "Desk buddy", "A little printed character that tests your printer.", DESK),
+    ("desk_buddy", "Desk buddy", "A little printed character that tests your printer.", MAKER),
     # sound and games
     ("smart_speaker", "Smart speaker", "A round speaker with a light ring and buttons.", FUN),
     ("music_box", "Music box", "A walnut music box with a knob and a lit window.", FUN),
@@ -88,6 +113,8 @@ CATALOG = (
 #: Parts and seeds in examples/ that are not products to start from.
 NOT_PRODUCTS = ("atech_case", "knob", "gear", "bracket", "enclosure",
                 "snap_box", "hinged_box")
+#: How many kind chips sit in one row of the gallery's filter (R1030).
+CHIPS_PER_ROW = 7
 #: How many example cards Home shows before "All examples".
 HOME_COUNT = 9
 
@@ -140,23 +167,29 @@ def entries(shipped=None, folder=None):
         seen.add(key)
         out.append({"key": key, "title": shipped.get(key) or title, "line": line,
                     "category": cat, "picture": picture(key),
-                    "shipped": shipped.get(key)})
+                    "shipped": shipped.get(key), "new": key in NEW_KEYS})
     for key in sorted(disk - seen):
         req = _request(os.path.join(folder or EXAMPLES_DIR, key + ".py"))
         if not req:
             continue
         out.append({"key": key, "title": key.replace("_", " ").capitalize(),
                     "line": req[:1].upper() + req[1:] + ".", "category": MORE,
-                    "picture": picture(key), "shipped": shipped.get(key)})
+                    "picture": picture(key), "shipped": shipped.get(key),
+                    "new": False})
     return out
 
 
 def matches(row, text="", category=None):
     """True when the row is in `category` (None: all) and every word of
-    `text` is in its title, line or category."""
-    if category and row["category"] != category:
+    `text` is in its title, line or category. NEW: the newest examples
+    (row["new"]), whatever their kind."""
+    if category == NEW:
+        if not row.get("new"):
+            return False
+    elif category and row["category"] != category:
         return False
-    hay = " ".join((row["title"], row["line"], row["category"], row["key"])).casefold()
+    hay = " ".join((row["title"], row["line"], row["category"], row["key"],
+                    NEW if row.get("new") else "")).casefold()
     return all(w in hay for w in (text or "").casefold().split())
 
 
@@ -220,7 +253,8 @@ def _card_class():
             self.pic.setAlignment(QtCore.Qt.AlignCenter)
             self._pixmap = None
             lay.addWidget(self.pic, 0, QtCore.Qt.AlignHCenter)
-            tag = QtWidgets.QLabel(row["category"].upper() if row["category"] == NEW else "")
+            kind = row["category"].upper()
+            tag = QtWidgets.QLabel(("NEW  \u00b7  " + kind) if row.get("new") else kind)
             tag.setObjectName("GalleryCardTag")
             lay.addWidget(tag)
             t = QtWidgets.QLabel(row["title"])
@@ -318,10 +352,13 @@ def ExamplesDialog(parent=None, rows=None, on_start=None):   # noqa: N802
             self.search.textChanged.connect(self.refilter)
             head.addWidget(self.search)
             v.addLayout(head)
-            chips = QtWidgets.QHBoxLayout()
+            # R1030: 13 kinds do not fit one row - the chips keep their full
+            # width and wrap into rows of CHIPS_PER_ROW
+            chips = QtWidgets.QVBoxLayout()
             chips.setSpacing(6)
+            row = None
             self.chips = []
-            present = [c for c in CATEGORIES if any(r["category"] == c for r in self.rows)]
+            present = [c for c in CATEGORIES if any(matches(r, category=c) for r in self.rows)]
             for cat in [None] + present:
                 # "&" would be read as a shortcut marker
                 b = QtWidgets.QPushButton("All" if cat is None else cat.replace("&", "&&"))
@@ -331,9 +368,17 @@ def ExamplesDialog(parent=None, rows=None, on_start=None):   # noqa: N802
                 b.setCursor(QtCore.Qt.PointingHandCursor)
                 b.category = cat
                 b.clicked.connect(lambda _=False, c=cat: self.set_category(c))
-                chips.addWidget(b)
+                b.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+                if row is None or row.count() >= CHIPS_PER_ROW:
+                    if row is not None:
+                        row.addStretch(1)
+                    row = QtWidgets.QHBoxLayout()
+                    row.setSpacing(6)
+                    chips.addLayout(row)
+                row.addWidget(b)
                 self.chips.append(b)
-            chips.addStretch(1)
+            if row is not None:
+                row.addStretch(1)
             v.addLayout(chips)
             self.scroll = QtWidgets.QScrollArea()
             self.scroll.setWidgetResizable(True)

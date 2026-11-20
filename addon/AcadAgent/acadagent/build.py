@@ -250,6 +250,14 @@ def prepare_workspace(workspace, reset_intent=True, doc=None, request=None):
         return []
     written = []
     start_turn(workspace, request, fix=not reset_intent)
+    if reset_intent and request:
+        # R1100: the user's words become the brief (brief.json, BRIEF.md)
+        try:
+            from . import p2p_ws
+            if p2p_ws.on_user_turn(workspace, request) is not None:
+                written.append(p2p_ws.BRIEF_MD)
+        except Exception as exc:                       # noqa: BLE001
+            _log("brief: %r" % (exc,))
     try:
         with open(os.path.join(KIT_DIR, "atech_cad.py"), "rb") as fh:
             if _write_if_changed(os.path.join(workspace, "atech_cad.py"), fh.read(), 0o444):
@@ -1010,6 +1018,29 @@ ATECH_CASE = "atech_case.py"
 #: ratios or percentages (the toy car agent spent its level grepping the
 #: checker for them and never designed anything).
 ARCHETYPES = (
+    # R1030: ten products in ten kinds (2026-11-20), first: their words
+    # are specific ("a tea timer" before the clock, "a star projector"
+    # before the lamps, "a drawing robot" before the robots).
+    ('tea steeper', ('tea timer', 'tea steeper', 'tea bag lifter', 'tea bag dipper', 'automatic tea maker', 'steeping timer', 'tea brewer', 'tea dunker'),
+     'a tower beside the cup on a wide weighted foot with a coaster; an arm on a motor swings the tea bag down into the cup and lifts it out; the countdown screen and a dial on the face'),
+    ('mailbox notifier', ('mailbox', 'letterbox', 'letter box', 'mail sensor', 'mailbox flag', 'post arrived', 'parcel box', 'post box'),
+     'a weatherproof mailbox-shaped box with drip edges on a keyhole flange; a sensor looks down into the mailbox through an open window and a motor raises a red flag when post lands'),
+    ('drink coaster', ('drink coaster', 'smart coaster', 'bottle coaster', 'cup coaster', 'water reminder', 'hydration tracker', 'drink reminder'),
+     'a low round puck a bottle stands on: a floating seat on a load cell inside a glowing halo ring, a small screen and a snooze key on the sloped front'),
+    ('star projector', ('star projector', 'night sky projector', 'planetarium night light', 'galaxy projector', 'starry night light', 'rotating star lamp', 'nursery projector'),
+     'a pierced dome or ball of stars and a moon turning slowly on a rounded base; the lights under it throw the stars onto the ceiling, a speaker grille and a soft key in the base'),
+    ('filament dry box', ('filament dry box', 'dry box', 'filament dryer', 'spool box', 'filament storage', 'desiccant box', 'spool holder', 'dry cabinet'),
+     'a lidded box for one spool rolling on bearings behind a big window, a PTFE exit on top, a desiccant drawer; the humidity sensor reads the chamber air, the screen in a plinth'),
+    ('record stand', ('record stand', 'now playing stand', 'vinyl stand', 'album display', 'record sleeve', 'vinyl display', 'lp stand', 'record ledge'),
+     'a weighted wooden ledge with a slot holding a 12-inch sleeve leaning back; the screen, a level-meter light strip, the mic and a key on a panel in the front'),
+    ('drawing robot', ('drawing robot', 'drawing bot', 'turtle robot', 'logo turtle', 'pen plotter robot', 'robot that draws', 'sketch bot', 'doodle bot'),
+     'a round domed robot on two wheels with a real pen standing through its middle on the axle and a pen lift; screen eyes behind a visor, a caster underneath'),
+    ('key hook', ('key hook', 'key rack', 'key holder', 'key board', "who's home", 'entryway organiser', 'hallway key', 'key hanger'),
+     'a wall plate by the door with three or four strong hooks, a name tag that lights above each, a sensor under each hook, a small screen and a motion eye; a tray on top'),
+    ('ball launcher', ('ball launcher', 'ball thrower', 'fetch machine', 'automatic fetch', 'tennis ball launcher', 'dog ball launcher', 'pitching machine', 'ball shooter'),
+     'a sturdy floor unit with a wide hopper on top; the ball rolls down a guarded throat between two flywheels and shoots out of a front mouth; a sensor in the chute, lights round the mouth'),
+    ('reaction game', ('reaction game', 'mole game', 'bop the mole', 'mole bop', 'reflex game', 'reflex trainer', 'light-up button game', 'tap the light game'),
+     'a low mound with a row of holes, a light-up mole-head button cap in each; a raised score sign with the screen at the back and a speaker grille'),
     # R990: ten more products (2026-11-17), first: their words are
     # specific ("a cloud lamp" before the lamp, "a cat toy" before
     # the feeder's "cat", "a drum pad" before the giant button's

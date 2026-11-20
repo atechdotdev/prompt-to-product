@@ -7,6 +7,55 @@ release may change behaviour.
 
 ## [Unreleased]
 
+### Ten more example products, one in each kind; six new gallery kinds (R1030)
+
+- **Ten new examples to start from**, each passing ./check and every
+  restyle knob's ends: a tea timer whose arm lifts the bag out of the cup,
+  a fetch machine for dogs, a mailbox flag that pops up when post arrives,
+  a water reminder coaster, a star projector for a child's room, a
+  filament dry box, a mole bop game, a now playing record stand, a
+  drawing robot and a who's home key hook. Each has its own picture in
+  the gallery, and the agent forks it for matching requests.
+- **The gallery has six new kinds:** Kitchen & food, Pets, Outdoor &
+  garden, Health & fitness, Kids & learning and Workshop & making.
+  Sixteen older examples moved to the kind they belong to (the cat wand
+  and pet feeder to Pets, the coffee scale and sourdough jar to Kitchen,
+  the bird cam to Outdoor, and so on).
+- **"New" is a filter, not a kind.** The newest examples keep their own
+  kind, with a NEW tag on the card; every card now shows its kind.
+- Existing installs get the new examples (default projects version 5).
+
+### From the prompt to a product someone can make, use and test (R1100-R1190)
+
+- **The prompt becomes a brief.** The first message of a chat is read into
+  a brief (BRIEF.md in the agent's workspace): the Atech modules it asks
+  for and why ("two buttons", "no screen"), the size it must fit ("120 x 80
+  x 60 mm", "pocket-sized"), power, where it lives, colours, how many, what
+  it should do ("when the button is pressed, it plays a tune") and the
+  questions still open. Later messages update it ("add a speaker", "make it
+  150 mm wide"). It ends in **Done when**: the product's acceptance criteria.
+- **./check says whether the design is what was asked for**: BRIEF lines,
+  each criterion met, not met or not known (never guessed), and a PRINT line:
+  the smallest Bambu printer every part fits, plates, filament and a rough
+  time. Information only; no gate changed.
+- **Firmware from the brief.** When the agent wrote no code, the product
+  pack writes project.yaml's code from the brief's behaviours, with only the
+  calls the Atech SDK documents (buttons, knob, motion, temperature, CO2,
+  distance, tilt, shake, sound level, timers; tones and tunes, the light's
+  colours, the screen, the motor). A seven-behaviour product built with the
+  real SDK for the ESP32-S3. Guessed thresholds are named so you can tune them.
+- **The product pack has every paper**: brief, done when, print plan per
+  Bambu printer, costs (your prices and the atech.dev quote; nothing
+  invented), what to buy with exact screw sizes and a one-screw-type hint,
+  the user manual, a one-page quick-start card, the product label, the test
+  by hand and the changelog (versions: what changed since the last pack).
+  Share carries them too, and its status says whether it was tested by hand.
+- **Make it shows it**: a "Prompt to product" card (brief, print plan,
+  cost, tested, version, open questions), **Test by hand** (pass, fail or
+  skip each test, with a note) and the brief.
+- **Headless**: `freecadcmd acadagent/p2p_make.py` with P2P_PROMPT and
+  P2P_EXAMPLE or P2P_FCSTD makes the whole pack with no window.
+
 ### Ten new example products, a landing-page Home (R980, R990)
 
 - **Ten new examples to start from**, each passing ./check at every resize

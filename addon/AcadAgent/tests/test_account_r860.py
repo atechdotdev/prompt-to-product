@@ -395,3 +395,60 @@ class TestButton(Base):
         b = self.make()
         [a for a in b.menu().actions() if a.text() == "Your account on atech.dev"][0].trigger()
         self.assertEqual(self.opened, [self.site.url + "/account"])
+
+
+@unittest.skipIf(QtWidgets is None, "PySide6 not available (run with the bundled python)")
+class TestHubR1020(Base):
+    """R1020: the project sidebar's atech.dev menu (account_ui.AtechHub)."""
+
+    def make(self, doc_open=True):
+        from acadagent import account_ui
+        self.opened, self.ran = [], []
+        acts = [("made", "Get it made by Atech…", lambda: self.ran.append("made")),
+                ("post", "Post to atech.dev…", lambda: self.ran.append("post"))]
+        return account_ui.AtechHub(None, acct=self.acct, opener=self.opened.append,
+                                   background=False, project_actions=acts,
+                                   enabled=lambda: doc_open)
+
+    def texts(self, b):
+        return [a.text() for a in b.menu().actions() if a.text()]
+
+    def test_signed_out_menu_signs_in_first_and_has_the_project(self):
+        b = self.make()
+        self.assertEqual(b.text(), "Sign in")
+        with mock.patch.object(account.SignIn, "start", lambda flow: None):
+            b.click()                                 # opens the menu, no sign-in
+        self.assertIsNone(b.flow)
+        t = self.texts(b)
+        self.assertEqual(t[0], "Sign in with your atech.dev account…")
+        for want in ("This project", "Get it made by Atech…", "Post to atech.dev…",
+                     "Atech shop: board and modules", "Docs"):
+            self.assertIn(want, t)
+        self.assertNotIn("Your account", t)
+        self.assertNotIn("Sign out", t)
+        acts = {a.text(): a for a in b.menu().actions()}
+        acts["Post to atech.dev…"].trigger()
+        self.assertEqual(self.ran, ["post"])
+        with mock.patch.object(account.SignIn, "start", lambda flow: None):
+            acts["Sign in with your atech.dev account…"].trigger()
+        self.assertIsNotNone(b.flow)
+
+    def test_no_project_greys_the_project_rows(self):
+        b = self.make(doc_open=False)
+        acts = {a.text(): a for a in b.menu().actions()}
+        self.assertFalse(acts["Get it made by Atech…"].isEnabled())
+        self.assertFalse(acts["Post to atech.dev…"].isEnabled())
+        self.assertTrue(acts["Docs"].isEnabled())
+
+    def test_signed_in_is_an_avatar_with_account_and_sign_out(self):
+        self.acct._take(self.site.session())
+        b = self.make()
+        self.assertEqual(b.text(), "D")                # "David": one initial
+        self.assertTrue(b.property("avatar"))
+        t = self.texts(b)
+        self.assertIn("Your account", t)
+        self.assertEqual(t[-1], "Sign out")
+        self.assertTrue(t[0].startswith("David · maker@example.com"))
+        [a for a in b.menu().actions() if a.text() == "Your account"][0].trigger()
+        self.assertEqual(self.opened, [self.site.url + "/account"])
+

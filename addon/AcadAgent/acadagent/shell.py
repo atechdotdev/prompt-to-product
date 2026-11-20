@@ -178,6 +178,14 @@ SIDEBAR_QSS = """
 }}
 #HomeBtn:hover {{ background: {hover}; border-color: {line_strong}; }}
 #HomeBtn:focus {{ border-color: {accent}; }}
+#AtechHub {{
+    background: {btn_bg}; border: 1px solid {btn_bg}; border-radius: 12px;
+    padding: 3px 12px; min-height: 18px; color: {btn_text}; font-family: {UI}; font-size: 12px; font-weight: 600;
+}}
+#AtechHub:hover {{ background: {text}; border-color: {text}; }}
+#AtechHub:focus {{ border-color: {accent}; }}
+#AtechHub::menu-indicator {{ image: none; width: 0; }}
+#AtechHub[avatar="true"] {{ padding: 0; min-height: 0; border-radius: 15px; font-size: 11px; }}
 #PartsHead {{ background: {panel}; border-top: 1px solid {line}; border-bottom: 1px solid {line}; }}
 #PartsToggle {{
     background: transparent; border: none; border-radius: 6px; text-align: left;
@@ -322,6 +330,10 @@ HOME_QSS = """
 #CardIcon {{ background: {bubble}; border-radius: 10px; }}
 #StartCard {{ background: {panel}; border: 1px solid {line}; border-radius: 18px; }}
 #StartCard:hover {{ border-color: {line_strong}; }}
+#HowBand {{ background: transparent; }}
+#HowCard {{ background: {panel}; border: 1px solid {line}; border-radius: 18px; }}
+#HowCard:hover {{ border-color: {line_strong}; }}
+#HowCard:focus {{ border: 1px solid {accent}; }}
 
 /* bring your own model */
 #ByoBand {{ background: {panel}; border: 1px solid {line}; border-radius: 24px; }}
@@ -756,7 +768,17 @@ EXAMPLE_ICONS = {"starter_board": "cpu", "starter_case": "cube",
                  "dice_tower": "cube",
                  "cat_wand": "sparkles",
                  "drum_pad": "grid",
-                 "pill_box": "grid"}
+                 "pill_box": "grid",
+                 "mole_bop": "grid",
+                 "ball_launcher": "rotate",
+                 "tea_steeper": "rotate",
+                 "mail_notifier": "cube",
+                 "hydration_coaster": "bell",
+                 "star_projector": "sparkles",
+                 "filament_dryer": "layers",
+                 "vinyl_stand": "layers",
+                 "drawing_bot": "ruler",
+                 "key_hook": "grid"}
 
 
 def example_entries(kind="product"):
@@ -1697,6 +1719,11 @@ class HomeView(QtWidgets.QWidget):
             self.hero_tiles.append(t)
         hl.addWidget(self.collage, 0, QtCore.Qt.AlignVCenter)
         v.addWidget(self.hero)
+        v.addSpacing(28)
+
+        # ---- how it works (R1010): electronics, CAD, firmware, then the tour
+        self.how = self._how_it_works()
+        v.addWidget(self.how)
         v.addSpacing(44)
 
         # ---- explore
@@ -1846,6 +1873,45 @@ class HomeView(QtWidgets.QWidget):
         self._sync_go()
         self.refresh_cards()
         self.refresh()
+
+    def _how_it_works(self):
+        """R1010: the three parts of every product, one card each, and the
+        guided tour. A card opens the tour at its step."""
+        from . import onboarding
+        band = QtWidgets.QFrame()
+        band.setObjectName("HowBand")
+        band.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        v = QtWidgets.QVBoxLayout(band)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(12)
+        head = QtWidgets.QHBoxLayout()
+        col, self.sec_how, _s = self._h2(
+            "How it works", "Every product has three parts. You describe it; "
+            "the agent does the electronics and the CAD, and the firmware is "
+            "handled for you.")
+        head.addLayout(col, 1)
+        self.btn_tour = self._btn("Take the 1-minute tour  →", "HomeLink",
+                                  acc="Open the getting started guide")
+        self.btn_tour.clicked.connect(lambda: onboarding.open_guide(0))
+        head.addWidget(self.btn_tour, 0, QtCore.Qt.AlignBottom)
+        v.addLayout(head)
+        row = QtWidgets.QHBoxLayout()
+        row.setSpacing(self.GAP)
+        self.how_cards = []
+        for i, (key, title, line) in enumerate(onboarding.PARTS):
+            card = ClickCard(("cpu", "cube", "terminal")[i % 3],
+                             "%d  %s" % (i + 1, title), line)
+            card.setObjectName("HowCard")
+            card.setMinimumSize(200, 128)          # stretches across the row
+            card.setMaximumSize(16777215, 128)
+            card.setAccessibleName("How it works: %s" % title)
+            card.step_key = key
+            card.clicked.connect(
+                lambda _=False, k=key: onboarding.open_guide(k))
+            row.addWidget(card, 1)
+            self.how_cards.append(card)
+        v.addLayout(row)
+        return band
 
     @staticmethod
     def _entry_cards(rows, what, pictures=False):
@@ -2171,7 +2237,8 @@ class HomeView(QtWidgets.QWidget):
         self._search_act = self.search.addAction(
             style.icon("search", t["dim"], 14),
             QtWidgets.QLineEdit.LeadingPosition)
-        for c in self.cards + self.project_cards + self.gallery_cards:
+        for c in (self.cards + self.project_cards + self.gallery_cards
+                  + self.how_cards):
             c.restyle()
         dpr = style.pixel_scale()
         for tile in self.hero_tiles:
@@ -2367,7 +2434,7 @@ def _w4_restyle(w):
 BUILTIN_TOOLS = (("measure", "Measure"), ("section", "Section view"),
                  ("colour", "Colour"), ("explode", "Exploded view"),
                  ("export", "Print"), ("files", "Export"),
-                 ("share", "Save a share image"))
+                 ("share", "Share"))
 #: R700/R701: Show and hide (visibility.py) and Dimensions (dimensions.py).
 EDIT_TOOLS = (("show", "Show and hide"), ("dims", "Dimensions"),
               ("shape", "Edit shapes"), ("part", "Edit part"))
@@ -2997,6 +3064,16 @@ class Overlay(QtCore.QObject):
         self.deleteLater()
 
 
+#: R1020: the sidebar's atech.dev menu, "This project" (key, label, fn):
+#: the run_command_action keys of the Export and share menu's atech.dev rows.
+SIDEBAR_HUB_ACTIONS = (
+    ("made", "Get it made by Atech\u2026", lambda: _safe(lambda: run_command_action("made"))),
+    ("post", "Post to atech.dev\u2026", lambda: _safe(lambda: run_command_action("post"))),
+    # R1040 (atech-atelier-d1): the share pack, with Post, MakerWorld and Send
+    ("sharepack", "Share\u2026", lambda: _safe(lambda: run_command_action("sharepack"))),
+)
+
+
 class Sidebar(QtWidgets.QWidget):
     """The sidebar head - brand row (where the menu bar cannot show it),
     the project picker with Terminal and Settings, the hardware switch,
@@ -3051,6 +3128,19 @@ class Sidebar(QtWidgets.QWidget):
         bl.addWidget(self.btn_home)
         self._home_state = None
         self.set_home_state(False, True)
+        # R1020: the atech.dev connection in one place, top right as on a
+        # website: the account (or Sign in), this project's Get it made and
+        # Post to atech.dev, the shop and the site's pages. It replaces the
+        # small "atech.dev" link that sat beside the FreeCAD credit (R950).
+        self.hub = None
+        try:
+            from . import account_ui
+            self.hub = account_ui.AtechHub(
+                self, project_actions=SIDEBAR_HUB_ACTIONS,
+                enabled=lambda: _active_doc() is not None)
+            bl.addWidget(self.hub)
+        except Exception as exc:                       # noqa: BLE001
+            _log("atech.dev hub: %r" % (exc,))
         hv.addWidget(self.brand)
         # R722: credit FreeCAD with its logo, under the Atech wordmark
         self.based_on = FreeCadBadge(16)
@@ -3058,14 +3148,6 @@ class Sidebar(QtWidgets.QWidget):
         brow.setContentsMargins(4, 0, 0, 0)
         brow.addWidget(self.based_on)
         brow.addStretch(1)
-        # R950: "atech.dev" beside it, the maker's site one click away
-        self.site_link = QtWidgets.QLabel()
-        self.site_link.setObjectName("BasedOn")
-        self.site_link.setOpenExternalLinks(False)
-        self.site_link.linkActivated.connect(_open_link)
-        self.site_link.setToolTip("Made by Atech.dev: opens atech.dev")
-        self.site_link.setAccessibleName("atech.dev")
-        brow.addWidget(self.site_link)
         hv.addLayout(brow)
         # R801: the logo is the way Home (all projects), as on a website.
         self.brand.setCursor(QtCore.Qt.PointingHandCursor)
@@ -3091,11 +3173,10 @@ class Sidebar(QtWidgets.QWidget):
             except Exception as exc:                   # noqa: BLE001
                 _log("picker row: %r" % (exc,))
         prow.addWidget(self.picker_row or self.picker, 1)
-        self.btn_terminal = self._icon_btn("Terminal", "Open a terminal")
-        self.btn_terminal.clicked.connect(lambda: _open_terminal())
-        prow.addWidget(self.btn_terminal)
+        # R1020: Terminal is a power tool; it lives in the gear's menu now
+        # ("Open terminal"), not as its own button on every screen.
         self.btn_settings = self._icon_btn(
-            "Settings", "Settings, appearance and keyboard shortcuts")
+            "Settings", "Settings, appearance, keyboard shortcuts and the terminal")
         self.btn_settings.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.btn_settings.setMenu(settings_menu(self.btn_settings))
         prow.addWidget(self.btn_settings)
@@ -3203,6 +3284,7 @@ class Sidebar(QtWidgets.QWidget):
         self._parts_open = False
         self._parts_sizes = None
         self.model_page.setVisible(False)
+        self.parts_head.setVisible(False)
         self.stack.addWidget(self.cad_page)
         from .modules_page import ModulesPage
         self.modules_page = ModulesPage()
@@ -3239,7 +3321,7 @@ class Sidebar(QtWidgets.QWidget):
         # R721: the brand row stays for the All projects button; only the
         # wordmark goes where the top bar already carries it (Linux)
         for w in (self.brand_mark, self.brand_word, self.based_on,
-                  self.btn_terminal, self.btn_settings):
+                  self.btn_settings):
             w.setVisible(on)
 
     def set_home_state(self, home, has_doc):
@@ -3290,6 +3372,9 @@ class Sidebar(QtWidgets.QWidget):
                 self._parts_sizes = sizes
         self._parts_open = on
         self.model_page.setVisible(on)
+        # R1020: the PARTS strip (Show and hide, Dimensions) only while the
+        # parts are open; closed, the layers button beside the tabs opens it.
+        self.parts_head.setVisible(on)
         if on:
             sizes = self._parts_sizes
             if not sizes:
@@ -3400,9 +3485,6 @@ class Sidebar(QtWidgets.QWidget):
         if pm is not None:
             self.brand_mark.setPixmap(pm)
         self.based_on.restyle()
-        self.site_link.setText('<a href="%s" style="color:%s; text-decoration:none;">atech.dev</a>'
-                               % (site_url(), style.tokens()["muted"]))
-        self.btn_terminal.setIcon(style.icon("terminal", t["muted"], 16))
         self.btn_settings.setIcon(style.icon("settings", t["muted"], 16))
         self._paint_home_btn()
         self._paint_parts_toggle()
@@ -4529,7 +4611,9 @@ def settings_menu(parent=None):
         a = menu.addAction("Keyboard shortcuts", lambda: open_shortcut_sheet())
         a.setShortcut(QtGui.QKeySequence("Ctrl+/"))
         a.setShortcutVisibleInContextMenu(True)
+        menu.addAction("Getting started…", lambda: _open_guide())   # R1010
         menu.addSeparator()
+        menu.addAction("Open terminal", lambda: _open_terminal())   # R1020
         wb = menu.addMenu("Switch workbench")
         wb.aboutToShow.connect(lambda m=wb: _fill_workbench_menu(m))
         menu.addAction("Credits & open-source licences",
@@ -4537,6 +4621,12 @@ def settings_menu(parent=None):
     menu.aboutToShow.connect(fill)
     fill()
     return menu
+
+
+def _open_guide(start=0):
+    """R1010: the getting started tour (onboarding.GuideDialog)."""
+    from . import onboarding
+    return onboarding.open_guide(start, _mw_or_none())
 
 
 def sidebar_chrome(mw=None, env=None):
@@ -4599,6 +4689,10 @@ EXPORT_COMMANDS = (
      "mwpublish"),
     ("Atech_PostToAtech", "Post to atech.dev\u2026", "Share the design on "
      "atech.dev/community, with its picture and assembly video", "post"),
+    # R1040
+    ("Atech_Share", "Share\u2026", "One folder with everything: the design in 3D, "
+     "print files, parts and shopping list, a message; then atech.dev, MakerWorld "
+     "or a person", "sharepack"),
     ("Atech_ShareImage", "Save a share image", "A 1920 x 1080 picture in "
      "Pictures, also copied", "share"),
     ("Atech_ReviewSheet", "Save a review sheet", "Six views of the model "
@@ -4693,6 +4787,11 @@ def run_command_action(key):
     if key == "electrical":                            # R1002
         from . import electrical_suite
         return electrical_suite.open_suite(_active_doc(), "overview", parent)
+    if key == "sharepack":                             # R1040
+        if click_tool("share"):
+            return key
+        from . import share
+        return _keep_dialog(share.ShareDialog(parent)).show()
     if key == "share":
         path, msg = export_tools.share_now(parent)
         _say_at_cursor(msg)
@@ -5522,6 +5621,17 @@ def _install_chrome(mw, dock, body):
     chrome.hide_toolbars()
     restyle()
     _sync_tasks()
+    # R1010: the getting started tour, once, after the window is up
+    QtCore.QTimer.singleShot(1500, lambda: _first_run_guide(mw))
+
+
+def _first_run_guide(mw):
+    try:
+        from . import onboarding
+        return onboarding.maybe_show_first_run(mw)
+    except Exception as exc:                           # noqa: BLE001
+        _log("getting started: %r" % (exc,))
+        return None
 
 
 def _hook_docs():

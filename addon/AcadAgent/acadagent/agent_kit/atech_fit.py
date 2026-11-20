@@ -274,6 +274,19 @@ def stage_at(minutes):
 # speaker robot" is a robot), the fan before the lamp words ("a desk fan
 # with lights" is a fan).
 FORKS = [
+    # R1030: ten products in ten kinds (2026-11-20), first: a tea timer
+    # before the clock's "timer", a star projector before the lamp
+    # words, a drawing robot before the robots
+    (r'\b(tea[- ]?(timers?|steepers?|brewers?|dunkers?)|tea ?bag (lifters?|dippers?|dunkers?|timers?)|(auto(matic)?|smart) tea (makers?|brewers?|steepers?)|steeping (timers?|machines?))\b', 'tea_steeper'),
+    (r'\b(mail ?box(es)?|letter ?box(es)?|post ?box(es)?|parcel ?box(es)?|mail ?(sensors?|alerts?|notifiers?|flags?)|(post|mail|letters?) (has )?(arrives?|arrived|came|comes))\b', 'mail_notifier'),
+    (r'\b((smart |drinks? |water |bottle |cup |mug )?coasters?|(water|hydration|drinking) (reminders?|trackers?)|bottle (bases?|stands?)|forget to drink|remind me to drink)\b', 'hydration_coaster'),
+    (r'\b((star|night[- ]?sky|galaxy|starry[- ]?sky|constellation|nebula) (projectors?|lamps?|night ?lights?|balls?)|planetarium( night ?light| lamp)?|(nursery|ceiling) projectors?|stars? on (the|my|his|her|their) ceiling|ceiling with stars)\b', 'star_projector'),
+    (r'\b(filament (dry ?box|dryer|storage|box|cabinet)s?|dry ?box(es)?|spool (dry ?box|box|dryer|holder)s?|desiccant (box|cabinet)s?|(3d[- ]?)?printer filament (box|storage))\b', 'filament_dryer'),
+    (r'\b(now[- ]playing|record (?:stand|sleeve|ledge|display|holder)|vinyl (?:stand|display|ledge|holder)|album (?:stand|display|sleeve)|lp (?:stand|display)|(?:album|record|song|track)s? (?:i\x27?m|i am|that\x27?s|that is) (?:listening to|playing))\b', 'vinyl_stand'),
+    (r'\b(draw(ing)?[ -]?(ro)?bots?|turtle[ -]?(ro)?bots?|logo turtles?|(pen|floor)[ -]?plotter( robots?)?|sketch[ -]?bots?|doodle[ -]?bots?|robots? that draws?|robot turtles?|(draws?|drawing) (with a pen|pictures|on paper))\b', 'drawing_bot'),
+    (r'\b(key[ -]?(hooks?|racks?|holders?|hangers?)|key boards?|who\'?s home|(entryway|hallway) (organi[sz]ers?|keys?))\b', 'key_hook'),
+    (r'\b((automatic |auto[- ]?)?(tennis )?ball (launch|throw|shoot|pitch)(er|ers|ing machines?)|fetch (machines?|toys?|launchers?)|plays? fetch|(pitching|throwing) machines?)\b', 'ball_launcher'),
+    (r'\b(moles?[ -]?(bop|bopper|bopping|game|bash(er|ing)?|smash(er|ing)?|hunt)s?|(bop|bonk|smack|hit|whack|tap|boop)(ping)?[ -]?(the|a|some)?[ -]?(light[- ]?up |glowing )?moles?|moles? (that )?(pop|light)|reaction (games?|testers?|trainers?|timers? game)|reflex (games?|trainers?|testers?)|(light[- ]up|glowing) (button|target)s? games?|(tap|hit|bop) the lights? games?)\b', 'mole_bop'),
     # R990: ten more products (2026-11-17), first: a cat toy before the
     # motion light's "motion-activated", a drum pad before the giant
     # button's "soundboard", a cloud lamp before the lamp words

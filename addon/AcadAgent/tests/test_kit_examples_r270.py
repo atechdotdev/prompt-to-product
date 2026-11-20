@@ -93,6 +93,17 @@ PRODUCTS = {
     'bird_cam.py': ('bird feeder camera', 'a smart bird feeder camera', None),
     'hype_button.py': ('giant button', 'a giant sound button', None),
     'fortune_ball.py': ('fortune ball', 'a fortune ball that answers your question when you shake it', None),
+    # R1030: ten products in ten kinds (2026-11-20)
+    'tea_steeper.py': ('tea steeper', "a tea timer that lifts the tea bag out of the cup when it's ready", None),
+    'mail_notifier.py': ('mailbox notifier', 'a mailbox sensor that tells my phone when the post arrives', None),
+    'hydration_coaster.py': ('drink coaster', 'a coaster for my water bottle that glows when I forget to drink', None),
+    'star_projector.py': ('star projector', "a night-sky projector that fills my kid's ceiling with stars", None),
+    'filament_dryer.py': ('filament dry box', 'a filament dry box that shows the humidity and how much filament is left', None),
+    'vinyl_stand.py': ('record stand', "a stand for my record sleeve that shows what's playing", None),
+    'drawing_bot.py': ('drawing robot', 'a little robot that drives around on paper and draws with a pen', None),
+    'key_hook.py': ('key hook', "a key hook by the door that knows who's home", None),
+    'ball_launcher.py': ('ball launcher', 'a mini ball launcher that plays fetch with my dog', None),
+    'mole_bop.py': ('reaction game', 'a desk game where you bop light-up moles before they hide', None),
     # R990: ten more products (2026-11-17)
     'cloud_lamp.py': ('cloud lamp', 'a cloud lamp that flashes lightning to music', None),
     'on_air_sign.py': ('on air sign', 'an on air sign that lights up when you are talking', None),

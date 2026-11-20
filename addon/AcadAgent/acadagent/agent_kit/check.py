@@ -2330,6 +2330,46 @@ def _electrical_line(at, fw=None):
         return None
 
 
+def _brief_lines(res, at):
+    """R1110: BRIEF lines - the workspace's brief.json (the user's request
+    read into acceptance criteria, p2p_brief) against this build.
+    Information only: it changes no verdict. No brief: no lines."""
+    try:
+        ws = os.path.dirname(res.get("script") or "") or os.getcwd()
+        import p2p_brief
+        b = p2p_brief.load(ws)
+        if not b:
+            return []
+        import p2p_accept
+        errors = None
+        if at.get("modules"):
+            try:
+                import atech_electrical
+                r = atech_electrical.analyse(at, firmware=res.get("firmware"))
+                errors = sum(x["level"] == "error" for x in r["rules"])
+            except Exception:                           # noqa: BLE001
+                errors = None
+        else:
+            errors = 0
+        facts = p2p_accept.facts_from_check(res, ws, errors)
+        return p2p_accept.lines(p2p_accept.check(b, facts))
+    except Exception:                                   # noqa: BLE001
+        return []
+
+
+def _print_line(res):
+    """R1120: one PRINT line - which Bambu printers take every part laid
+    flat, plates, rough grams and time (p2p_print). Information only."""
+    try:
+        import p2p_print
+        import p2p_brief
+        ws = os.path.dirname(res.get("script") or "") or os.getcwd()
+        plan = p2p_print.plan(p2p_print.parts_from_check(res), p2p_brief.load(ws))
+        return p2p_print.check_line(plan)
+    except Exception:                                   # noqa: BLE001
+        return None
+
+
 def _fitted_after(doc, res):
     """R137: intent.json "fitted_after" -> the Labels of model.py's parts it
     names (end caps, a lid fitted after the modules). S50: a name model.py
@@ -2477,6 +2517,11 @@ def _say_summary(res):
         line = _electrical_line(at, res.get("firmware"))
         if line:
             _say(line)
+    for line in _brief_lines(res, at):                  # R1110
+        _say(line)
+    line = _print_line(res)                             # R1120
+    if line:
+        _say(line)
     fw = res.get("firmware") or {}
     if fw:
         _say("FIRMWARE %s, project.yaml %s; the modules block of this build:"

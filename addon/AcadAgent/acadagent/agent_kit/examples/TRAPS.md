@@ -304,3 +304,50 @@ R21. **The gallery renderer draws everything opaque.** Glass, frosted and
     smoked parts show as solid colour in the example picture, so light
     a "glowing" part with colour and make anything inside glass read
     from its outside (starter_jar.py's ticks and lettering on the jar).
+
+## Ten products in ten kinds (R1030) - found by the agents that built them
+
+R22. **Label words change what the checks do.** In atech_geom "Foot" is a
+    trim word and "Hook" counts as a fastener; a part with "clip" in its
+    label is read as a fastener and one with "glass" as trim. Name parts
+    for what they are, and know that a loose prop (a mug on a coaster, a
+    record in a slot) needs a real holder or the fastening check flags it
+    (vinyl_stand.py's felt clips, tea_steeper.py's glass cup).
+R23. **Some port pairs do not seat a 2-connector module.** Ports (5, 6) sit
+    19.9 mm apart, not 20 (star_projector.py); landscape-upright, screen
+    pairs (2,3), (3,4) and (5,6) fail `seated` while (1,2), (4,5), (9,10),
+    (10,11) and (13,14) pass (drawing_bot.py). A cabled plug on a failing
+    pair fails too.
+R24. **Short ribbons break when a knob moves them.** A cabled module whose
+    socket sits just above its plug gives "cable ... is not one valid
+    solid" after a 2 mm move. Mount it low and let the ribbon hairpin with
+    fixed waypoints (drawing_bot.py's button), and sweep every knob end.
+R25. **Arcs and segmented grooves read as channels** (more of R19): a true
+    arc roof, a groove_ring cut into pieces by wheel arches. Draw them as
+    straight facets (mail_notifier.py's roof: 40 facets) or leave them out.
+R26. **Coaxial blind bores in two posts of one part are "a hole through 2
+    walls".** Use one pin through one rail, plain ring bearings, or
+    soft-square bracket holes (filament_dryer.py's rollers, drawing_bot.py).
+R27. **`cad.fuse_one` can blow the tolerance up** (53 mm seen) when an
+    earlier cut nicks a soft crease (a flat deck meeting a loft); every
+    common/section on that part then comes back empty. Keep cuts 2-3 mm
+    off the crease (hydration_coaster.py's bezel).
+R28. **Sharp letters on small raised text make thin walls.** N, M and S at
+    tag size give wall PROBLEMs; space the letters or pick names without
+    them (key_hook.py's tags).
+R29. **A stepper needs its own motor supply.** The SDK's driver wants
+    12-24 V and USB-C gives 5 V; ./check prints a WIRING note. Say it in
+    the docstring and suggest a 12 V USB-C PD trigger (tea_steeper.py,
+    mail_notifier.py, drawing_bot.py).
+R30. **A cabled screen facing +Z always fails "cable intersects screen"**:
+    its socket sits under the module and the check counts those points as
+    inside it. Face it +Y with the cable -Z (ball_launcher.py's back-wall
+    screen) or seat it.
+R31. **`cad.split(..., lip=...)` on a drafted body returns faces with wrong
+    volumes**, so every later cut reports a negative change and
+    `cad.screw_through` raises "countersink removed nothing". Split with no
+    lip and build the lip and groove from the same drafted outlines
+    (mole_bop.py), bosses and countersinks as one fuse plus one cut.
+R32. **Slow helpers on curved faces:** `cad.speaker_grille` on a curved insert
+    took 17-25 s; cutting the holes yourself in ONE cut took the whole
+    build from 60 s to 15 s (ball_launcher.py).

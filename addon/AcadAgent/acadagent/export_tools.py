@@ -1636,6 +1636,10 @@ ICONS = {
                     '<path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
     "image": '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/>'
              '<path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+    # R1040: Lucide "share-2" (ISC), the view bar's Share
+    "share": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/>'
+             '<circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/>'
+             '<path d="m15.41 6.51-6.82 3.98"/>',
     # R920: Lucide "printer" (ISC), the view bar's Print
     "printer": '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>'
                '<path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/>'
@@ -2188,7 +2192,10 @@ def view_bar_buttons(parent=None, doc_fn=_active_doc, selection_fn=_selected):
             # R940: Export - STL, 3MF or STEP files (ExportDialog), its own
             # button again now that the printer button opens Print
             ("files", "download", "Export"),
-            ("share", "image", "Save a share image"))
+            # R1040: Share - one folder with everything (share.py): the 3D
+            # page, print files, BOM, shopping list, message; then atech.dev,
+            # MakerWorld or a person. The share image is in it (and in the menu).
+            ("share", "share", "Share"))
     out = {}
     for key, ic, tip in spec:
         b = QtWidgets.QPushButton("", parent)
@@ -2259,9 +2266,15 @@ def view_bar_buttons(parent=None, doc_fn=_active_doc, selection_fn=_selected):
         out["files"]._dlg = d
         d.show()
 
+    out["share"].setToolTip("Share: the design in 3D, the print files, the parts and "
+                            "shopping list and a message, in one folder; then post it "
+                            "on atech.dev, upload it to MakerWorld or send it")
+
     def share():
-        _p, msg = share_now(out["share"], doc_fn)
-        _say(out["share"], msg)
+        from . import share as share_mod
+        d = share_mod.ShareDialog(out["share"].window(), doc_fn)
+        out["share"]._dlg = d
+        d.show()
 
     for key, fn in (("colour", colour), ("explode", explode), ("export", export),
                     ("files", files), ("share", share)):

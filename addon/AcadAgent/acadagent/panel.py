@@ -2359,11 +2359,21 @@ class AgentPanel(QtWidgets.QWidget):
 
     def _nodoc_actions(self):
         acts = [("New", self._on_new_document),
-                ("Open file…", self._on_open_file)]
+                ("Open file…", self._on_open_file),
+                ("How it works", self._on_getting_started)]       # R1010
         if self._crane_available():
             # R89: the same name as the start card (shell.py).
             acts.insert(0, ("Sample crane", self._on_reference))
         return acts
+
+    def _on_getting_started(self):
+        """R1010: the guided tour (idea, electronics, CAD, firmware, make)."""
+        try:
+            from . import onboarding
+            return onboarding.open_guide(0, self.window())
+        except Exception as exc:                       # noqa: BLE001
+            _log("getting started: %r" % (exc,))
+            return None
 
     @staticmethod
     def _atech_parts(doc):

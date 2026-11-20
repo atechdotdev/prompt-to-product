@@ -127,10 +127,30 @@ def gather(doc):
     prints = os.path.join(os.path.expanduser("~/Documents/Atech Prints"), name)
     if os.path.isdir(prints) and "printed" not in st:
         st = dict(st, printed={"when": None, "where": prints})
-    return {"project": name, "built": built(doc), "check": None,
-            "levels": levels_of(doc), "bom": bom, "electrical": el,
-            "sdk": sdk_tools.find(), "state": st, "folder": folder,
-            "firmware_yaml": electrical_suite.agent_yaml(doc)}
+    f = {"project": name, "built": built(doc), "check": None,
+         "levels": levels_of(doc), "bom": bom, "electrical": el,
+         "sdk": sdk_tools.find(), "state": st, "folder": folder,
+         "firmware_yaml": electrical_suite.agent_yaml(doc)}
+    # R1180: part sizes and the chat's workspace (its brief.json)
+    try:
+        from . import p2p_product
+        f["parts"] = p2p_product.part_rows(doc, bom)
+        f["whole_mm"] = p2p_product.whole_mm(doc)
+        f["ws"] = workspace_of(doc)
+    except Exception as exc:                            # noqa: BLE001
+        _log("p2p: %r" % (exc,))
+    return f
+
+
+def workspace_of(doc):
+    """The chat workspace of doc (where brief.json is), or None."""
+    try:
+        from . import panel as panel_mod
+        p = panel_mod.get_panel()
+        st = p._docs.get(p._doc_key(doc)) if p is not None else None
+        return getattr(st, "ws", None)
+    except Exception:                                   # noqa: BLE001
+        return None
 
 
 def picture(doc, path):
@@ -282,6 +302,13 @@ class MakeIt(QtWidgets.QDialog):
             row = StepRow(i, s, self.act, current=(nxt is not None and s["key"] == nxt["key"]))
             self.rows.append(row)
             self.body.addWidget(row)
+        try:                                            # R1190
+            from . import p2p_view
+            self.papers = p2p_view.papers_card(f, self)
+            self.body.addWidget(self.papers)
+        except Exception as exc:                        # noqa: BLE001
+            _log("papers: %r" % (exc,))
+            self.papers = None
         self.note = _lab("", "MkNote")
         self.note.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         last = (f.get("state") or {}).get("pack")

@@ -69,6 +69,46 @@ def bambu_studio(roots=APP_ROOTS):
     return None
 
 
+#: R1041 Bambu Connect: Bambu's own bridge from other apps to the printer
+#: (wiki.bambulab.com/en/software/bambu-connect). It takes a sliced file
+#: through its URL scheme and sends it to the printer it is bound to.
+CONNECT_BUNDLES = ("Bambu Connect.app", "BambuConnect.app")
+CONNECT_DOWNLOAD = "https://wiki.bambulab.com/en/software/bambu-connect"
+
+
+def bambu_connect(roots=APP_ROOTS):
+    """The Bambu Connect app bundle, or None."""
+    for r in roots:
+        for b in CONNECT_BUNDLES:
+            p = os.path.join(r, b)
+            if os.path.isdir(p):
+                return p
+    return None
+
+
+def connect_url(path, name, version="1.0.0"):
+    """bambu-connect://import-file?path=...&name=...&version=... (every
+    value encodeURIComponent-encoded, as the wiki asks)."""
+    from urllib.parse import quote
+    return "bambu-connect://import-file?path=%s&name=%s&version=%s" % (
+        quote(os.path.abspath(path), safe=""), quote(name, safe=""), quote(version, safe=""))
+
+
+def send_to_connect(project, name=None, runner=None):
+    """Hand the sliced project to Bambu Connect. Its file is named
+    <name>.gcode.3mf (a copy next to it when it is not). Returns the URL."""
+    if not project.endswith(".gcode.3mf"):
+        gp = project[:-len(".3mf")] + ".gcode.3mf" if project.endswith(".3mf") \
+            else project + ".gcode.3mf"
+        import shutil
+        shutil.copyfile(project, gp)
+        project = gp
+    name = name or os.path.basename(project)[:-len(".gcode.3mf")]
+    url = connect_url(project, name)
+    (runner or (lambda c: subprocess.Popen(c)))(["open", url])
+    return url
+
+
 def bambu_cli(app):
     return os.path.join(app, "Contents", "MacOS", "BambuStudio")
 
@@ -419,7 +459,7 @@ def summary(res):
 # R920 the Print chooser
 # ===================================================================
 def PrintDialog(parent=None, doc_fn=None, selection_fn=None, app_fn=bambu_studio,
-                profile_fn=bambu_profile, opener=None):
+                profile_fn=bambu_profile, opener=None, connect_fn=bambu_connect):
     """Print: Bambu Lab (plates, slice, open in Bambu Studio), Export a
     file..., Get it made by Atech."""
     from PySide6 import QtCore, QtWidgets
@@ -501,6 +541,14 @@ def PrintDialog(parent=None, doc_fn=None, selection_fn=None, app_fn=bambu_studio
     d.btn_folder = QtWidgets.QPushButton("Show files", d)
     d.btn_folder.setVisible(False)
     open_row.addWidget(d.btn_folder)
+    # R1041: straight to the printer, through Bambu Connect (when installed)
+    d.connect_app = connect_fn()
+    d.btn_send = QtWidgets.QPushButton("Send to printer", d)
+    d.btn_send.setToolTip("Sends the sliced plates to your printer through Bambu "
+                          "Connect, without opening Bambu Studio")
+    d.btn_send.setAccessibleName("Send to printer with Bambu Connect")
+    d.btn_send.setVisible(False)
+    open_row.addWidget(d.btn_send)
     d.btn_open = QtWidgets.QPushButton("Open in Bambu Studio", d)
     d.btn_open.setObjectName("ToolPrimary")
     d.btn_open.setVisible(False)
@@ -531,8 +579,10 @@ def PrintDialog(parent=None, doc_fn=None, selection_fn=None, app_fn=bambu_studio
         d.btn_folder.setVisible(bool(res.get("folder")))
         if res.get("ok"):
             d.btn_open.setVisible(True)
+            d.btn_send.setVisible(bool(d.connect_app))
             open_project(res["project"], app, opener)
-            say(summary(res) + " Opened in Bambu Studio: check the plates, then Print.")
+            say(summary(res) + " Opened in Bambu Studio: check the plates, then Print%s."
+                % (" (or Send to printer: Bambu Connect)" if d.connect_app else ""))
 
     def bambu():
         if not (app and profile):
@@ -601,6 +651,13 @@ def PrintDialog(parent=None, doc_fn=None, selection_fn=None, app_fn=bambu_studio
     d.btn_open.clicked.connect(lambda _=False: d.result and open_project(
         d.result["project"], app, opener))
     d.btn_folder.clicked.connect(lambda _=False: show_folder())
+
+    def send():
+        if d.result and d.result.get("ok"):
+            send_to_connect(d.result["project"], getattr(doc_fn(), "Label", None), opener)
+            say("Sent to Bambu Connect: pick the printer there and start the print.")
+    d.btn_send.clicked.connect(lambda _=False: et._guard(send))
+    d.send = send
     d.bambu, d.export, d.made = bambu, export, made
     d.resize(560, 460)
     return d

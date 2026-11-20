@@ -6437,6 +6437,16 @@ def _jsonable(v):
 ARCHETYPE_GATES = (
     # build.ARCHETYPES' rows in its order (R802/R803 starter rows and the
     # R940 products have no image gate of their own yet: None).
+    ('tea steeper', ('tea timer', 'tea steeper', 'tea bag lifter', 'tea bag dipper', 'automatic tea maker', 'steeping timer', 'tea brewer', 'tea dunker'), None),
+    ('mailbox notifier', ('mailbox', 'letterbox', 'letter box', 'mail sensor', 'mailbox flag', 'post arrived', 'parcel box', 'post box'), None),
+    ('drink coaster', ('drink coaster', 'smart coaster', 'bottle coaster', 'cup coaster', 'water reminder', 'hydration tracker', 'drink reminder'), None),
+    ('star projector', ('star projector', 'night sky projector', 'planetarium night light', 'galaxy projector', 'starry night light', 'rotating star lamp', 'nursery projector'), None),
+    ('filament dry box', ('filament dry box', 'dry box', 'filament dryer', 'spool box', 'filament storage', 'desiccant box', 'spool holder', 'dry cabinet'), None),
+    ('record stand', ('record stand', 'now playing stand', 'vinyl stand', 'album display', 'record sleeve', 'vinyl display', 'lp stand', 'record ledge'), None),
+    ('drawing robot', ('drawing robot', 'drawing bot', 'turtle robot', 'logo turtle', 'pen plotter robot', 'robot that draws', 'sketch bot', 'doodle bot'), None),
+    ('key hook', ('key hook', 'key rack', 'key holder', 'key board', "who's home", 'entryway organiser', 'hallway key', 'key hanger'), None),
+    ('ball launcher', ('ball launcher', 'ball thrower', 'fetch machine', 'automatic fetch', 'tennis ball launcher', 'dog ball launcher', 'pitching machine', 'ball shooter'), None),
+    ('reaction game', ('reaction game', 'mole game', 'bop the mole', 'mole bop', 'reflex game', 'reflex trainer', 'light-up button game', 'tap the light game'), None),
     ('cloud lamp', ('cloud lamp', 'thunder cloud', 'storm cloud', 'lightning lamp', 'cloud light', 'rain cloud lamp', 'music reactive light'), None),
     ('on air sign', ('on air sign', 'on air light', 'recording light', 'studio light', 'busy light', 'do not disturb sign', 'in a meeting light', 'tally light'), None),
     ('theremin', ('theremin', 'air instrument', 'hand wave instrument', 'touchless instrument', 'gesture synth', 'wave your hand music', 'distance played instrument'), None),

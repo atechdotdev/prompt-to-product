@@ -246,6 +246,18 @@ class Catalogue(unittest.TestCase):
         fake.open_default.assert_called_once_with("Hype button")
         fake.open_example.assert_called_once_with("toy_car")
 
+    def test_new_is_a_filter_and_every_kind_is_used(self):
+        # R1030: the newest examples keep their own kind; New picks them out
+        rows = eg.entries(shipped={})
+        new = [r for r in rows if eg.matches(r, category=eg.NEW)]
+        self.assertEqual({r["key"] for r in new}, set(eg.NEW_KEYS))
+        self.assertTrue(all(r["category"] != eg.NEW for r in rows))
+        self.assertEqual(len({r["category"] for r in new}), len(new), "one per kind")
+        for cat in eg.CATEGORIES:
+            if cat not in (eg.NEW, eg.MORE):
+                self.assertTrue([r for r in rows if eg.matches(r, category=cat)], cat)
+        self.assertEqual([r["key"] for r in rows if eg.matches(r, "tea")], ["tea_steeper"])
+
     def test_search_and_category(self):
         rows = eg.entries(shipped={})
         self.assertEqual([r["key"] for r in rows if eg.matches(r, "duck")], ["debug_duck"])

@@ -104,7 +104,7 @@ class TestR380ViewBarTools(Case):
         self.assertEqual(names, ["Measure", "Section view", "Show and hide",
                                  "Exploded view", "Simulate", "Dimensions",
                                  "Edit shapes", "Edit part", "Colour",
-                                 "Print", "Export", "Save a share image",
+                                 "Print", "Export", "Share",
                                  "Make assembly video"])
         for w in bar.tools():
             self.assertEqual(w.objectName(), "VBtn")
@@ -239,7 +239,7 @@ class TestR381ContextMenu(Case):
         self.assertEqual(sub, ["Atech_Print", "Atech_ExportForPrint", "Atech_ExplodedView",
                                "Atech_BillOfMaterials", "Atech_GetItMade",
                                "Atech_PublishMakerWorld", "Atech_PostToAtech",
-                               "Atech_ShareImage", "Atech_ReviewSheet",
+                               "Atech_Share", "Atech_ShareImage", "Atech_ReviewSheet",
                                "Atech_MakeIt", "Atech_Electrical"])
 
     def test_tree_menu_and_other_recipients(self):
@@ -278,7 +278,7 @@ class TestR381ContextMenu(Case):
         # R885 Edit part, R900 From / Publish to MakerWorld, R920 Print,
         # R940 Export, R970 Import a model / Examples, R1002 Electrical, R1004 Make it
         self.assertEqual(len(added), len(s.TOOL_COMMANDS) + len(s.EXPORT_COMMANDS))
-        self.assertEqual(len(added), 20)
+        self.assertEqual(len(added), 21)
         s.uninstall()
         self.assertFalse(hasattr(wb, "ContextMenu"))
 

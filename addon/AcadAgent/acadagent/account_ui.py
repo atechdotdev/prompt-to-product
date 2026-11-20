@@ -134,3 +134,90 @@ class AccountButton(QtWidgets.QPushButton):
 
     def sign_out(self):
         self._bg(lambda: (self.acct.sign_out(), self._emit_changed()))
+
+
+#: R1020: the project sidebar's atech.dev menu, (key, label, path on the site)
+HUB_SITE = (("account", "Your account", "/account"),
+            ("community", "Builds by the community", "/community"),
+            ("shop", "Atech shop: board and modules", None),
+            ("docs", "Docs", "/docs"),
+            ("app", "What's new in Prompt2Product", "/atelier"))
+
+
+def _initials(name):
+    parts = [p for p in str(name or "").replace("@", " ").split() if p[:1].isalnum()]
+    return "".join(p[0] for p in parts[:2]).upper() or "?"
+
+
+class AtechHub(AccountButton):
+    """R1020: everything that goes to atech.dev, in one place on the project
+    sidebar: who is signed in (or Sign in), this project's Get it made by
+    Atech and Post to atech.dev, then the site's pages. A click always opens
+    the menu; signed out, its first row signs in.
+
+    project_actions: [(key, label, fn)] for "This project"; enabled() says
+    whether a project is open (no project: they are greyed)."""
+
+    def __init__(self, parent=None, acct=None, opener=None, background=True,
+                 project_actions=(), enabled=None):
+        self.project_actions = list(project_actions)
+        self.enabled = enabled or (lambda: True)
+        super().__init__(parent, acct=acct, opener=opener, background=background)
+        self.setObjectName("AtechHub")
+        self.setAccessibleDescription("atech.dev: your account, Get it made, Post, the shop")
+
+    def sync(self):
+        super().sync()
+        avatar = self.flow is None and self.acct.signed_in()
+        if avatar:
+            # a round avatar with the initials, as on a website; the name,
+            # the email and the site are in the tooltip and the menu
+            u = self.acct.user or {}
+            self.setText(_initials(u.get("name") or u.get("email")))
+            self.setFixedSize(30, 30)
+        else:
+            self.setMinimumSize(0, 0)
+            self.setMaximumSize(16777215, 16777215)
+            if self.flow is not None:
+                self.setText("Signing in…")
+        if self.property("avatar") != avatar:
+            self.setProperty("avatar", avatar)
+            self.style().unpolish(self)
+            self.style().polish(self)
+        self.setToolTip(self.toolTip() + "\nClick for Get it made, Post to atech.dev "
+                        "and the Atech shop.")
+
+    def _click(self):
+        self.menu().popup(self.mapToGlobal(QtCore.QPoint(0, self.height())))
+
+    def menu(self):
+        if self.flow is not None:
+            return super().menu()
+        m = QtWidgets.QMenu(self)
+        m.setAccessibleName("atech.dev")
+        signed = self.acct.signed_in()
+        if signed:
+            u = self.acct.user or {}
+            other = account.other_site()
+            who = m.addAction("%s · %s%s" % (u.get("name") or self.acct.label(), u.get("email", ""),
+                                             " (%s)" % other if other else ""))
+            who.setEnabled(False)
+        else:
+            m.addAction("Sign in with your atech.dev account…", self.sign_in)
+        m.addSection("This project")
+        on = bool(self.enabled())
+        for key, label, fn in self.project_actions:
+            a = m.addAction(label, fn)
+            a.setObjectName("hub_" + key)
+            a.setEnabled(on)
+        m.addSection("atech.dev")
+        for key, label, path in HUB_SITE:
+            if key == "account" and not signed:
+                continue
+            url = shop.SHOP if path is None else shop.SITE + path
+            m.addAction(label, lambda u=url: self.opener(u))
+        if signed:
+            m.addSeparator()
+            m.addAction("Sign out", self.sign_out)
+        self._menu = m
+        return m

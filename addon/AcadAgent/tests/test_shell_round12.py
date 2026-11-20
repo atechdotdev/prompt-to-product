@@ -147,14 +147,17 @@ class TestR300Chrome(Case):
         body = s._S["body"]
         self.assertTrue(body.brand.isVisible())
         self.assertEqual(body.brand_word.text(), "Prompt2Product")
-        for b, name in ((body.btn_terminal, "Terminal"),
-                        (body.btn_settings, "Settings")):
-            self.assertTrue(b.isVisible(), name)
-            self.assertEqual(b.accessibleName(), name)
+        self.assertTrue(body.btn_settings.isVisible())
+        self.assertEqual(body.btn_settings.accessibleName(), "Settings")
         # on the picker row
-        self.assertIs(body.btn_terminal.parentWidget(),
+        self.assertIs(body.btn_settings.parentWidget(),
                       (body.picker_row or body.picker).parentWidget())
+        # R1020: the atech.dev menu in the brand row; Terminal in the gear's menu
+        self.assertIsNotNone(body.hub)
+        self.assertTrue(body.hub.isVisible())
+        self.assertIs(body.hub.parentWidget(), body.brand)
         texts = [a.text() for a in body.btn_settings.menu().actions()]
+        self.assertIn("Open terminal", texts)
         self.assertIn("Agent settings…", texts)
         self.assertIn("Appearance & navigation…", texts)
         self.assertIn("Keyboard shortcuts", texts)
@@ -170,7 +173,7 @@ class TestR300Chrome(Case):
         # wordmark is the top bar's
         self.assertFalse(body.brand_word.isVisible())
         self.assertFalse(body.brand_mark.isVisible())
-        self.assertFalse(body.btn_terminal.isVisible())
+        self.assertFalse(body.btn_settings.isVisible())
         word = s._S["topbar"]["left"].findChild(QtWidgets.QLabel, "Wordmark")
         self.assertEqual(word.text(), "Prompt2Product")
         gear = [b for b, n in s._S["topbar"]["btns"] if n == "settings"][0]

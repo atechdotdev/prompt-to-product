@@ -93,6 +93,17 @@ PRODUCTS = {
     'bird_cam.py': 'a smart bird feeder camera',
     'hype_button.py': 'a giant sound button',
     'fortune_ball.py': 'a fortune ball that answers your question when you shake it',
+    # R1030: ten products in ten kinds (2026-11-20)
+    'tea_steeper.py': "a tea timer that lifts the tea bag out of the cup when it's ready",
+    'mail_notifier.py': 'a mailbox sensor that tells my phone when the post arrives',
+    'hydration_coaster.py': 'a coaster for my water bottle that glows when I forget to drink',
+    'star_projector.py': "a night-sky projector that fills my kid's ceiling with stars",
+    'filament_dryer.py': 'a filament dry box that shows the humidity and how much filament is left',
+    'vinyl_stand.py': "a stand for my record sleeve that shows what's playing",
+    'drawing_bot.py': 'a little robot that drives around on paper and draws with a pen',
+    'key_hook.py': "a key hook by the door that knows who's home",
+    'ball_launcher.py': 'a mini ball launcher that plays fetch with my dog',
+    'mole_bop.py': 'a desk game where you bop light-up moles before they hide',
     # R990: ten more products (2026-11-17)
     'cloud_lamp.py': 'a cloud lamp that flashes lightning to music',
     'on_air_sign.py': 'an on air sign that lights up when you are talking',
@@ -210,6 +221,17 @@ def sweep_points(src):
 
 # ------------------------------------------------------------ the seed features
 FEATURES = {
+    "mole_bop.py": ('lights = [ap.seat(doc, "light", n) for n in (2, 10)]', 'def hull_wire(circles, grow, z):', 'mole0 = cad.cut(cad.revolve_profile(mole_sec, at=(0, 0, Z_HB)), face0)'),
+    "ball_launcher.py": ('SQUEEZE = 1.45', 'def hop_cone(z0, z1, grow):', 'tof = ap.seat(doc, "distance_sensor", 4)'),
+    # R1030: each product's hero code
+    "tea_steeper.py": ('motor, _rep = am.load_module(doc, "nema17_stepper"', 'usb, usb_rib = ap.cable(doc, "usbc", 11, ap.module_placement(', 'drv = ap.seat(doc, "stepper_motor", (1, 2))', 'CX = max(HOOK_X, XR + COASTER_R + 4.5)'),
+    "mail_notifier.py": ('"motion": [{"part": "Flag"', 'ZE = MTOP + 1.0 - RISE + RO - math.sqrt(RI * RI - HW * HW)', 'am.load_module(doc, "nema17_stepper", label="Motor"', 'flag, stripe = insert(flag,'),
+    "hydration_coaster.py": ('cell = ap.seat(doc, "load_cell", 2)', '"covers": {"Snooze_Key": "button_13"}', 'cone = Part.makeLoft([w0, w1], True, True)', 'halo = cad.fuse_one(halo, *pipes)'),
+    "star_projector.py": ('"motion": [{"part": "Shade_Lower"', 'M, Z_PIN, Z_GEAR = 1.0, 12, 84', '"Big_Dipper": ['),
+    "filament_dryer.py": ('ap.cable(doc, "distance_sensor", 14', 'cad.snap_fit_pair(sleeve, lid, count=4, walls="x")', '# the gauge on the glass', 'B0 = SC_Y - SPOOL_W / 2 + 1.0'),
+    "vinyl_stand.py": ('"Light_Strip_Red"', 'cad.speaker_grille(platter,', '"Felt_Clip_Front"', 'STABILITY %.0f g with a'),
+    "drawing_bot.py": ('am.load_module(doc, "nema17_stepper"', 'ap.seat(doc, "stepper_motor", (9, 10))', 'TAB_Z = SHZ - LIFT / 2 + 6.5 + 0.8', 'ap.cable(doc, "dc_motor", 6'),
+    "key_hook.py": ('lights = [ap.seat(doc, "light", p) for p in (2, 4, 6)]', 'NAMES = ("ELSA", "OLLE", "IDA")'),
     # R990: each product's hero code
     "fortune_ball.py": ('cable="-X")),', 'def to_window(s):', 'bezel = cad.revolve_profile(bezel_sec)', 'constellation = cad.fuse_one(*pieces).common(layer)'),
     # R990: each product's hero code

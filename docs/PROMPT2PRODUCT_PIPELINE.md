@@ -89,3 +89,37 @@ NOTE lines only, written atomically.
   - environment: the KiCad parts installed in the profile, the
     fake-CLI-with-spaces family, timing under a parallel build (they pass
     alone).
+
+## R1100-R1190: ten rounds toward a true prompt to product (20 Nov 2026)
+
+Asked 19 Nov 2026: "come up with 10 things to improve. Do this 10 times ...
+until the app is a true Prompt to product." Each round is one step of the
+path from a sentence to a product someone can make, use, test and sell.
+All the logic is plain Python in agent_kit/p2p_*.py (stdlib, no FreeCAD,
+no Qt); the hooks are small and guarded.
+
+| Round | What | Where | Tests |
+|---|---|---|---|
+| R1100 | The prompt read into a brief, updated by later messages; BRIEF.md in the workspace; the agent's API card | p2p_brief, acadagent/p2p_ws, build.prepare_workspace, projects/atech_ports | test_p2p_r1100 (26) |
+| R1110 | Acceptance: each "Done when" criterion met / not met / not known; ./check BRIEF lines | p2p_accept, p2p_printers, check._brief_lines | test_p2p_r1110 (12, real ./check) |
+| R1120 | Print plan per Bambu printer: smallest printer, plates, grams (skin + infill), rough time, brim, AMS, material; ./check PRINT line | p2p_print, check._print_line | test_p2p_r1120 (13, real ./check) |
+| R1130 | Cost sheet and what to buy: exact screw specs, one-screw-type hint, the user's prices.json, the atech.dev quote, margin | p2p_cost | test_p2p_r1130 (11) |
+| R1140 | Firmware code from the behaviours, SDK calls only, catalog-aware | p2p_behave | test_p2p_r1140 (12, real `atech build`) |
+| R1150 | User manual, A6 quick-start card, label (never claims certification) | p2p_manual | test_p2p_r1150 (9) |
+| R1160 | Test by hand: plan, qa.json, the honest "tested or not" | p2p_qa | test_p2p_r1160 (9) |
+| R1170 | Versions: snapshot, revisions.json, what changed | p2p_rev | test_p2p_r1170 (5) |
+| R1180 | Every paper in the product pack; headless `p2p_make.py` | acadagent/p2p_product, p2p_make, product.write_pack, product_view.gather | test_p2p_r1180 (10, real freecadcmd runs) |
+| R1190 | Make it's "Prompt to product" card, Test by hand, the brief; Share carries the papers | acadagent/p2p_view, product_view, share.P2P_PAPERS | test_p2p_r1190 (8, offscreen) |
+
+Found on the way (open):
+
+- The Atech SDK removed the PIR sensor (python-sdk 0e79b96); the app's
+  catalog snapshot (1.0.0a11) still has it, so a PIR product fails `atech
+  build` on the current SDK. The current CLI has no `atech emulate`, which
+  Make it offers. Resyncing the snapshot changes examples (motion light, cat
+  wand): not done, a decision for the product owner.
+- A pack's "Passes ./check" is "not known" unless a check ran: Make it does
+  not know the last check's verdict yet.
+- Filament price: a labelled planning figure until the user writes
+  prices.json (in ~/Documents/Atech Products/); nothing else is priced
+  without the user or the site.

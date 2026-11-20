@@ -289,6 +289,11 @@ def readme(f, files):
          "## Status", ""]
     for s in ss:
         L.append("- **%s**: %s" % (s["title"], s["line"]))
+    p2p = f.get("p2p_status") or {}
+    for key, word in (("brief", "Brief"), ("print", "Print plan"), ("cost", "Cost"),
+                      ("qa", "Tested"), ("version", "Version")):
+        if p2p.get(key):
+            L.append("- **%s**: %s" % (word, p2p[key]))
     L += ["", "## In this folder", ""]
     for name, what in files:
         L.append("- `%s`: %s" % (name, what))
@@ -346,6 +351,17 @@ def write_pack(f, folder, extra=None, picture=None):
                 files.append((rel, what))
         except Exception:                               # noqa: BLE001
             pass
+    # R1180: the prompt-to-product papers (brief, done when, print plan,
+    # costs, to buy, manual, card, label, test plan, changelog, firmware
+    # from the brief's behaviours)
+    try:
+        from . import p2p_product
+        g = p2p_product.enrich(f, ws=f.get("ws"), prompt=f.get("prompt"))
+        got = p2p_product.papers(g, folder)
+        files = [(r, w) for r, w in files if r not in {x for x, _y in got}] + got
+        f["p2p_status"] = p2p_product.status(g)
+    except Exception:                                   # noqa: BLE001
+        pass
     pic_rel = None
     if picture and os.path.isfile(picture):
         import shutil
