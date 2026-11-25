@@ -189,14 +189,7 @@ def gather(doc, inputs=None):
         fw_on = bool(build.firmware_on())
     except Exception:                                   # noqa: BLE001
         pass
-    reserved = None
-    try:
-        from . import modules_page
-        _ports, _ = modules_page._lib()
-        reserved = getattr(_ports, "RESERVED", None)
-    except Exception:                                   # noqa: BLE001
-        reserved = None
-    w = W().build(atech, names=dict(E().NAMES), reserved=reserved, firmware_on=fw_on,
+    w = W().build(atech, names=dict(E().NAMES), firmware_on=fw_on,
                   project=getattr(doc, "Label", "") or "",
                   made=time.strftime("%d %b %Y %H:%M"))
     return E().analyse(w=w, project=getattr(doc, "Label", "") or "",
@@ -525,8 +518,10 @@ class ElectricalSuite(QtWidgets.QDialog):
         tbl.setShowGrid(False)
         t = style.tokens()
         for i, p in enumerate(r["ports"]):
-            vals = [str(p["port"]), p["name"] or ("reserved in the SDK" if p["state"] == "reserved"
-                                                  else "free"),
+            vals = [str(p["port"]), p["name"] or (
+                        {"USB-C": "USB-C port (USB-C module only)",
+                         "Reset": "reset port (reset button only)"}.get(p.get("role"))
+                        or ("reserved in the SDK" if p["state"] == "reserved" else "free")),
                     p["lines"].get("A", ""), p["lines"].get("B", ""), p["can"], p["how"]]
             for j, v in enumerate(vals):
                 it = QtWidgets.QTableWidgetItem(v)

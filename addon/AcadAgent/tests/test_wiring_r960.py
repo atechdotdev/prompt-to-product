@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 os.environ["ATECH_SDK_CATALOG"] = "snapshot"
 HERE = os.path.dirname(os.path.abspath(__file__))
 KIT = os.path.join(os.path.dirname(HERE), "acadagent", "agent_kit")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 sys.path.insert(0, KIT)
 
 import atech_firmware  # noqa: E402
@@ -127,23 +128,41 @@ class Model(unittest.TestCase):
         self.assertIn("damages the servos", text)          # normalised across the newline
         self.assertNotIn("\n", text)
 
-    def test_disputed_ports(self):
+    def test_port_rules(self):
+        # TOY: usbc on 7 and a distance sensor on 8 break both port-8 rules
         w = aw.build(TOY)
-        self.assertEqual(w["flags"], ["Port 8: board.yaml marks it reserved (USB-C); "
-                                      "the Atech SDK board layout shows USB-C here"])
-        self.assertIn(aw.UNKNOWN_8_12, w["unknown"])
-        # a USB-C module on 8 agrees with every source: no flag
+        self.assertEqual(w["flags"], [
+            "The USB-C module goes on port 8 only (port 8 is the USB-C port), "
+            "not on port 7.",
+            "Port 8 is the USB-C port: only the USB-C module goes there."])
+        # the USB-C module on 8: no flag
         w = aw.build(atech(mod("usbc", [8]), mod("button", [3])))
         self.assertEqual(w["flags"], [])
-        self.assertNotIn(aw.UNKNOWN_8_12, w["unknown"])
-        self.assertNotIn(aw.UNKNOWN_USBC_OFF_8, w["unknown"])
-        # a module without firmware (camera) on 12 is flagged too
+        # anything but a button on 12 is flagged, a module without firmware too
         w = aw.build(atech(mod("camera", [11, 12]), mod("usbc", [8])))
-        self.assertTrue(w["flags"][0].startswith("Port 12: board.yaml marks it reserved (Reset)"))
+        self.assertTrue(w["flags"][0].startswith("Port 12 is the reset port"))
+        # a button on 12 is the reset button: no flag, a note
+        w = aw.build(atech(mod("button", [12]), mod("usbc", [8])))
+        self.assertEqual(w["flags"], [])
+        self.assertIn(aw.RESET_NOTE, w["notes"])
+        self.assertTrue([c for c in w["connections"] if c.get("reset")])
 
-    def test_reserved_wins_when_set(self):
-        w = aw.build(TOY, reserved={8: "USB-C", 12: "Reset"})
-        self.assertEqual(w["flags"], ["Port 8: reserved (USB-C)"])
+    def test_port_rule_matches_the_library_table(self):
+        # projects/atech_ports.py enforces the same table (it needs FreeCAD
+        # to import, so its source is read here)
+        import ast
+        with open(os.path.join(REPO_ROOT, "projects", "atech_ports.py"),
+                  encoding="utf-8") as fh:
+            src = fh.read()
+        vals = {}
+        for node in ast.parse(src).body:
+            if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                    and getattr(node.targets[0], "id", None) in
+                    ("PORT_ONLY", "MODULE_ONLY", "PORT_ROLE")):
+                vals[node.targets[0].id] = ast.literal_eval(node.value)
+        self.assertEqual(vals, {"PORT_ONLY": aw.PORT_ONLY,
+                                "MODULE_ONLY": aw.MODULE_ONLY,
+                                "PORT_ROLE": aw.PORT_ROLE})
 
     def test_power_and_unknowns(self):
         w = aw.build(atech(mod("button", [3])))
@@ -151,7 +170,6 @@ class Model(unittest.TestCase):
         self.assertIn(aw.UNKNOWN_12V, w["unknown"])
         w = aw.build(ARM)
         self.assertEqual(w["power"]["text"], "USB-C on port 7")
-        self.assertIn(aw.UNKNOWN_USBC_OFF_8, w["unknown"])
         w = aw.build(atech(mod("power_jack", [3]), mod("button", [4])))
         self.assertIn(aw.UNKNOWN_JACK_ALONE, w["unknown"])
         self.assertNotIn(aw.UNKNOWN_12V, w["unknown"])

@@ -39,6 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SNAPSHOT = os.path.join(HERE, "atech_sdk_catalog.json")
 PROJECT = "project.yaml"
 BOARD = "14port"             # the CAD library's board (motherboard_14_port)
+RESET_PORT = 12              # the reset port: a button there is the board's reset
 REFERENCE = "ATECH_FIRMWARE.md"
 
 #: CAD module name (presets.yaml) -> Atech SDK module id. None: the module
@@ -192,8 +193,10 @@ def sdk_label(cat=None):
 def plan(seated, cat=None):
     """project.yaml module entries for the modules a build seats or cables:
     [{"id", "instance", "ports", "cad"}] in port order. A module without
-    firmware (usbc) is left out; a CAD name the map does not know gets
-    id None (issues() reports it)."""
+    firmware (usbc) is left out, and so is a button on port 12: that is the
+    board's reset button (the port rules), which the SDK reserves and the
+    firmware never sees. A CAD name the map does not know gets id None
+    (issues() reports it)."""
     cat = cat or catalog() or {"modules": {}}
     rows = sorted(seated, key=lambda m: min(m.get("ports") or [99]))
     used, out = {}, []
@@ -201,6 +204,8 @@ def plan(seated, cat=None):
         name = str(m.get("module") or "")
         if name in SDK_ID and SDK_ID[name] is None:
             continue
+        if name == "button" and RESET_PORT in [int(p) for p in m.get("ports") or ()]:
+            continue                         # the reset button, not an input
         sid = SDK_ID.get(name)
         if sid is None and name in cat["modules"]:
             sid = name                       # the SDK and CAD share the id

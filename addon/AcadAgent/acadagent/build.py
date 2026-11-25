@@ -1860,6 +1860,12 @@ Never model the board or a module, or move their meshes by hand:
     board = ap.board_object(doc)         # the board (created if missing)
     ap.seat(doc, "button", 3)            # one-connector module on port 3
     ap.seat(doc, "screen", ap.pair_for(doc, "screen", 11))  # two connectors
+PORT RULES (hard): port 8 is the USB-C port - ap.seat(doc, "usbc", 8), and
+nothing else on port 8; the usbc module goes on no other port (a cable from
+port 8 brings the socket anywhere). Port 12 is the reset port - leave it
+empty; only a button (the board's reset button) may go there, and only when
+the user asks for a reset button. ap.seat and ap.cable refuse anything else,
+and ./check fails it.
 They are Mesh features (no .Shape): ap.bbox(obj) and cad.bound_of(board,
 *modules, *ribbons) give world boxes. Set board.Placement BEFORE seating
 (modules follow it) and seat again after any change. model.py seats every
@@ -2387,6 +2393,12 @@ pins in the sockets:
     ap.seat(doc, "button", 3)            # one-connector module on port 3
     ap.seat(doc, "speaker", (9, 10))     # two-connector module on 9 and 10
     ap.remove(doc, 3); ap.occupied(doc)  # {{port: object}}
+PORT RULES (hard): port 8 is the USB-C port - ap.seat(doc, "usbc", 8), and
+nothing else on port 8; the usbc module goes on no other port (a cable from
+port 8 brings the socket anywhere). Port 12 is the reset port - leave it
+empty; only a button (the board's reset button) may go there, and only when
+the user asks for a reset button. ap.seat and ap.cable refuse anything else,
+and ./check fails it.
 Module names come from atech_modules.modules_of("module"). Seated modules
 and the board are Mesh features (no .Shape): cad.bound_of(board, *modules)
 gives one world box around them to size a case from. To stand the board
@@ -5402,6 +5414,12 @@ def rejudge_fitted_after(result, doc, old, new):
     return True
 
 
+#: How a port_rule FAIL is said to the agent (atech_ports port rules).
+PORT_RULE_TEXT = (" (port rules: port 8 takes only the USB-C module and the "
+                  "USB-C module goes only on port 8; port 12 takes only a "
+                  "button, the reset button, and is usually left empty)")
+
+
 def failures(result):
     """Measured problems worth sending back to the agent, or ''."""
     # Only what is actually broken goes back to the agent: an invalid shape,
@@ -5450,5 +5468,7 @@ def failures(result):
     for label, checks in sorted((getattr(result, "atech_verdicts", None) or {}).items()):
         failed = sorted(k for k, v in checks.items() if v == "FAIL")
         if failed:
-            bad.append("Atech %s: %s FAIL" % (label, ", ".join(failed)))
+            bad.append("Atech %s: %s FAIL%s" % (
+                label, ", ".join(failed),
+                PORT_RULE_TEXT if "port_rule" in failed else ""))
     return "; ".join(bad)

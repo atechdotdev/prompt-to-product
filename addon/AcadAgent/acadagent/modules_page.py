@@ -36,8 +36,10 @@ this file only draws and dispatches:
 A module with two connectors takes the picked port and a free neighbour in
 the same column whose trial check passes (atech_ports.pair_for); if neither
 does, the page says so instead of adding a module its own check would FAIL.
-Only modules with a measurable pin header are offered, and a port listed in
-atech_ports.RESERVED (empty until the owner decides) offers none. Anything the library cannot do is said in a sentence that uses
+Only modules with a measurable pin header are offered, and the port rules
+(atech_ports.port_rule) decide what each port offers: port 8 only the USB-C
+module, port 12 only a button (the reset button), and the USB-C module no
+other port. Anything the library cannot do is said in a sentence that uses
 the module's display name (describe_error), never replaced by a guess and
 never shown as a raw exception with internal slugs or paths; the raw text
 goes to the Report view.
@@ -335,6 +337,8 @@ def describe_error(exc, module=None, port=None, specs=None, action="adding"):
                     "seat cleanly next to either free neighbour, so it was "
                     "not added. Try another port."
                     % (name, info.get("port", port)))
+        if kind == "port_rule" and info.get("why"):
+            return info["why"]
         if kind == "no_pair":
             return ("%s plugs into two ports: port %d and a free port next to "
                     "it in the same column. Free a neighbour or pick another "
@@ -370,6 +374,10 @@ CHECK_WORDS = {
                    "in is clear"},
 }
 CHECK_ORDER = ("seated", "interference", "slide_path")
+# The port rules (atech_ports.port_rule): shown only when they FAIL.
+CHECK_WORDS["port_rule"] = {"PASS": "Allowed on this port",
+                            "FAIL": "Not allowed on this port",
+                            None: "Can't tell if it is allowed on this port"}
 
 
 # R302: a cabled module is not seated on its port, its cable's plug is; and
@@ -383,6 +391,7 @@ CABLED_WORDS = {
                    None: "On a cable, nothing slides in"},
 }
 CABLED_ORDER = ("seated", "interference")
+CABLED_WORDS["port_rule"] = CHECK_WORDS["port_rule"]
 CABLE_REMADE_WHY = ("The board or the module moved after its cable was made. "
                     "Use Remake cable.")
 
@@ -417,6 +426,8 @@ def fail_why(key, result, name_of=None):
     atech_ports.check(); nothing is rounded into a nicer story."""
     if not isinstance(result, dict) or result.get("verdict") != "FAIL":
         return None
+    if key == "port_rule":
+        return result.get("why")
     if key == "seated" and "make the cable again" in str(result.get("why") or ""):
         return CABLE_REMADE_WHY
     if key == "seated":
@@ -456,7 +467,22 @@ def power_warning(modules):
     if not mods or POWER_MODULE in mods:
         return None
     return ("No USB-C module on the board, so nothing can power it. Add a "
-            "USB-C module (it usually goes on port 8).")
+            "USB-C module on port 8.")
+
+
+#: What ports 8 and 12 are for (the atech_ports port rules), said on the
+#: board map when one is picked.
+PORT_RULE_WORDS = {
+    8: "the USB-C port · only the USB-C module goes here.",
+    12: "the reset port · only a button (the board's reset button) goes "
+        "here. Most products leave it empty.",
+}
+
+
+def module_allowed(rule, name, n):
+    """True when the port rules let module `name` on port n. rule:
+    atech_ports.port_rule (None: an older library without rules)."""
+    return rule is None or not name or not rule(name, n)
 
 
 EDGE_WORDS = {"left": "slides in from the left", "right":
@@ -484,6 +510,8 @@ def port_tooltip(n, edge=None, occupant=None, others=(), cable_mm=None,
             also = " · also on port%s %s" % ("s" if len(ns) > 1 else "",
                                               ", ".join(str(p) for p in ns))
         return "%s · %s%s" % (head, what, also)
+    if n in PORT_RULE_WORDS:
+        return "%s · empty · %s" % (head, PORT_RULE_WORDS[n].rstrip("."))
     if reserved:
         return "%s · reserved for %s" % (head, reserved)
     return "%s · empty · a module %s" % (head, EDGE_WORDS.get(edge, "slides in"))
@@ -1142,6 +1170,7 @@ class ModulesPage(QtWidgets.QWidget):
         self._specs = {}
         self._seatable = {}             # module -> connector count (measured)
         self._reserved = {}             # port -> reason (atech_ports.RESERVED)
+        self._rule = None               # atech_ports.port_rule (the port rules)
         self._selected = None
         self._anim = None
         self._error = None
@@ -1553,6 +1582,7 @@ class ModulesPage(QtWidgets.QWidget):
             # only ever fail). R65.
             self._seatable = ports_mod.seatable(sorted(self._specs))
             self._reserved = dict(getattr(ports_mod, "RESERVED", {}) or {})
+            self._rule = getattr(ports_mod, "port_rule", None)
             # R305: parts that plug into no port, placed by hand
             from . import projects
             self._free_names = projects.free_parts(seatable=self._seatable)
@@ -1616,6 +1646,7 @@ class ModulesPage(QtWidgets.QWidget):
             if derived:
                 tip += "\n\nDerived model, not Atech CAD: " + derived
             b.setToolTip(tip)
+            b.setProperty("atechModule", name)
             b.clicked.connect(lambda _=False, n=name: self._add(n))
             self.grid.addWidget(b, i // 2, i % 2)
             self._module_btns.append(b)
@@ -1765,7 +1796,7 @@ class ModulesPage(QtWidgets.QWidget):
             self._wiring_key = key
             names = {n: (sp or {}).get("display_name") or n
                      for n, sp in (self._specs or {}).items()}
-            w = aw.build(atech, names=names, reserved=self._reserved,
+            w = aw.build(atech, names=names,
                          firmware_on=fw_on, project=getattr(doc, "Label", "") or "",
                          made=time.strftime("%Y-%m-%d %H:%M"))
             fname = getattr(doc, "FileName", "") or ""
@@ -1912,23 +1943,20 @@ class ModulesPage(QtWidgets.QWidget):
             self.by_cable.hide()
             for b in self._module_btns:
                 b.hide()
-        elif n in self._reserved:
-            self.port_sub.setText("Reserved for %s · no module can be added "
-                                  "here." % self._reserved[n])
-            self.occ_row.hide()
-            self.list_label.hide()
-            self.by_cable.hide()
-            for b in self._module_btns:
-                b.hide()
         else:
-            self.port_sub.setText("Empty · %s edge · a module %s and stops "
-                                  "when its pins are seated." % (port.edge, axis))
+            if n in PORT_RULE_WORDS:
+                self.port_sub.setText("Empty · %s" % PORT_RULE_WORDS[n])
+            else:
+                self.port_sub.setText("Empty · %s edge · a module %s and stops "
+                                      "when its pins are seated." % (port.edge, axis))
             self.occ_row.hide()
             self.list_label.show()
             self.by_cable.show()
             self.by_cable.setEnabled(self._anim is None)
+            # The port rules: only the USB-C module on 8, only a button on
+            # 12, and the USB-C module nowhere else.
             for b in self._module_btns:
-                b.show()
+                b.setVisible(module_allowed(self._rule, b.property("atechModule"), n))
                 b.setEnabled(self._anim is None)
 
     # ------------------------------------------------------------ actions
@@ -1944,7 +1972,11 @@ class ModulesPage(QtWidgets.QWidget):
 
     def _add(self, name):
         n = self._selected
-        if n is None or self._anim is not None or n in self._reserved:
+        if n is None or self._anim is not None:
+            return
+        why = self._rule(name, n) if self._rule is not None else None
+        if why:
+            self._show_error(why)
             return
         if self.by_cable.isChecked():
             self._add_cabled(name)
@@ -2136,10 +2168,16 @@ class ModulesPage(QtWidgets.QWidget):
         if act == "refuse":
             self._show_error(arg)
             return
-        if act == "move" and n in self._reserved:
-            self._show_error("Port %d is reserved for %s, so no module can go "
-                             "there." % (n, self._reserved[n]))
-            return
+        if act in ("move", "swap") and self._rule is not None:
+            # the port rules, before anything is tried (the library also
+            # refuses: PortNotAllowed)
+            why = self._rule(getattr(o, "AtechModule", ""), n)
+            if not why and act == "swap" and tgt is not None:
+                why = self._rule(getattr(tgt, "AtechModule", ""),
+                                 [int(p) for p in o.AtechPorts])
+            if why:
+                self._show_error(why)
+                return
         self.err.hide()
         shown = self._short(o)
         import FreeCAD
@@ -2653,8 +2691,10 @@ class ModulesPage(QtWidgets.QWidget):
             label = self._short(o) if o is not None else name
             cabled = o is not None and self._joint(o) == "cable"
             cells, whys = [], []
-            for key in (CABLED_ORDER if cabled else CHECK_ORDER):
+            for key in ("port_rule",) + (CABLED_ORDER if cabled else CHECK_ORDER):
                 r = verdicts.get(key) or {}
+                if key == "port_rule" and r.get("verdict") != "FAIL":
+                    continue            # said only when the port rules refuse it
                 text, tok = verdict_words(key, r, name_of, cabled=cabled)
                 cells.append("<span style='color:%s;font-weight:600'>%s</span>"
                              % (t[tok], html.escape(text)))

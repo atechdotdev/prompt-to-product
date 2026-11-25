@@ -186,6 +186,10 @@ Branch `wiring-diagrams`, worktree `~/dev/atech/atelier-wiring`. The base,
 ## Decisions for David
 
 1. Do ports 8 and 12 work as module ports? Seven examples put modules there.
+   **Decided 25 Nov 2026:** no. Port 8 takes only the USB-C module (and the
+   USB-C module only port 8); port 12, the reset port, takes only a button
+   (the reset button) and is usually empty. Enforced by atech_ports
+   (port_rule); the examples that break it are not yet moved.
 2. What is the physical pin order, and where is pin 1?
 3. Should arm_dock get a power jack? It would need a free cell, the arm's
    voltage and the deck height.

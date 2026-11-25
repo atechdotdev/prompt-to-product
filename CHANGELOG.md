@@ -7,6 +7,38 @@ release may change behaviour.
 
 ## [Unreleased]
 
+### Port 8 is the USB-C port, port 12 the reset port
+
+- **Port 8 takes the USB-C module and nothing else, and the USB-C module
+  goes on no other port.** **Port 12 is the reset port: only a button (the
+  board's reset button) goes there**, and most products leave it empty.
+  The two housings look like every other port, so until now the app let
+  any module go there and only warned.
+- The Atech library refuses anything else: placing, cabling, moving or
+  swapping a module onto a port it may not use stops with the rule in one
+  sentence, and the port check fails it (`port_rule`), so `./check` and the
+  build fail and the agent is told to move it.
+- The Atech modules page offers only the USB-C module on port 8, only a
+  button on port 12, and the USB-C module on no other port.
+- The electrical suite reports a broken port rule as an error with its fix,
+  and a button on port 12 as the reset button, which the firmware never
+  sees (it is left out of project.yaml). "Whether ports 8 and 12 work as
+  module ports" is no longer listed as unknown.
+- The agent's prompt, API card and hardware reference state the rules.
+  Starter projects never put anything on port 12.
+- A document that already has a module on such a port still opens and
+  re-seats. The Modules page and the port check say what is wrong with
+  it, and a build that only carries it along gets a warning, not a
+  failure, because only the user can move their own modules.
+- **Not done yet:** 52 of the 64 examples still put the USB-C module on
+  another port (most on port 7) or a module on 8 or 12. Until they are
+  moved, those examples fail `./check`. The same goes for some test
+  fixtures built around the old placements: the car and many-hole cases
+  in test_kit_round12 (USB-C on 7, speaker on 11 and 12, a sensor cabled
+  to 8), the night light in test_agent_kit (USB-C on 5: R152, R164) and
+  the R164 socket probe. fc_atech_cad's socket_opening case now prints
+  SKIP (USB-C on 5).
+
 ### Ten more example products, one in each kind; six new gallery kinds (R1030)
 
 - **Ten new examples to start from**, each passing ./check and every

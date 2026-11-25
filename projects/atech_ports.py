@@ -61,6 +61,7 @@ WHAT IT DOES NOT KNOW (raises UndefinedByLibrary rather than guessing)
     Pin-1 end of the row, retention, any board other than the 14-port, any
     part whose mesh carries no header (n20_wheel, nema17_stepper).
 """
+import contextlib
 import json
 import math
 import os
@@ -223,18 +224,76 @@ PIN_SECTION = 0.64                   # module pin square section
 
 PASS, FAIL, CANNOT = "PASS", "FAIL", "CANNOT DETERMINE"
 
-# RESERVED PORTS: {port number: reason shown to the user}. EMPTY ON PURPOSE.
-# backend/motherboard/board.yaml says "Ports 8 (USB-C, bottom middle) and 12
-# (Reset, right column) are reserved and cannot host modules"; atech_docs
-# 14_port.md says port 8 takes the USB-C module; both meshes carry full,
-# identical housings on 8 and 12. docs/ATECH_ASSEMBLY.md lists this as OPEN,
-# and the rule belongs to whoever owns the port map, so nothing is reserved
-# until the owner decides. The decision is this one line, e.g.
-#     RESERVED = {8: "USB-C", 12: "Reset"}
-# pair_for() never picks a reserved port and the Modules page offers no
-# module on one. seat() itself does not enforce it: the library measures
-# geometry, and geometry allows both ports.
-RESERVED = {}
+# PORT RULES of the 14-port board, decided by Atech (25 Nov 2026). Both
+# meshes carry full, identical housings on 8 and 12, so geometry allows any
+# module there; these rules do not:
+#   port 8  is the USB-C port. Only the USB-C module goes there, and the
+#           USB-C module goes on no other port.
+#   port 12 is the reset port. Only a button goes there: the board's reset
+#           button. Most products leave it empty.
+# port_rule() is the one test. seat(), cable(), move() and swap() refuse
+# what it refuses (PortNotAllowed), check() FAILs it as "port_rule",
+# pair_for() never pairs into a port the module may not use, and the
+# Modules page offers only the allowed modules on 8 and 12.
+# agent_kit/atech_wiring.py carries the same table for the pure-Python
+# electrical checks; a test keeps the two equal.
+PORT_ONLY = {8: ("usbc",), 12: ("button",)}     # port -> the only modules allowed
+MODULE_ONLY = {"usbc": (8,)}                    # module -> the only ports allowed
+PORT_ROLE = {8: "USB-C", 12: "Reset"}           # what the port is for
+#: {port: what it is for}: ports with a fixed role (kept under this name for
+#: the callers that show it).
+RESERVED = dict(PORT_ROLE)
+
+
+def port_rule(module_name, port_arg):
+    """None when module_name may use the ports in port_arg (int or tuple),
+    else the rule it breaks, as one sentence for the user."""
+    ns = [int(x) for x in (port_arg if isinstance(port_arg, (list, tuple))
+                           else (port_arg,))]
+    only_ports = MODULE_ONLY.get(module_name)
+    if only_ports is not None:
+        bad = [n for n in ns if n not in only_ports]
+        if bad:
+            return ("The USB-C module goes on port 8 only (port 8 is the USB-C "
+                    "port), not on port %s." % ", ".join(str(n) for n in bad))
+    for n in ns:
+        allowed = PORT_ONLY.get(n)
+        if allowed is not None and module_name not in allowed:
+            if n == 8:
+                return ("Port 8 is the USB-C port: only the USB-C module goes "
+                        "there.")
+            if n == 12:
+                return ("Port 12 is the reset port: only a button (the board's "
+                        "reset button) goes there. Most products leave it empty.")
+            return "Port %d takes only %s." % (n, ", ".join(allowed))
+    return None
+
+
+_SEEDING = [0]      # > 0 inside _seeding()
+
+
+@contextlib.contextmanager
+def _seeding():
+    """Re-create modules that already exist (the user's document, sent to a
+    build as context) where they are, even on a port the rules refuse: the
+    user's own document is not refused, check() still FAILs it
+    ("port_rule"), and the Modules page says so. Not on the API card."""
+    _SEEDING[0] += 1
+    try:
+        yield
+    finally:
+        _SEEDING[0] -= 1
+
+
+def _enforce_rule(module_name, port_arg):
+    if _SEEDING[0]:
+        return
+    why = port_rule(module_name, port_arg)
+    if why:
+        ns = [int(x) for x in (port_arg if isinstance(port_arg, (list, tuple))
+                               else (port_arg,))]
+        raise PortNotAllowed(why, kind="port_rule", module=module_name,
+                             ports=ns, why=why)
 
 
 # ---------------------------------------------------------------- errors
@@ -270,6 +329,12 @@ class GeometryMismatch(AtechPortError):
 
 class PortSpecError(AtechPortError):
     """Ports given do not fit the module (count, column, alignment)."""
+
+
+class PortNotAllowed(PortSpecError):
+    """The port rules (PORT_ONLY, MODULE_ONLY) do not allow this module on
+    these ports, whatever the geometry says. info: kind="port_rule",
+    module, ports, why (the sentence for the user)."""
 
 
 class PortOccupied(AtechPortError):
@@ -1589,7 +1654,11 @@ def seat(doc, module_name, port_arg, label=None):
       AtechSlideOut   — mm to move back along -AtechSlideAxis until the
                         module is entirely clear of the board,
       AtechSeatPlacement — the seated placement (the travel limit).
+
+    PORT RULES: raises PortNotAllowed for a module the ports do not take
+    (port_rule: port 8 is USB-C only, port 12 a button only, USB-C on 8 only).
     """
+    _enforce_rule(module_name, port_arg)
     b = board_object(doc)
     ps = _as_ports(port_arg)
     occ = occupied(doc)
@@ -1895,8 +1964,10 @@ def cable(doc, module_name, port_arg, placement, via=(), label=None, smooth=Fals
     its interference, and it has no slide path.
 
     IDEMPOTENT like seat(): the same module, ports and placement already
-    cabled returns the existing objects."""
+    cabled returns the existing objects. The port rules apply as for seat():
+    a cable does not get a module round them (PortNotAllowed)."""
     import Part
+    _enforce_rule(module_name, port_arg)
     b = board_object(doc)
     ps = _as_ports(port_arg)
     pl = placement if isinstance(placement, App.Placement) else App.Placement(placement)
@@ -3236,6 +3307,9 @@ def _evaluate(sig, feat, Mw, ps, Bm, s_out, board, obstacles, untested, skip=Non
 
 def first_why(res):
     """One line saying why a module's checks did not all PASS, or None."""
+    rule = res.get("port_rule") or {}
+    if rule.get("verdict") == FAIL:
+        return rule.get("why") or "the port rules do not allow it there"
     for k in CHECKS:
         r = res.get(k) or {}
         v = r.get("verdict")
@@ -3260,7 +3334,8 @@ def first_why(res):
 @_few_blas_threads
 def check(doc, only=None, fitted_after=None):
     """Per Atech module: {'seated', 'interference', 'slide_path'} each a dict
-    with 'verdict' in PASS / FAIL / CANNOT DETERMINE plus the numbers.
+    with 'verdict' in PASS / FAIL / CANNOT DETERMINE plus the numbers, and
+    'port_rule' (PASS / FAIL with 'why'): the port rules (port_rule()).
 
     only: iterable of object Names to CHECK. Every other object still counts
     as an obstacle; it is just not itself checked. Obstacles are every
@@ -3312,6 +3387,12 @@ def check(doc, only=None, fitted_after=None):
                 res[k] = {"verdict": CANNOT, "why": "not an Atech-seated module "
                                                    "(no AtechPorts): its port is unknown"}
             continue
+        # The port rules (port 8 USB-C only, port 12 a button only), judged
+        # before and apart from the geometry: a module can fit perfectly on
+        # a port it is not allowed on.
+        why = port_rule(o.AtechModule, [int(n) for n in o.AtechPorts])
+        res["port_rule"] = ({"verdict": FAIL, "why": why} if why
+                            else {"verdict": PASS})
         if b is None or board is None:
             for k in CHECKS:
                 res[k] = {"verdict": CANNOT, "why": "no board in document" if b is None else berr}
@@ -3383,6 +3464,10 @@ def pair_for(doc, module_name, port_n, reserved=None):
         if q.number in occ or q.number in reserved or p0.number in reserved:
             continue
         pair = tuple(sorted((p0.number, q.number)))
+        why = port_rule(module_name, pair)
+        if why:                 # the port rules, whatever `reserved` says
+            tried.append((pair, why))
+            continue
         try:
             pl, info = seated_placement(module_name, pair,
                                         b.Placement if b is not None else None, feat)
@@ -3536,6 +3621,10 @@ def api_card():
         L.append("  %-4d %-6s %-5s %s..%s  %s..%s  %s"
                  % (n, p["edge"], _axis_word(p["insert_dir"]), _fmt(lo[0]), _fmt(hi[0]),
                     _fmt(lo[2]), _fmt(hi[2]), _mouth_plane(p)))
+    L.append("PORT RULES (seat/cable/move refuse anything else; check FAILs it)")
+    L.append("  port 8 = USB-C port: the usbc module only, and usbc goes on port 8 only")
+    L.append("  port 12 = reset port: a button only (the board's reset button); "
+             "leave it empty unless the product needs a reset button")
     names = sorted(f[:-4] for f in os.listdir(STL_DIR)
                    if f.endswith(".stl") and f[:-4] != BOARD_NAME)
     users = user_part_names()
@@ -3642,8 +3731,6 @@ def api_card():
                 if abs(round(p["mouth"], 2) - ref) > 0.005]
     L.append("OPEN (unknown; do not assume)")
     L.append("  pin-1 end of the row and the pin order (two sources disagree)")
-    L.append("  ports 8, 12 as module slots (reserved now: %s)"
-             % (", ".join("%d %s" % kv for kv in sorted(RESERVED.items())) or "none"))
     if off:
         L.append("  mouths off their column (%s): real board or export artefact; "
                  "pairs across them can fail" % ", ".join(off))
@@ -3817,7 +3904,9 @@ def move(doc, o, port_arg):
     two-connector module). The new ports must be free (or held by o itself).
     A seated module is re-seated there; a cabled module stays where it is
     and its cable is remade to the new port. Its default label follows the
-    ports. Returns o."""
+    ports. Returns o. PortNotAllowed when the port rules refuse the new
+    ports (port_rule)."""
+    _enforce_rule(o.AtechModule, port_arg)
     ps = _as_ports(port_arg)
     ns = [p.number for p in ps]
     occ = occupied(doc)
@@ -3857,6 +3946,7 @@ def swap(doc, a, b_obj):
                             "swap" % (a.Label, len(pa), b_obj.Label, len(pb)),
                             kind="swap_count", module=getattr(a, "AtechModule", ""))
     for o, ns in ((a, pb), (b_obj, pa)):
+        _enforce_rule(o.AtechModule, ns)
         seated_placement(o.AtechModule, ns if len(ns) > 1 else ns[0], None)
     # free a's ports for a moment, so neither move sees the other in the way
     a.AtechPorts = []

@@ -182,7 +182,9 @@ def lines_on(module, i):
 def port_map(w, cat=None):
     """[{port, can, module, name, line_role, state}] for the 14 ports.
     can: what the SDK lets the port do ("i2c, digital, gpio, uart");
-    state: "used" | "free" | "reserved" (SDK says reserved, nothing on it)."""
+    state: "used" | "free" | "reserved" (SDK says reserved, nothing on it);
+    role: what the port is for under the port rules ("USB-C" on 8, "Reset"
+    on 12, else "")."""
     cat = _cat(cat)
     b = _board(cat)
     reserved = set(b.get("reserved") or ())
@@ -195,7 +197,8 @@ def port_map(w, cat=None):
         can = sorted((b.get("ports") or {}).get(str(p)) or ())
         row = {"port": p, "can": ", ".join(can) if can else "",
                "uart": "uart" in can, "analog": "analog" in can,
-               "module": "", "name": "", "lines": {}, "state": "free", "how": ""}
+               "module": "", "name": "", "lines": {}, "state": "free", "how": "",
+               "role": _wiring.PORT_ROLE.get(p, "")}
         if p in by_port:
             c, i = by_port[p]
             row.update(module=c["module"], name=c["name"], state="used",
@@ -330,14 +333,18 @@ def rules(w, cat=None, b=None, firmware_issues=None):
     if not any(m in have for m in _wiring.POWER_MODULES):
         out.append(_rule("power.none", "error",
                          "Nothing powers the board: no USB-C or power jack module.",
-                         "Add a USB-C module. It usually goes on port 8."))
-    for c in have.get("usbc", []):
-        if 8 not in c["ports"]:
-            out.append(_rule("power.usbc_port", "note",
-                             "The USB-C module is on port %s, not port 8. Whether it "
-                             "powers the board there is not published."
-                             % ", ".join(map(str, c["ports"])),
-                             "Put it on port 8, or ask Atech.", c["ports"]))
+                         "Add a USB-C module on port 8."))
+    # the port rules: port 8 the USB-C module only (and USB-C on 8 only),
+    # port 12 a button only (the reset button)
+    for c in conns:
+        for f in c.get("flags") or []:
+            fix = ("Move it to port 8." if c["module"] == "usbc"
+                   else "Move it to a free port other than 8 and 12.")
+            out.append(_rule("port.rule", "error", f, fix, c["ports"]))
+        if c.get("reset"):
+            out.append(_rule("port.reset", "note", _wiring.RESET_NOTE,
+                             "Leave port 12 empty unless the product needs a "
+                             "reset button.", c["ports"]))
     if "robot_arm" in have and "power_jack" not in have:
         out.append(_rule("power.arm_rail", "warning",
                          "The robot arm's servos run from the high-voltage rail, and "
@@ -412,10 +419,6 @@ def rules(w, cat=None, b=None, firmware_issues=None):
                     "them" if len(few) > 1 or "+" in few[0] else "it")
         out.append(_rule("sdk.placement", level, shown[0].upper() + shown[1:] + ".", fix,
                          [int(x) for x in re.findall(r"port (\d+)", t)][:2]))
-    for f in w.get("flags") or []:
-        out.append(_rule("port.disputed", "warning", f + ".",
-                         "Use another port until Atech confirms 8 and 12 take modules.",
-                         [int(x) for x in re.findall(r"Port (\d+)", f)]))
     # firmware limits the SDK states
     motors = have.get("dc_motor", [])
     if len(motors) > 4:
@@ -510,7 +513,8 @@ def bringup(w, cat=None, entries=None):
         "number on the board's silkscreen.",
         "Cabled modules: the ribbon's lengths are in the wiring list. Don't twist "
         "or kink a ribbon.",
-        "Nothing on ports 8 or 12 except the USB-C module, unless Atech says so.",
+        "Port 8 holds the USB-C module and nothing else. Port 12 holds nothing, "
+        "or the reset button.",
     ]}]
     own = [c for c in w.get("connections") or [] if c["module"] in OWN_SUPPLY]
     if own:
@@ -571,14 +575,14 @@ def _example_value(ac):
 
 # ---------------------------------------------------------------- analyse
 def analyse(atech=None, w=None, cat=None, project="", made="", names=None,
-            loads=None, supply=None, bank_mah=None, firmware=None, reserved=None):
+            loads=None, supply=None, bank_mah=None, firmware=None):
     """Everything above in one dict. Give atech (check's res["atech"] or
     atech_wiring.modules_from_doc) or a ready wiring dict w."""
     cat = _cat(cat)
     if w is None:
         w = _wiring.build(atech or {"modules": []}, firmware=firmware,
                           names=dict(NAMES, **(names or {})),
-                          reserved=reserved, cat=cat, project=project, made=made)
+                          cat=cat, project=project, made=made)
     entries = _fw.plan(_seated(w), cat)
     issues = _fw.issues(entries, cat=cat)
     b = budget(w, loads=loads, supply=supply, bank_mah=bank_mah)

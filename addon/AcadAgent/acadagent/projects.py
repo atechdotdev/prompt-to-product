@@ -170,9 +170,11 @@ def placed_free_parts(doc):
 
 # --------------------------------------------- starter projects (R306)
 #: The order starter modules take ports in: the side columns first, then
-#: the top edge; 8 (USB-C, bottom middle) and 12 (Reset) last, as the
-#: board's own docs describe them. USB-C goes to 8 first.
-STARTER_PORT_ORDER = (1, 2, 3, 4, 5, 6, 9, 10, 11, 13, 14, 7, 12, 8)
+#: the top edge. Port 8 (USB-C, bottom middle) takes the USB-C module and
+#: nothing else, and USB-C goes nowhere else (atech_ports port rules).
+#: Port 12 is the reset port: a starter never puts anything there, a reset
+#: button included, since most products leave it empty.
+STARTER_PORT_ORDER = (1, 2, 3, 4, 5, 6, 9, 10, 11, 13, 14, 7)
 STARTER_PREFERRED = {"usbc": (8,)}
 
 
@@ -201,10 +203,18 @@ def seat_starter(doc, module_names, ap=None):
             continue
         order = list(STARTER_PREFERRED.get(name, ())) + [
             n for n in STARTER_PORT_ORDER if n not in STARTER_PREFERRED.get(name, ())]
+        rule = getattr(ap, "port_rule", None)
         done, last = None, "no free port"
         for n in order:
             occ = ap.occupied(doc)
-            if n in occ or n in reserved:
+            if n in occ:
+                continue
+            if rule is not None:
+                why = rule(name, n)
+                if why:
+                    last = why
+                    continue
+            elif n in reserved:
                 continue
             try:
                 arg = (n if seatable[name] == 1

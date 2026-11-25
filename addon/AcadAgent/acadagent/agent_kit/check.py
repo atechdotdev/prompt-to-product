@@ -522,8 +522,20 @@ def placement_list(pl):
 
 def _seed_atech(App, doc, items):
     """The Atech board and the user's seated modules, re-created with the
-    library itself (meshes have no BREP to pass) - PRD R92."""
+    library itself (meshes have no BREP to pass) - PRD R92. A module the
+    user already has on a port the port rules refuse is re-created there
+    all the same (ap._seeding): it is the user's, and _atech_port_check
+    warns about it instead of failing the build."""
+    import contextlib
     import atech_ports as ap
+    with getattr(ap, "_seeding", contextlib.nullcontext)():
+        _seed_atech_items(App, doc, items, ap)
+
+
+_SEEDED_MODULES = set()   # Labels of the user's modules re-created by _seed_atech
+
+
+def _seed_atech_items(App, doc, items, ap):
     for it in items:
         if it["atech"] == "board":
             b = ap.board_object(doc)
@@ -539,11 +551,14 @@ def _seed_atech(App, doc, items):
                     hasattr(ap, "place_cabled"):
                 # R511: the user's cabled module stands where they put it
                 # (its cables came as ordinary context shapes)
-                ap.place_cabled(doc, str(it["module"]), arg,
-                                _placement(App, it["placement"]),
-                                label=it.get("label") or None)
-                continue
-            ap.seat(doc, str(it["module"]), arg, label=it.get("label") or None)
+                o = ap.place_cabled(doc, str(it["module"]), arg,
+                                    _placement(App, it["placement"]),
+                                    label=it.get("label") or None)
+            else:
+                o = ap.seat(doc, str(it["module"]), arg, label=it.get("label") or None)
+            o = o[0] if isinstance(o, tuple) else o
+            if o is not None:
+                _SEEDED_MODULES.add(o.Label)
 
 
 def _follow_board(doc, seeded):
@@ -2260,6 +2275,13 @@ def _atech_port_check(doc, res):
                 # R222: the reason when the library gives one ("the board
                 # or the module moved after its cable was made")
                 why = v.get("why") if isinstance(v.get("why"), str) else ""
+                if k == "port_rule" and label in _SEEDED_MODULES:
+                    # the user's own module, which the build may not move:
+                    # say it, but it is not this build's failure
+                    res["warnings"].append(
+                        "Atech %s (the user's module): %s - only the user can "
+                        "move it (Atech modules); say so in the reply" % (label, why))
+                    continue
                 res.setdefault("problems", []).append(
                     "Atech %s: %s FAIL%s" % (label, k, ": " + why if why else ""))
     res["atech_check_seconds"] = round(time.time() - t, 2)
@@ -2269,8 +2291,9 @@ def _firmware(res, ws):
     """The firmware half of an Atech build (atech_firmware, the Atech SDK's
     catalog): the project.yaml modules block of what model.py placed, every
     port the SDK would refuse, and ws/project.yaml against the build.
-    Warnings, never problems: the CAD board and the SDK's still disagree
-    on ports 8 and 12."""
+    Warnings, never problems: a port the SDK refuses is also a port_rule
+    FAIL of the Atech port check when the port rules forbid it (8, 12);
+    the rest is firmware advice the agent can act on."""
     mods = (res.get("atech") or {}).get("modules") or []
     if not mods:
         return

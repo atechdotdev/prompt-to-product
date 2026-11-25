@@ -39,10 +39,17 @@ PIN_ORDER_KNOWN = False
 POWER_MODULES = ("usbc", "power_jack")
 POWER_WORDS = {"usbc": "USB-C", "power_jack": "Power jack"}
 
-#: Ports the sources disagree on, with each source's own word for the spot:
-#: board.yaml ("Ports 8 (USB-C) and 12 (Reset) are reserved and cannot host
-#: modules") and the Atech SDK 14port board layout grid ("USB-C", "Restart").
-DISPUTED = {8: ("USB-C", "USB-C"), 12: ("Reset", "Restart")}
+#: The 14-port board's port rules (Atech, 25 Nov 2026): port 8 is the USB-C
+#: port (the USB-C module only, and the USB-C module on no other port);
+#: port 12 is the reset port (a button only: the board's reset button; most
+#: products leave it empty). The same table as projects/atech_ports.py
+#: (PORT_ONLY, MODULE_ONLY, PORT_ROLE), which enforces it; a test keeps the
+#: two equal. This copy needs no FreeCAD.
+PORT_ONLY = {8: ("usbc",), 12: ("button",)}
+MODULE_ONLY = {"usbc": (8,)}
+PORT_ROLE = {8: "USB-C", 12: "Reset"}
+USBC_PORT = 8
+RESET_PORT = 12
 
 #: The board map's port cells (modules_page.CELLS, board frame, mm): centre
 #: and the way a module there faces. A copy, so this file needs no Qt; a
@@ -75,8 +82,8 @@ PINOUT_ASK = ("Atech sends a module's pinout on request: hello@atech.dev or "
               "Discord.")
 UNKNOWN_PIN_ORDER = "The pin order inside a port"
 UNKNOWN_CURRENT = "How much current each module draws"
-UNKNOWN_8_12 = "Whether ports 8 and 12 work as module ports"
-UNKNOWN_USBC_OFF_8 = "Whether a USB-C module on a port other than 8 powers the board"
+RESET_NOTE = ("The button on port 12 is the board's reset button: pressing it "
+              "restarts the board. The firmware gets no events from it.")
 UNKNOWN_12V = "Whether the 12 V rail is fed without a power module"
 UNKNOWN_JACK_ALONE = "Whether the power jack module powers the board without a USB-C module"
 NO_POWER = "No USB-C or power jack module in this design."
@@ -91,10 +98,33 @@ STEPPER_NOTE = ("stepper_motor: the Atech SDK says it needs its own motor "
                 "ports do not provide it.")
 
 
-def _disputed_words(port):
-    yaml_w, sdk_w = DISPUTED[port]
-    return ("Port %d: board.yaml marks it reserved (%s); the Atech SDK board "
-            "layout shows %s here" % (port, yaml_w, sdk_w))
+def port_rule(module, ports):
+    """None when module may use ports (an int or a list), else the rule it
+    breaks as one sentence. The same test as atech_ports.port_rule."""
+    ns = [int(p) for p in (ports if isinstance(ports, (list, tuple)) else (ports,))]
+    only = MODULE_ONLY.get(module)
+    if only is not None:
+        bad = [n for n in ns if n not in only]
+        if bad:
+            return ("The USB-C module goes on port 8 only (port 8 is the USB-C "
+                    "port), not on port %s." % ", ".join(str(n) for n in bad))
+    for n in ns:
+        allowed = PORT_ONLY.get(n)
+        if allowed is not None and module not in allowed:
+            if n == USBC_PORT:
+                return ("Port 8 is the USB-C port: only the USB-C module goes "
+                        "there.")
+            if n == RESET_PORT:
+                return ("Port 12 is the reset port: only a button (the board's "
+                        "reset button) goes there. Most products leave it empty.")
+            return "Port %d takes only %s." % (n, ", ".join(allowed))
+    return None
+
+
+def is_reset_button(module, ports):
+    """True for a button on the reset port (12): the board's reset button,
+    not a firmware input."""
+    return module == "button" and RESET_PORT in [int(p) for p in ports or ()]
 
 
 def _norm(text):
@@ -233,20 +263,17 @@ def _code_names(mods, firmware, cat):
     return out
 
 
-def build(atech, firmware=None, names=None, reserved=None, cat=None,
+def build(atech, firmware=None, names=None, cat=None,
           firmware_on=True, project="", made=""):
     """The wiring dict of one build.
 
     atech:     res["atech"] or modules_from_doc(doc)
     firmware:  res["firmware"] (check) or None (the app: plan() is used)
     names:     {cad module: display name}; the CAD id when missing
-    reserved:  atech_ports.RESERVED ({port: reason}); when it is not empty
-               it is the rule for ports, over the disputed-ports flag
     firmware_on: False hides the code names (the app's firmware switch)
     project, made: the title's project name and the build time text
     """
     names = names or {}
-    reserved = {int(k): v for k, v in (reserved or {}).items()}
     mods = list((atech or {}).get("modules") or [])
     cat = _catalog(cat) if firmware_on else None
     code = _code_names(mods, firmware, cat) if firmware_on else {}
@@ -257,8 +284,7 @@ def build(atech, firmware=None, names=None, reserved=None, cat=None,
     except Exception:                                   # noqa: BLE001
         pass
     conns, flags_all, cautions = [], [], []
-    used_8_12 = False
-    usbc_off_8 = False
+    reset_button = False
     for m in sorted(mods, key=lambda m: min(m.get("ports") or [99])):
         mod = str(m.get("module") or "")
         ports = sorted(int(p) for p in m.get("ports") or [])
@@ -276,15 +302,12 @@ def build(atech, firmware=None, names=None, reserved=None, cat=None,
             inst = code.get((mod, ports[0]))
             if inst:
                 c["code_name"] = inst
-        for p in ports:
-            if reserved:
-                if p in reserved:
-                    c["flags"].append("Port %d: reserved (%s)" % (p, reserved[p]))
-            elif p in DISPUTED and mod != "usbc":
-                c["flags"].append(_disputed_words(p))
-                used_8_12 = True
-        if mod == "usbc" and 8 not in ports:
-            usbc_off_8 = True
+        why = port_rule(mod, ports) if ports else None
+        if why:
+            c["flags"].append(why)
+        if is_reset_button(mod, ports):
+            c["reset"] = True
+            reset_button = True
         flags_all.extend(c["flags"])
         sid = sdk_id.get(mod, mod) if mod in sdk_id else mod
         sm = ((cat or {}).get("modules") or {}).get(sid) if sid else None
@@ -304,15 +327,13 @@ def build(atech, firmware=None, names=None, reserved=None, cat=None,
                                                  ", ".join(str(p) for p in c["ports"]))
                                for c in pw)
     unknown = [UNKNOWN_PIN_ORDER, UNKNOWN_CURRENT]
-    if used_8_12:
-        unknown.append(UNKNOWN_8_12)
-    if usbc_off_8:
-        unknown.append(UNKNOWN_USBC_OFF_8)
     if conns and "power_jack" not in have:
         unknown.append(UNKNOWN_12V)
     if "power_jack" in have and "usbc" not in have:
         unknown.append(UNKNOWN_JACK_ALONE)
     nts = []
+    if reset_button:
+        nts.append(RESET_NOTE)
     if "robot_arm" in have:
         nts.append("The robot arm needs a power module for its 12 V rail: "
                    "see the Atech SDK caution.")
@@ -430,8 +451,8 @@ def _board(sv, cx, cy, s, w, size=12):
     the top left, as on the Atech modules page)."""
     t = sv.t
     used = {p for c in w["connections"] for p in c["ports"]}
-    flagged = {int(re.match(r"Port (\d+)", f).group(1)) for f in w["flags"]
-               if re.match(r"Port (\d+)", f)}
+    # the ports of a module the port rules refuse there
+    flagged = {p for c in w["connections"] if c.get("flags") for p in c["ports"]}
     sv.rect(cx - 30 * s, cy - 60 * s, 60 * s, 120 * s, t["board"], rx=4 * s)
     for n in PORTS:
         (x, y), _ = PORT_CELLS[n]

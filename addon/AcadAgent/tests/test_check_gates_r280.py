@@ -145,7 +145,7 @@ import atech_ports as ap
 doc = FreeCAD.newDocument("hh")
 board = ap.board_object(doc)
 board.Placement = Placement(V(), Rotation(V(1, 0, 0), 90))      # flat: modules up (+Z)
-scr = ap.seat(doc, "screen", (11, 12))
+scr = ap.seat(doc, "screen", (10, 11))
 doc.recompute()
 bb, sb = board.Mesh.BoundBox, scr.Mesh.BoundBox
 mods = [mod(board), mod(scr)]
@@ -176,7 +176,7 @@ def build(zs, visor):
         if o.Name != board.Name:
             doc.removeObject(o.Name)
     pl = ap.module_placement("screen", (300, -24, zs), face="-Y")
-    scr, _c = ap.cable(doc, "screen", (11, 12), pl)
+    scr, _c = ap.cable(doc, "screen", (10, 11), pl)
     doc.recompute()
     sb = scr.Mesh.BoundBox
     body = box(255, 345, -30, 30, 0, 160).cut(

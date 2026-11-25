@@ -2503,7 +2503,7 @@ class AtechCables(unittest.TestCase):
         self.assertEqual(out["solids"], [1], out)
         self.assertTrue(out["valid"], out)
         self.assertEqual(out["verdicts"], {"seated": "PASS", "interference": "PASS",
-                                           "slide_path": "PASS"})
+                                           "slide_path": "PASS", "port_rule": "PASS"})
         self.assertEqual(out["speaker_cables"], [9, 10])
         self.assertTrue(out["speaker_ribbons_apart"], out)
         self.assertIn("right angles", out["axis_error"] or "")

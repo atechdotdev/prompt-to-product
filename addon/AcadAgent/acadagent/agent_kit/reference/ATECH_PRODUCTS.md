@@ -41,6 +41,16 @@ recipes.
    carved for you"). Use them for intent only ("never cover the screen").
    The board has no USB connector of its own: power comes through the
    `usbc` module, so every product needs one.
+4. **PORT RULES (hard).** Port 8 is the USB-C port: `ap.seat(doc, "usbc", 8)`
+   (or `ap.cable(doc, "usbc", 8, ...)` to bring the socket elsewhere), and
+   nothing else ever goes on port 8; the `usbc` module goes on no other
+   port. Port 12 is the reset port: leave it empty. Only a `button` may go
+   there, as the board's reset button, and only when the user asks for one;
+   the firmware gets no events from it. `ap.seat`, `ap.cable` and
+   `ap.move` refuse anything else and `./check` fails it (`port_rule`).
+   Some examples and recipes below still show the USB-C module on another
+   port, or a module on 8 or 12, from before these rules: keep their bodies
+   and fit code, but follow the rules.
 
 ---
 
@@ -131,18 +141,19 @@ gates. MEASURED times: ./check of the example with the review sheet off
 | Port pitch | 20.0 mm along a column (ports 3/4/5 are 0.05-0.20 mm off-grid) |
 | Seated module overhang | 0.37-0.67 mm proud of the board edge |
 | Slide-in travel | 19.1 mm (19.4 for the speaker): each seated module slides in along its axis from 19.1 mm outside the board edge. That corridor must be empty, or every part in it must be listed in intent.json `fitted_after` |
-| Ports 8 and 12 | geometrically identical to the others |
+| Ports 8 and 12 | geometrically identical to the others, but ruled: 8 = USB-C port (the usbc module only, and usbc only there); 12 = reset port (a button only, usually empty) |
 
 **Valid port pairs for 2-connector modules** (each seated and checked):
 
 | Module | Passes | Fails |
 |---|---|---|
-| screen, microphone | (1,2) (4,5) (9,10) (10,11) (11,12) (12,13) (13,14) | (2,3) (3,4) (5,6): header 0.05-0.10 mm short |
-| speaker | (1,2) (9,10) (10,11) (11,12) (12,13) (13,14) | (4,5) hits the board; (2,3) (3,4) (5,6) as above |
+| screen, microphone | (1,2) (4,5) (9,10) (10,11) (13,14) | (2,3) (3,4) (5,6): header 0.05-0.10 mm short; (11,12) (12,13): port 12 is the reset port |
+| speaker | (1,2) (9,10) (10,11) (13,14) | (4,5) hits the board; (2,3) (3,4) (5,6) as above; (11,12) (12,13): port 12 |
 | cabled 2-connector (`ap.cable`) | the same pairs | (2,3) fails |
 
-Every 1-connector module passes on all 14 ports. `ap.pair_for(doc, name,
-port)` picks a passing pair.
+Every 1-connector module fits on all 14 ports, but the port rules decide:
+`usbc` on 8 only, nothing else on 8, only a `button` on 12. `ap.pair_for(doc,
+name, port)` picks a passing pair and never one with port 8 or 12.
 
 **Stack heights above the PCB top** (add 2.5 mm for the board underside):
 
@@ -180,8 +191,8 @@ def place_board(rot, x0=0.0, y0=None, z0=0.0):        # the board's measured box
 |---|---|
 | **FLAT** (face +Z) | 1-6 left column x -0.4..19.1, y -10 -> -110 (1 at the back, y ~0). 9-14 right column x 40.9..60.4. 7 back centre (y -19..+0.4, a USB-C mouth there faces +Y); 8 front centre (y -120.4..-101). Put the product's nose at the port-8 end (-Y = FreeCAD's front) |
 | **UPRIGHT_FRONT** (face -Y) | 1-6 on the viewer's right (x 41..60, z 0 -> 120 bottom to top), 9-14 on the left (x -0.4..19). 7 bottom centre (a USB-C mouth faces -Z, down). 8 top centre, exits +Z |
-| **LANDSCAPE_UP** (face -Y) | `place_board(LANDSCAPE_UP, 0, None, 36)` gives x 0..120, z 36..96: bottom row 1..6 left -> right (z 36..56), top row 9..14 (z 76..96), 7 at the left end (z 56..76, USB-C mouth -X), 8 at the right end. Top centre pair **(11,12) x 40..80** |
-| **LANDSCAPE_FRONT** (face -Y) | top row 6..1 left -> right, bottom row 14..9, 8 left end, 7 right end. Bottom centre pair (12,11) x 40..80; speaker pairs on the bottom row hang 20 mm below |
+| **LANDSCAPE_UP** (face -Y) | `place_board(LANDSCAPE_UP, 0, None, 36)` gives x 0..120, z 36..96: bottom row 1..6 left -> right (z 36..56), top row 9..14 (z 76..96), 7 at the left end (z 56..76, USB-C mouth -X), 8 at the right end. Top centre pair (11,12) x 40..80 takes port 12, the reset port: not allowed; use (10,11) or (13,14) |
+| **LANDSCAPE_FRONT** (face -Y) | top row 6..1 left -> right, bottom row 14..9, 8 left end, 7 right end. Bottom centre pair (12,11) x 40..80 takes port 12, the reset port: not allowed; use (10,11); speaker pairs on the bottom row hang 20 mm below |
 
 In LANDSCAPE_UP the board's spine is world x 20..100, z 56..76 (between
 the rows), its face at y -4.5. A 2-connector module's long side runs along
@@ -217,10 +228,13 @@ Route rules (MEASURED):
 - Twist-free needs `face x cable` parallel to the plug's width (FLAT ports
   1-6/9-14: world Y; 7/8: world X; LANDSCAPE rows: X). Otherwise the ribbon
   twists 90 degrees through a ~30 mm cube.
-- **Straight rises are the cleanest.** LANDSCAPE_UP top-row pair (11,12)
+- **Straight rises are the cleanest.** A LANDSCAPE_UP top-row pair
+  ((10,11) or (13,14); desk_robot.py's (11,12) predates the port rules)
   into a screen straight above (`face="-Y", cable="-Z"`, centre y -4.84):
   two straight ribbons up a neck (desk_robot.py, 34 mm above the board).
-- **A nose sensor ahead of FLAT port 8** (`face="-Y", cable="-Z"`) needs
+- **A nose sensor ahead of FLAT port 8** (from before the port rules: port 8
+  is now the USB-C port, so cable the sensor from another port along the
+  same route) (`face="-Y", cable="-Z"`) needs
   its centre >= PCB top + 30 (at +27 the ribbon clipped the sensor);
   y -131.4 (rc_tank.py, MEASURED R500). toy_car.py (R700) has front
   motors under that route: its ToF sits at PCB top + 14 with
@@ -272,7 +286,9 @@ Sizes are row x up x slide (mm). Features measured from height maps.
    any hardware corner and the inner wall (a 12 mm corner radius cuts 2.9
    mm into the corner, the back-edge fillet more: MEASURED 3.5 mm
    overlapped the board).
-2. **Power:** always a `usbc` module, where a real product's port would be.
+2. **Power:** always a `usbc` module, on port 8 (the USB-C port). Where a
+   real product's socket would be is not where port 8 is: orient the board
+   so port 8 faces that wall, or `ap.cable` the usbc module from port 8.
 3. **Assembly:** modules slide in sideways, so a part beside them blocks
    them. A **fixed** tray/base below or behind the module layer holds the
    board; everything else is **fitted after** (listed in `fitted_after`).
@@ -875,7 +891,8 @@ motor, rib = ap.cable(doc, "dc_motor", 7, ap.module_placement(
 
 The knob's connector, the button's travel, the microphone's port position,
 a soil-moisture or stepper-driver module, the pin-1 order, module
-retention, and ports 8/12 as special. Say what is unknown in the reply.
+and module retention. Say what is unknown in the reply. (Ports 8 and 12
+are not unknown: see the port rules in section 0.)
 
 ---
 

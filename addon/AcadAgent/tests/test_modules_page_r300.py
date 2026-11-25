@@ -76,10 +76,38 @@ class TestWords(unittest.TestCase):
                          "Port 9 · right edge · Screen, seated · also on port 10")
         self.assertEqual(mp.port_tooltip(11, "right", "Button", cable_mm=182.4),
                          "Port 11 · right edge · Button on a 182 mm cable")
+        # the port rules: what 8 and 12 are for
         self.assertEqual(mp.port_tooltip(8, "bottom", reserved="USB-C"),
-                         "Port 8 · bottom edge · reserved for USB-C")
+                         "Port 8 · bottom edge · empty · the USB-C port · only the "
+                         "USB-C module goes here")
+        self.assertTrue(mp.port_tooltip(12, "right").startswith(
+            "Port 12 · right edge · empty · the reset port · only a button"))
         # the pin order is OPEN in the library: never named
         self.assertNotIn("pin", mp.port_tooltip(3, "left").lower())
+
+    def test_port_rules_words(self):
+        rule = lambda m, n: (None if (n == 8) == (m == "usbc") and (n != 12 or m == "button")
+                             else "no")
+        self.assertTrue(mp.module_allowed(rule, "usbc", 8))
+        self.assertFalse(mp.module_allowed(rule, "usbc", 7))
+        self.assertFalse(mp.module_allowed(rule, "light", 8))
+        self.assertTrue(mp.module_allowed(rule, "button", 12))
+        self.assertFalse(mp.module_allowed(rule, "speaker", 12))
+        self.assertTrue(mp.module_allowed(None, "light", 8))     # older library
+        why = "Port 8 is the USB-C port: only the USB-C module goes there."
+        bad = {"verdict": "FAIL", "why": why}
+        self.assertEqual(mp.verdict_words("port_rule", bad),
+                         ("Not allowed on this port", "fail"))
+        self.assertEqual(mp.fail_why("port_rule", bad), why)
+
+        class PortNotAllowed(Exception):
+            info = {"kind": "port_rule", "module": "light", "why": why}
+        PortNotAllowed.__mro__  # describe_error dispatches on class names
+        class PortSpecError(Exception):
+            pass
+        class E(PortNotAllowed, PortSpecError):
+            pass
+        self.assertEqual(mp.describe_error(E()), why)
 
     def test_r302_cable_words(self):
         self.assertEqual(mp.cable_words([182.4]), "Connected by cable · 182 mm")

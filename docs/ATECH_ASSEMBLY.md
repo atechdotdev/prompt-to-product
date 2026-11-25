@@ -193,6 +193,17 @@ Data A, Data B — the **exact reverse** of David's sequence. Neither says which
 physical end of the row is pin 1, and no pin-1 key or asymmetry exists in
 either mesh (the six contacts and six pins are identical). **Still OPEN.**
 
+## DECIDED — port rules (Atech, 25 Nov 2026)
+
+- **Port 8 is the USB-C port.** Only the USB-C module goes there, and the
+  USB-C module goes on no other port.
+- **Port 12 is the reset port.** Only a button goes there: the board's reset
+  button. Most products leave it empty.
+- The housings on 8 and 12 are full and identical to the others, so the
+  geometry allows any module; the rules do not. `atech_ports.port_rule()`
+  is the test: `seat`, `cable`, `move` and `swap` refuse what it refuses
+  (`PortNotAllowed`), and `check()` FAILs it as `port_rule`.
+
 ## OPEN — still unknown
 
 - **Pin-1 end of the row**, and therefore which physical pin carries which
@@ -200,10 +211,6 @@ either mesh (the six contacts and six pins are identical). **Still OPEN.**
 - **Ports 3, 4, 5 off the grid** (0.05–0.20 mm): is that the real board, or an
   export artefact present in both meshes? Settles whether 2-connector modules
   can use pairs (2,3), (3,4), (5,6). Measure a real board's housing positions.
-- **Port 8 and port 12 as module slots.** Geometry: full, identical housings.
-  `board.yaml`: "reserved and cannot host modules". `14_port.md`: port 8 takes
-  the USB-C module; both have power, data lines reserved. The library lets
-  any module seat on either; the rule belongs to whoever owns the port map.
 - **Retention.** No latch, detent or friction feature exists in any mesh;
   only the fork contacts' grip holds a module. Is that the design?
 - **Knob** — its STL has no header or pins at all, so it cannot be seated

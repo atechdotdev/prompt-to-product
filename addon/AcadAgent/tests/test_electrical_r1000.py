@@ -99,11 +99,45 @@ class Rules(unittest.TestCase):
         self.assertEqual(r["verdict"]["level"], "ok")
         self.assertTrue(r["verdict"]["text"].startswith("Ready to wire"))
 
-    def test_usbc_off_port_8_is_a_note(self):
+    def test_usbc_off_port_8_is_an_error(self):
+        # the port rules: the USB-C module goes on port 8 only
         r = E.analyse(design(mod("usbc", [7]), mod("button", [1])))
-        rule = [x for x in r["rules"] if x["id"] == "power.usbc_port"][0]
-        self.assertEqual(rule["level"], "note")
+        rule = [x for x in r["rules"] if x["id"] == "port.rule"][0]
+        self.assertEqual(rule["level"], "error")
         self.assertEqual(rule["ports"], [7])
+        self.assertIn("port 8 only", rule["text"])
+        self.assertEqual(rule["fix"], "Move it to port 8.")
+        self.assertNotIn("power.usbc_port", ids(r))
+
+    def test_only_usbc_on_port_8(self):
+        r = E.analyse(design(mod("usbc", [8]), mod("distance_sensor", [8])))
+        rule = [x for x in r["rules"] if x["id"] == "port.rule"][0]
+        self.assertEqual(rule["level"], "error")
+        self.assertIn("Port 8 is the USB-C port", rule["text"])
+        self.assertEqual(rule["fix"], "Move it to a free port other than 8 and 12.")
+
+    def test_only_a_button_on_port_12(self):
+        r = E.analyse(design(mod("usbc", [8]), mod("screen", [11, 12])))
+        rule = [x for x in r["rules"] if x["id"] == "port.rule"][0]
+        self.assertEqual(rule["level"], "error")
+        self.assertIn("Port 12 is the reset port", rule["text"])
+        self.assertEqual(rule["ports"], [11, 12])
+
+    def test_button_on_port_12_is_the_reset_button(self):
+        r = E.analyse(design(mod("usbc", [8]), mod("button", [12])))
+        self.assertNotIn("port.rule", ids(r))
+        note = [x for x in r["rules"] if x["id"] == "port.reset"][0]
+        self.assertEqual(note["level"], "note")
+        self.assertEqual(note["ports"], [12])
+        # the reset button is no firmware input: nothing for project.yaml,
+        # so the SDK (which reserves port 12) has nothing to refuse
+        self.assertNotIn("sdk.placement", ids(r))
+        self.assertEqual(r["verdict"]["level"], "ok")
+
+    def test_port_map_names_the_ruled_ports(self):
+        r = E.analyse(design(mod("usbc", [8]), mod("button", [1])))
+        roles = {p["port"]: p["role"] for p in r["ports"]}
+        self.assertEqual((roles[8], roles[12], roles[1]), ("USB-C", "Reset", ""))
 
     def test_robot_arm_needs_a_power_module(self):
         r = E.analyse(design(mod("usbc", [8]), mod("robot_arm", [3])))
