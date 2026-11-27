@@ -1306,6 +1306,7 @@ def main():
     _holders(res, ends, items)                          # R442
     res["geometry_seconds"] = round(time.time() - t_g, 3)
     _walls(res, ends, ws)
+    _printability(res, ends)                            # R1250
     _atech_port_check(doc, res)
     _firmware(res, ws)
     _wiring(res)                                        # R960
@@ -2137,6 +2138,42 @@ def _walls_cached(parts):
             "cached": len(parts) - len(todo)}
 
 
+#: R1250: the time the print check may take over all parts (seconds)
+PRINT_BUDGET_S = 6.0
+
+
+def _printability(res, ends):
+    """R1250: how each printed part lies on the bed (atech_print): the side
+    that goes down, its first layer, the faces that hang over air. One
+    PRINT line per part; a first layer that will not hold (a knife edge,
+    no flat side) is a WARNING. Never a problem: the numbers are measured,
+    the verdict is the person's. Rows go in res["printability"] for the
+    print papers."""
+    parts = [{"label": o.Label, "shape": o.Shape} for o in ends if _judged(o)]
+    if not parts:
+        return
+    try:
+        import atech_print
+        rows = atech_print.reports(parts, budget_s=PRINT_BUDGET_S)
+    except Exception as exc:                            # noqa: BLE001
+        res["warnings"].append("print check could not run: %s" % exc)
+        return
+    res["printability"] = rows
+    for r in rows:
+        for level, text in r.get("flags") or []:
+            if level == "warning":
+                res["warnings"].append("%s: %s" % (r["label"], text))
+
+
+def _print_part_lines(res):
+    """R1250: the PRINT line of each part, or []."""
+    try:
+        import atech_print
+        return [atech_print.line(r) for r in res.get("printability") or []]
+    except Exception:                                   # noqa: BLE001
+        return []
+
+
 def _walls(res, ends, ws=None):
     """R154: the thinnest wall the sampled probe measured; a WARNING below
     atech_geom.WALL_FLOOR_MM, never a failure (it is an estimate). R194:
@@ -2544,6 +2581,8 @@ def _say_summary(res):
         _say(line)
     line = _print_line(res)                             # R1120
     if line:
+        _say(line)
+    for line in _print_part_lines(res):                 # R1250
         _say(line)
     fw = res.get("firmware") or {}
     if fw:
