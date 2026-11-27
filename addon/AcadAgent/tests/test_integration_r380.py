@@ -236,7 +236,8 @@ class TestR381ContextMenu(Case):
                   "Atech_Section"):
             self.assertIn(c, root)
         sub = dict(wb.menus)[self.shell.EXPORT_MENU]
-        self.assertEqual(sub, ["Atech_Print", "Atech_ExportForPrint", "Atech_ExplodedView",
+        self.assertEqual(sub, ["Atech_Print", "Atech_ExportForPrint", "Atech_FitTest",
+                               "Atech_ExplodedView",
                                "Atech_BillOfMaterials", "Atech_GetItMade",
                                "Atech_PublishMakerWorld", "Atech_PostToAtech",
                                "Atech_Share", "Atech_ShareImage", "Atech_ReviewSheet",
@@ -278,7 +279,7 @@ class TestR381ContextMenu(Case):
         # R885 Edit part, R900 From / Publish to MakerWorld, R920 Print,
         # R940 Export, R970 Import a model / Examples, R1002 Electrical, R1004 Make it
         self.assertEqual(len(added), len(s.TOOL_COMMANDS) + len(s.EXPORT_COMMANDS))
-        self.assertEqual(len(added), 21)
+        self.assertEqual(len(added), 22)                # R1240: + Fit test
         s.uninstall()
         self.assertFalse(hasattr(wb, "ContextMenu"))
 

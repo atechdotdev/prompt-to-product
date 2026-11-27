@@ -4678,6 +4678,9 @@ EXPORT_COMMANDS = (
      "printer and open them in Bambu Studio, or export a file", "print"),
     ("Atech_ExportForPrint", "Export for print\u2026", "Save STL, 3MF or "
      "STEP files for a 3D printer", "export"),
+    # R1240
+    ("Atech_FitTest", "Fit test\u2026", "Print the fit test once and say what "
+     "fitted: every design after is drawn for your printer", "fittest"),
     ("Atech_ExplodedView", "Exploded view (E)", "Pull the parts apart to "
      "see how they fit and step through them, or put them back", "explode"),
     ("Atech_BillOfMaterials", "Bill of materials\u2026", "Printed parts and "
@@ -4781,6 +4784,9 @@ def run_command_action(key):
     if key == "post":
         from . import post
         return _keep_dialog(post.PostDialog(parent)).show()
+    if key == "fittest":                               # R1240
+        from . import fit_view
+        return _keep_dialog(fit_view.FitDialog(parent)).show()
     if key == "makeit":                                # R1004
         from . import product_view
         return product_view.open_make_it(_active_doc(), parent)
