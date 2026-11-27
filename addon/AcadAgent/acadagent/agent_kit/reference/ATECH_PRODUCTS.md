@@ -488,7 +488,8 @@ eye, rib = ap.cable(doc, "distance_sensor", 8, ap.module_placement(
 - **Stack:** 118.3 x 136.8 x 42.2. **Product:** hull 107 W x ~150 L,
   tracks 12 wide each side -> ~131 W x 150 L x 55 H.
 - **Human-design details:** 1. drive sprockets on the shafts
-  (`cad.spur_gear`, bore 3.3); 2. an idler at the front; 3. 4-5 road
+  (`cad.spur_gear`, then `cad.d_bore` with the shaft's own flat); 2. an
+  idler at the front; 3. 4-5 road
   wheels on stubs; 4. track link plates; 5. grousers on each link;
   6. return rollers; 7. a turret on a ring (fitted after); 8. a turret
   ring groove; 9. a gun barrel (`cad.pipe`); 10. a muzzle brake with slots;

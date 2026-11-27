@@ -69,12 +69,14 @@ modules that sit where they really go.
   (the Atech SDK's emulator) and **Flash to board**, with the
   [Atech SDK](https://atech.dev/docs) (`uv tool install atech`).
 - **Parts that fit, drawn for your printer.** A wheel pushes onto the DC
-  Motor's D-shaft with the bore that was printed and fitted, not a guessed
-  one. The agent's check says how each part will lie on the bed, what its
-  first layer is and what hangs over air, and what each shaft-in-bore
-  prints as. **Fit test** (Export and share) prints five pucks and a gauge
-  once; say which fitted and every design after uses your printer's own
-  numbers. Most other fit values are still assumptions, and say so.
+  Motor's D-shaft with the bore that was printed and fitted (in PETG and
+  PETG-CF), not a guessed one. The agent's check says how each part will
+  lie on the bed, what its first layer is and what hangs over air, and
+  what each shaft-in-bore prints as. **Fit test** (Export and share)
+  prints five pucks and a gauge once per printer and filament; say which
+  fitted, or that a printed fit was too tight or too loose, and every
+  design after uses your printer's own numbers for that filament. Most
+  other fit values are still assumptions, and say so.
 - **Get back to your projects anytime.** Click the Atech logo or press
   **Ctrl+0** for Home.
 - **Export** as STEP or STL for printing, or keep the `.FCStd`.

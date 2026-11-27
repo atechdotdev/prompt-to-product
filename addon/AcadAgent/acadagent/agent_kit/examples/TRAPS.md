@@ -352,30 +352,36 @@ R32. **Slow helpers on curved faces:** `cad.speaker_grille` on a curved insert
     took 17-25 s; cutting the holes yourself in ONE cut took the whole
     build from 60 s to 15 s (ball_launcher.py).
 
-## From parts that were printed (R1280) - each of these cost a print
+## From parts that were designed and printed (R1280)
 
 These come from Gustav's cad-workflow: wheels, cases and trays that were
-printed, did not fit or came loose, and were drawn again. ./check measures
-most of them now (its PRINT and FIT lines).
+printed in PETG and PETG-CF, did not fit or came loose, and were drawn
+again (R33 to R38, R40), and three rules of his workflow (R39, R41, R42).
+./check measures most of them now (its PRINT and FIT lines).
 
 R33. **A wheel or hub on a DC motor's shaft needs the D-bore, at the size
     that printed.** The shaft is a D (3.0 round, 2.5 across the flat). A
     bore drawn 3.1 had to be drilled open, 3.3 went on only while warm;
-    3.4 / 2.9 fits and has shipped. A round bore does not drive at all.
+    3.4 / 2.9 fits and has shipped (PETG and PETG-CF; no PLA print on
+    record). A round bore has no key: only friction turns the wheel (the
+    drilled first wheel was "snug but no key").
     `s = cad.motor_shaft(motor)`, then
     `cad.wheel(..., flat=s["flat"], axis=s["axis"], at=s["tip"] + s["axis"] * 1.3)`
     or `cad.d_bore(hub, mouth, s["axis"] * -1, flat=s["flat"])`
     (starters/starter_wheels.py). Give the shaft's own flat, or the bore
     and the shaft overlap in the model.
 R34. **A printed hole comes out about 0.25 mm under its drawn size.** A
-    3 mm pin in a hole drawn 3.0 is an interference, drawn 3.3 it still
-    does not turn. Name the fit and let the kit add the shrink:
-    `cad.shaft_hole(part, at, axis, 3.0, "running")` draws 3.5. ./check's
-    FIT lines say what each pin-in-hole pair prints as.
+    3 mm pin in a hole drawn 3.0 is an interference. Name the fit and let
+    the kit add the shrink: `cad.shaft_hole(part, at, axis, 3.0, "push")`
+    draws 3.4 (snug by hand, as the motor bore printed), `"press"` 3.3,
+    `"running"` 3.5 - the running size is assumed, no turning hole has
+    been printed yet. ./check's FIT lines say what each pin-in-hole pair
+    prints as.
 R35. **A rim that stands on the bed is chamfered on ONE side only.** A
-    lead-in on both sides left a first layer 0.3 mm wide: a knife edge,
-    and the print came loose. Keep the first layer two lines (0.8 mm) wide
-    or more; ./check warns below that ("its first layer is a line only").
+    0.6 mm lead-in on both sides of a 1.2 mm rim left a first layer of
+    slivers (25 mm2 in six pieces), and the prints let go of the bed.
+    Keep the first layer two lines (0.8 mm) wide or more; ./check warns
+    below that ("its first layer is a line only").
 R36. **Know which side goes down.** Export lays each part on its largest
     flat side, and ./check's PRINT line says which that is and what hangs
     over air. A lid drawn in place is turned over; a part with no flat
@@ -387,18 +393,22 @@ R37. **Nothing across the print direction inside a tall part.** Cross bars
     part.
 R38. **A thick solid part is slow: make it a shell with ribs.** A plate of
     eight solid wheels was 14 h 36 and 334 g; as cups with six ribs each
-    (and 0.24 mm layers) 4 h 13 and 135 g. Grooves and tread multiply the
-    perimeter and string: leave them off unless they do something.
-R39. **Engrave on the face that lies on the bed, 1 mm deep, in bold
-    letters.** Thin strokes left hairline gaps in the floor of the
-    letters. The wheels' names are 7 mm letters, 1 mm deep:
-    `cad.text(..., mode="deboss", depth=1.0)`.
+    at 0.24 mm layers 7 h 08 and 171 g; smaller and without tread, 4 h 13
+    and 135 g. Grooves and tread multiply the perimeter and string: leave
+    them off unless they do something.
+R39. **Lettering: on the face that lies on the bed, 1 mm deep, strokes
+    0.8 mm or wider.** The wheels' names are 7 mm letters, 1 mm deep:
+    `cad.text(..., mode="deboss", depth=1.0)`. Small or thin letters
+    leave walls thinner than one extrusion line between strokes, and
+    ./check fails those (the fit test's first labels did: it is marked
+    with dots now).
 R40. **A sleeve or pocket drawn at exactly the hardware's size does not go
     on.** A case sleeve drawn at the board socket's exact width did not
-    slide over it; 0.3 mm per side did (`cad.fit("slide")`). The numbers
-    are per printer and filament: the fit test (`cad.fit_coupon()`, and
-    Export and share > Fit test) finds this printer's, and the kit uses
-    them from then on.
+    slide over it. 0.3 mm per side is what is drawn now
+    (`cad.fit("slide")`); that size is assumed, its print is not on
+    record. The numbers are per printer and filament: the fit test
+    (`cad.fit_coupon()`, and Export and share > Fit test) finds this
+    printer's, and the kit uses them from then on.
 R41. **A dimension you have not measured is not a dimension.** When a size
     comes from memory or a guess (a bought part, a battery, a connector),
     say so in the reply as "MEASURE: <what>, assumed <value>" and keep it
@@ -413,5 +423,5 @@ R42. **A part that carries a load gets one hand number before it is
     `mech.pin_double_shear`, `mech.bearing` (a pin on a printed hole) and
     `mech.press_fit`. Forces in N, sizes in mm. A load ACROSS the layers
     takes `direction="z"`: that is where a print breaks. The material
-    numbers are data-sheet values, not measured: they find a part that is
-    ten times too weak, they do not prove one.
+    numbers are data-sheet values and design assumptions, not measured:
+    they find a part that is ten times too weak, they do not prove one.

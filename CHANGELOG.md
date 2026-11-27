@@ -11,63 +11,88 @@ release may change behaviour.
 
 Gustav's cad-workflow makes parts that fit because every print result goes
 back into a number. Its knowledge is now in the app. The plan, the
-decisions and the measurements are in `docs/CAD_WORKFLOW_MERGE.md`.
+decisions, the measurements and what a review of the work found are in
+`docs/CAD_WORKFLOW_MERGE.md`.
 
-- **A wheel on the DC Motor's shaft drives.** The motor's shaft is a D
-  (3.0 mm round, 2.5 across the flat). The app's own number for the bore
-  was 3.10 / 2.60, the size Gustav had to drill open, and no kit call cut
-  it: wheels got a round 3.3 mm bore, which does not drive. The bore is now
-  3.4 / 2.9, the size that printed and has shipped with kits.
-  `cad.motor_shaft(motor)` measures a seated motor's shaft (its tip, its
-  direction, the side its flat is on), `cad.d_bore` cuts the keyed bore and
-  `cad.wheel(..., flat=...)` puts it in the hub. The "Two-wheel base"
-  starter had the round bores; its wheels now push on with the D-bore.
+- **A wheel on the DC Motor's shaft is keyed to it.** The motor's shaft is
+  a D (3.0 mm round, 2.5 across the flat). The app's own number for the
+  bore was 3.10 / 2.60, the size Gustav had to drill open, and no kit call
+  cut it: wheels got a round 3.3 mm bore, which has no key, so only
+  friction turned them. The bore is now 3.4 / 2.9, the size that printed
+  and has shipped with kits (in PETG and PETG-CF; there is no PLA print
+  on record). `cad.motor_shaft(motor)` measures a seated motor's shaft
+  (its tip, its direction, the side its flat is on), `cad.d_bore` cuts the
+  keyed bore and `cad.wheel(..., flat=...)` puts it in the hub. In a part
+  thinner than the bore is deep, `cad.d_bore` stops 1 mm short of the far
+  side and says so. The "Two-wheel base" starter had the round bores; its
+  wheels now push on with the D-bore.
 - **Fit numbers say where they come from.** A value proven on a print has
   the tag P and a source (who, when, which printer and filament, where it
-  is written down). A printed hole comes out about 0.25 mm under its drawn
-  size: `cad.shaft_hole` draws a hole so that it prints with the fit you
-  name, and a hole a 3 mm shaft turns in is 3.5, not 3.3.
+  is written down). Only three numbers have it: the D-bore, its depth and
+  how much a printed hole shrinks (about 0.25 mm under its drawn size).
+  `cad.shaft_hole` draws a hole so that it prints with the fit you name.
+  On a 3 mm shaft `"press"` is 3.3 (it went on warm) and `"push"` 3.4 (snug
+  by hand), as the motor bores printed; `"running"` 3.5 and `"clearance"`
+  3.75 are assumed, and so is the 0.3 mm a sleeve is drawn wider than its
+  hardware.
 - **Fit test.** Export and share > Fit test makes five pucks with bores
   from 3.2 to 3.6 mm and a plate with three windows for a module (as
-  Gustav's own test print). Say which puck was snug on the motor shaft and
-  which window the module slid through, for which printer and filament:
-  every design after is drawn with those numbers. They are kept in
-  `~/Documents/Atech Products/fit_user.json`. Only fit values can change,
-  by at most 1 mm; board sizes, ports and seat tolerances cannot.
+  Gustav's own test print), each marked with dots: 4 dots is 3.4 mm, 3
+  dots is 0.3 mm a side. Say which puck was snug on the motor shaft and
+  which window the module slid through, for which printer and filament.
+  For any other printed fit, say whether it fitted, was too tight or too
+  loose, and by about how much. Every design after is drawn with those
+  numbers. They are kept per printer and filament in
+  `~/Documents/Atech Products/fit_user.json`, and a design uses the ones
+  for the filament Bambu Studio has selected: results from PLA are not
+  drawn into a PETG print. Only fit values can change, by at most 1 mm;
+  board sizes, ports and seat tolerances cannot.
 - **The agent's check looks at printing.** For each printed part: which
   side goes down (as Export lays it), the first layer's area, how many
   pieces it is in and how wide its lines are, and how much hangs over air.
   A first layer narrower than two extrusion lines, or a larger part with
   no flat side, is a warning. For each motor shaft and each pin in a hole:
   the clearance left once the hole has shrunk in printing, and the fit
-  that is. A round bore gripping a motor's D-shaft is a warning. None of
-  this fails a build.
+  that is. A round bore gripping a motor's D-shaft is a warning; a D-bore
+  whose flat is turned away from the shaft's flat is a note. A size the
+  design script marks `# MEASURE:` is listed, so the reply says it is
+  assumed. None of this fails a build.
 - **Print slices with every setting.** Bambu Studio's command line reads
   only the preset file it is given, not what that preset inherits, and not
   the printer's own start G-code, which is kept in separate files. Print
   passed it exactly those files. Each preset is now written out whole
-  before slicing, and the sliced file gets the printer's model id, which
-  the printer checks. Bambu Studio is also found on Linux; it was looked
-  for as a macOS app only. The print plan in the product pack says which
-  side of each part goes down, its first layer, and why supports are
-  needed.
+  before slicing, and the process names the build plate: without it the
+  command line slices for the Cool Plate, which PETG and PETG-CF do not
+  print on. The plate is the printer's own default, never one the printer
+  or the filament rules out, and the result says which plate to use. When
+  the printer's own G-code files are not found, the result says so and
+  asks you to slice again in Bambu Studio; before, nothing was said. The
+  sliced file also gets the printer's model id, as a precaution (Gustav's
+  notes do not confirm that a printer refuses a file without it). Bambu
+  Studio is also found on Linux; it was looked for as a macOS app only.
+  The print plan in the product pack says which side of each part goes
+  down, its first layer, and why supports are needed.
 - **Screw bosses take heat-set inserts.** `cad.screw_boss(kind="insert")`.
   The agent's instructions have named this option since R511, but it did
   not exist, so the first try raised an error.
 - **Strength by hand.** `atech_mech`: a cantilever, a strip on two
   supports, a snap hook's strain, a pin in shear, a press fit, each with a
-  safety factor. The material numbers are data-sheet values and say so.
-- The agent's TRAPS file has ten lessons from printed parts, and its fit
-  rules name the new calls.
+  safety factor. Stiffness and strength are data-sheet values; the
+  knock-down across layers, the yield fraction and the snap strain are
+  design assumptions. None is measured, and the module says so.
+- The agent's TRAPS file has seven lessons from printed parts and three
+  rules of Gustav's workflow, and its fit rules name the new calls.
 - **Found by the new check, not fixed here:** five examples put a part on
-  a motor's D-shaft with a round 3.3 mm bore, which does not drive: the toy
+  a motor's D-shaft with a round 3.3 mm bore, which has no key: the toy
   car (four wheels), the RC tank (two sprockets), the desk fan and the pet
   feeder (their rotors) and the photo turntable (its pinion). `./check`
   warns about each. The examples are left as they are for now.
 - **Not tried on a real printer or a real Bambu Studio.** The printed
   numbers are from Gustav's printers (Bambu H2S, H2D and X2D; PETG and
-  PETG-CF). The slicing changes follow his notes and are tested against a
-  fake support folder, because this machine has no Bambu Studio.
+  PETG-CF). The slicing changes follow his notes and his real H2S preset
+  files, and are tested against a fake support folder, because this
+  machine has no Bambu Studio. The app does not yet ask how a print came
+  out: the Fit test window is where a result is told to it.
 
 ### Port 8 is the USB-C port, port 12 the reset port
 

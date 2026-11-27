@@ -118,7 +118,7 @@ dragon STL.
 | R1200 | **This plan, and a look at what the repo can reproduce.** Run cad-workflow's `wheel.py` and `testfit.py` in a throwaway venv; note what only exists on Gustav's Mac. | Plan committed. The reference STLs exist, or the plan says why not. |
 | R1210 | **Printed fit numbers in `atech_fit.py`.** Tag `P` with a source per value. D-bore, round shaft hole, hole shrink, sleeve, module recess, lid lip, the fit bands (press … pocket). `render_tables()` shows the tag. User overrides (tag `U`) read from a JSON file. | Unit tests: every `P` value has a source; the override beats the table; the prompt tables carry the new values. |
 | R1220 | **Kit calls that apply them.** `cad.d_bore()` and `wheel(flat=…)` for the DC Motor shaft; `screw_boss(kind="tap" | "insert")`, which the prompt already tells the agent to use; a `shaft_hole` helper that adds the shrink. The API card and prompt name them. | FreeCAD tests: the D-bore section measures 3.4 / 2.9, 12 deep; the insert boss has the insert hole; old calls give the same solid as before. |
-| R1230 | **Fit coupon.** A kit function builds the five bore pucks (3.2 to 3.6, size engraved) and a sleeve gauge; a starter opens it. Compared with cad-workflow's `testfit.py` output. | FreeCAD test: five solids, each bore as labelled; passes `./check`. |
+| R1230 | **Fit coupon.** A kit function builds the five bore pucks (3.2 to 3.6, size marked) and a sleeve gauge; the Fit test window opens it. Compared with cad-workflow's `testfit.py` output. | FreeCAD test: five solids, each bore as labelled; passes `./check`. |
 | R1240 | **Print feedback.** `p2p_fitlog.py`: "it fit / too tight / too loose, by how much" becomes a user override per printer and material; the workspace and the prompt carry it; the Fit rows of `qa.json` feed it. A small dialog asks. | Unit tests for the maths and the file; an offscreen test of the dialog. |
 | R1250 | **Printability in `./check`.** Per printed part, in its print orientation: first-layer area, share of the footprint and loop count; area of downward faces steeper than 45 degrees; a knife-edge first layer. `PRINT` lines and WARNINGs only. | Unit tests on meshes of cad-workflow's own failures (a cup rim-down, a lid on its tip, a chamfered rim); a real `./check` run prints the lines. |
 | R1260 | **Fit class for shafts in bores.** `./check` finds a cylinder inside a hole of another part and reports the clearance and its class (press, transition, running, slide, clearance). NOTE lines only. | FreeCAD test with a 3.0 pin in 3.0, 3.3 and 3.6 holes. |
@@ -156,28 +156,56 @@ R1250, R1230-R1240, R1270, the rest.
 ## Later (noted, not done here)
 
 - **Five examples put a part on a motor's D-shaft with a round 3.3 mm bore**
-  (found by R1260's check; it does not drive): `toy_car` (Rim_RL, Rim_RR,
+  (found by R1260's check; it has no key, so only friction turns the
+  part): `toy_car` (Rim_RL, Rim_RR,
   Rim_FL, Rim_FR), `rc_tank` (Sprocket_L, Sprocket_R), `desk_fan` (Rotor),
   `pet_feeder` (Rotor), `photo_turntable` (Pinion). Each needs
   `cad.motor_shaft` and the D-bore, as `starters/starter_wheels.py` now has.
   The examples that use the `n20_wheel` hub in a socket (rover, balance bot)
   are not affected.
+- **The two projects the app ships with break the port rules** and do not
+  build: "Bedside lamp" has its USB-C module on port 2, "Weather station"
+  has a module on port 12 (`test_default_projects`, which is skipped unless
+  the built app's FreeCAD is named). They are the first projects a new user
+  sees, so they come before the examples.
 - The examples' port placements (52 of 64, from the port rules commit).
 - Turn the R1250 / R1260 lines into gates. Measured so far: the first-layer
-  warning fires on 5 of 873 parts in the examples, all parts with no flat
-  side (a ball, two grilles, a caster ball, a glow ring).
-- A test print of the fit coupon on our printers, then move values from `P`
-  (Gustav's prints) to confirmed. Until then they are his printers' numbers.
-- Run Print once against a real Bambu Studio: R1270 follows Gustav's notes
-  and was tested with a fake support folder only. The exact names of the
-  machine template files, and whether a process preset's `inherits` is
-  followed, could not be checked here.
+  warning fires on 5 of the 873 parts that were judged in the examples, all
+  parts with no flat side (a ball, two grilles, a caster ball, a glow ring).
+- A test print of the fit coupon on our printers, in PLA too: every `P`
+  value is from Gustav's printers in PETG and PETG-CF, and he has no PLA
+  record for the bore. PLA is the kit's default material.
+- A print that confirms the assumed sizes: the running hole (3.5 for a
+  3 mm shaft; no turning hole has been printed), the 0.3 mm sleeve
+  clearance (the redrawn sleeve's print is not on record), the lid lip
+  (0.20 / 0.15 agrees with cad-workflow's egg lid, 0.20 snug in PLA, and
+  box lid, 0.25, but neither is recorded as a confirmed fit).
+- Run Print once against a real Bambu Studio. What is known: the template
+  file names and the `include` list are confirmed against Gustav's real H2S
+  files (`test_gustavs_real_files_when_given`); the command line is assumed
+  not to follow `inherits` for machine, process or filament presets (his
+  answer of 27 Nov). What is not: one real slice with our files, where a
+  Linux install keeps its template files (the folders in
+  `LINUX_PROFILE_DIRS` are likely places, not checked), and whether a
+  printer refuses a file without a model id.
+- The build plate when the printer's file names no default and the
+  filament prints on every plate: nothing is set then (Bambu Studio's own
+  default, as before). If BambuStudio.conf records the plate the person
+  chose, read it.
+- The app does not ask how a print came out. `print.json` has an empty
+  `how_it_printed` that nothing reads, the by-hand test paper (`qa.json`)
+  does not feed the fit record, and the Fit test window opens from the menu
+  only. The window now takes "fitted / too tight / too loose, by about";
+  asking after a print is the missing step.
+- Check what was exported, not only what was drawn (Gustav's rule "run it
+  yourself": load the STL that goes to the printer and measure the bore in
+  it), and warn when the filament selected in Bambu Studio is not the
+  material the design was drawn for.
+- `./check`'s shaft check sees true cylinders only. A bore that is a
+  polygon or came through a STEP round trip as a spline gets no FIT line.
 - One live agent run of a wheel request, to see the agent pick up
   `cad.motor_shaft`. Not done: an agent run costs the user's tokens and the
   harness is built for hours-long runs.
-- `atech_fit`'s lid lip (0.20 / 0.15) agrees with cad-workflow's egg lid
-  (0.20 snug in PLA) and box lid (0.25) but neither is recorded as a
-  confirmed fit; left tagged A.
 
 ## Results (27 Nov 2026)
 
@@ -200,16 +228,18 @@ per step (two for R1240 and R1250).
   noticed.
 - **R1230 done.** `cad.fit_coupon`: the row is 86.00 x 14.00 x 10.00 mm and
   7.179 cm3 against Gustav's 7.167.
-- **R1240 done.** `p2p_fitlog`, `fit_view.FitDialog`, the copy into the chat
-  folder, the load in `./check`. End to end under freecadcmd: with "puck 35"
-  recorded, `cad.d_bore` cuts 3.50 x 3.00; without, 3.40 x 2.90.
+- **R1240 done, in part.** `p2p_fitlog`, `fit_view.FitDialog`, the copy into
+  the chat folder, the load in `./check`. End to end under freecadcmd: with
+  "puck 35" recorded, `cad.d_bore` cuts 3.50 x 3.00; without, 3.40 x 2.90.
+  Not done: the Fit rows of `qa.json` do not feed the record (the step's
+  own text says they would), and nothing asks after a print (see Later).
 - **R1250 done.** `atech_print`, PRINT lines. Measured on all 64 examples
   (894 parts, built with the port rules switched off for the measurement
   only): first run 24 warnings and 79 parts past the time budget; after
-  vectorising the slicing and making trim parts a note, 5 warnings and 21
-  parts past the budget. 418 parts (48 %) have overhangs that need supports
-  in Export's orientation: said in the line, never a warning. `./check`
-  takes the same 60 s median as before.
+  vectorising the slicing and making trim parts a note, 21 parts past the
+  budget and 873 judged, 5 of them with a warning. 418 of the 873 (48 %)
+  have overhangs that need supports in Export's orientation: said in the
+  line, never a warning. `./check` takes the same 60 s median as before.
 - **R1260 done.** `atech_fitcheck`, FIT lines, `cad.motor_shaft`. Found on
   the way: a D-bore whose flat does not face the shaft's flat overlaps the
   shaft in the model, so the wheel and the bore take the shaft's own flat,
@@ -265,3 +295,82 @@ the port rules, and the fake-CLI family.
 - No live agent run (see Later).
 - Nothing was printed, and Bambu Studio was not run.
 - The existing examples were not changed, as agreed.
+
+## The review (27 Nov 2026), and what it changed
+
+After the steps were committed, and with Gustav's files unpacked, twelve
+reviewers went through the branch: six looked for defects (slicing, the
+facts taken from Gustav's records, the hardware numbers, the kit calls, the
+checks, and what cad-workflow learnt that the app still does not do), six
+others tried to refute each finding. 40 findings stood, 22 were refuted.
+Three were of high or medium weight in what a person would meet:
+
+1. **A slice of PETG or PETG-CF would have failed.** The process written for
+   Bambu Studio's command line did not name the build plate, so it sliced
+   for the Cool Plate, which those filaments do not print on (Gustav's note
+   of 8 Nov; all 16 of his process files that printed set the plate). Fixed:
+   `print_plates.bed_type`.
+2. **The fit test did not pass the app's own check.** Its engraved digits
+   left 0.05 mm walls. Fixed: the pucks and the plate are marked with dots,
+   and a test runs `./check` on them.
+3. **One part could stall `./check`.** On a solid sewn from a mesh the print
+   check's time grew with the square of the face count. Fixed: one measure
+   per direction, a face limit, and the time budget is looked at inside a
+   part too.
+
+The other fixes, by where they are:
+
+| Where | What was wrong | Now |
+|---|---|---|
+| `atech_fit` fit classes | The bands called the drawn 3.1 bore (drilled open) a valid press fit and the proven 3.4 "running"; `shaft_hole(3.0, "press")` drew 3.1. | Four classes anchored on the motor-shaft prints: press 3.3, push 3.4, running 3.5 (assumed), clearance 3.75 (assumed). The bands touch, so every clearance has one word. |
+| `atech_fit` tags | `slide` 0.3, the 3.5 running hole and the motor face's bearing were tagged as printed. | Tagged assumed. `P` is left on the D-bore, its depth and the hole shrink, and the legend names PETG / PETG-CF. |
+| `atech_fit` user values | A D-bore that is not a D, a negative clearance and a broken `active` were accepted. | Refused; `load_user` never raises. |
+| `cad.d_bore` | The default 12 mm went through a thinner part without a word; on 3 mm it blamed `at` and `axis`. | Stops 1 mm short of the far side and says so; under 5 mm it says why and what to do. |
+| `cad.wheel(flat=)` | On a small wheel the error said "use hub_d <= 7.16" when the keyed hub needs 7.4, and the size it led to was refused for its spoke windows. | Both messages name the smallest wheel that builds (25 mm with windows, 19 mm with bar spokes). |
+| `cad.fit_coupon` | Module and shaft sizes were typed. | Read from the measured values. |
+| `./check` FIT lines | A D-bore turned away from the shaft's flat was "the push fit that printed". | A note with the angle and the call that fixes it. |
+| `./check` PRINT lines | A bottom tilted under a degree was "already down"; Export does not agree. | Export's tolerance. |
+| `./check` | A guessed size was a sentence in TRAPS only. | `# MEASURE:` comments in model.py are listed in a MEASURE line. |
+| Fit record | "Too tight" on the preload made it tighter. A printer name with a bar split the profile. A design script could plant its own record. Results from PLA were used for a PETG-CF print. A rebuild without a turn used the old copy. | Fixed, each with a test: the record is always written (empty when there is none), a build takes the profile of the filament Bambu Studio has selected, and the panel refreshes the copy before every final build. |
+| Fit test window | "Forget" made another printer's results the ones in use. "Too tight / too loose" had no way in. | Forget leaves none in use; the window has the verdict row. |
+| Slicing | Missing template files, the fall-back to preset files and an empty model id were silent. Two AppImages: the older was taken. "Show files" ran `open` on Linux. | Said in the result and in `print.json`; the newer file; the system's opener. |
+| TRAPS, CHANGELOG, README | "Each of these cost a print", "does not drive", "0.3 mm per side did", a first layer "0.3 mm wide", and the wheel plate's times were more than Gustav's records say. | Reworded to what is on record, each number with its step. |
+| `atech_mech` | Its snap strain (2 % / 4 %) disagreed with the fit table's (1.5 % / 3 %). | One value, the fit table's. |
+| Reference texts | Still pointed at round 3.3 bores on motor shafts. | Point at `cad.d_bore`. |
+
+Left open, on purpose (all under Later): asking after a print and reading
+`qa.json`; bores that are not true cylinders; a real print and a real Bambu
+Studio run; the examples.
+
+What the review confirmed as right: the module meshes in this repository
+are newer than the set Gustav sent (his are this repository's import of
+4 Oct), so they were not swapped; `cad.motor_shaft` gives the shaft's tip,
+axis and flat correctly in 18 placements; the board is 7.00 thick; the
+USB-C module's receptacle is at the right end; nothing in the branch
+changes a port rule.
+
+### The test suite after the review's fixes
+
+The same run as before (every module, one process each), this time with
+`ATECH_FREECADCMD` naming the built app's `freecadcmd`, so that tests which
+are skipped in a worktree run:
+
+| | modules | tests | failing tests |
+|---|---|---|---|
+| before the fixes | 127 | 2556 | 71 |
+| after | 127 | 2574 | 72 |
+
+`test_cadwf_r1295` (9 tests, written during that run) is not in the count;
+it passes. No failure comes from the fixes:
+
+- Five tests that failed before pass now (`test_port_rules`,
+  `test_agent_integration_r500`): they needed the built app's FreeCAD.
+- Six tests fail that did not before. All six were skipped before, and they
+  fail in the same way on the untouched repository when it is run with the
+  same setting:
+  - `test_default_projects` (4): the two projects the app ships with break
+    the port rules (see Later).
+  - `test_design_first_r600` (1): a real prompt is 40 000 characters against
+    that test's 32 000. Its sibling test fails for the same reason on both
+    sides.
+  - `test_build_ws` (1): the headless suite, which contains the two above.
