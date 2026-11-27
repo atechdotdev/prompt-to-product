@@ -60,7 +60,10 @@ def support():
         "type": "machine", "machine_start_gcode": START})
     put("machine", MACHINE + " template machine_end_gcode", {
         "type": "machine", "machine_end_gcode": "; H2S end\n"})
+    # as the real file: the plate it ships with, and the one it does not take
     put("machine", "Bambu Lab H2S", {"type": "machine_model", "model_id": "O1S",
+                                     "default_bed_type": "Textured PEI Plate",
+                                     "not_support_bed_type": "Cool Plate",
                                      "nozzle_diameter": "0.4;0.6;0.8"})
     put("process", "fdm_process_common", {"type": "process", "layer_height": "0.2",
                                           "wall_loops": "2", "enable_support": "0"})
@@ -68,7 +71,8 @@ def support():
                              "from": "system", "setting_id": "GP158"})
     put("filament", "fdm_filament_petg", {
         "type": "filament", "filament_density": ["1.27"], "filament_flow_ratio": ["0.95"],
-        "textured_plate_temp": ["70"], "nozzle_temperature": ["255"]})
+        "textured_plate_temp": ["70"], "hot_plate_temp": ["70"], "cool_plate_temp": ["0"],
+        "nozzle_temperature": ["255"]})
     put("filament", FILAMENT, {"type": "filament", "inherits": "fdm_filament_petg",
                                "from": "system", "setting_id": "GFSG02_11"})
     with open(os.path.join(d, "BambuStudio.conf"), "w") as fh:
@@ -154,7 +158,8 @@ class WholePresets(unittest.TestCase):
         prof = pp.bambu_profile(self.d)
         with tempfile.TemporaryDirectory() as out:
             files = pp.write_flat_presets(prof, out, supports=True)
-            self.assertEqual(sorted(files), ["filament_file", "machine_file", "process_file"])
+            self.assertEqual(sorted(k for k in files if k.endswith("_file")),
+                             ["filament_file", "machine_file", "process_file"])
             with open(files["process_file"]) as fh:
                 proc = json.load(fh)
         self.assertEqual(proc["layer_height"], "0.2")              # inherited, now present
@@ -172,11 +177,192 @@ class WholePresets(unittest.TestCase):
         self.assertIsNone(pp.write_flat_presets({"machine": MACHINE}, "/nowhere"))
 
 
+class BedType(unittest.TestCase):
+    """R1295 review (high): the process written for the command line had
+    no "curr_bed_type". Gustav's note of 2026-11-08: the command line then
+    slices for the Cool Plate, and PETG and PETG-CF (bed temperature 0 on
+    that plate) fail with "Filaments are not compatible with the plate
+    type". All 16 of his process files that printed set "Textured PEI
+    Plate"."""
+
+    def setUp(self):
+        self.d = support()
+        self.addCleanup(shutil.rmtree, self.d, True)
+
+    def _model(self, **change):
+        p = os.path.join(self.d, "system", "BBL", "machine", "Bambu Lab H2S.json")
+        with open(p) as fh:
+            d = json.load(fh)
+        for k, v in change.items():
+            if v is None:
+                d.pop(k, None)
+            else:
+                d[k] = v
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+
+    def _plate(self, filament=None):
+        m = pp.flat_preset(self.d, "machine", MACHINE)
+        f = pp.flat_preset(self.d, "filament", FILAMENT)
+        f.update(filament or {})
+        return pp.bed_type(self.d, m, f)
+
+    def test_the_process_names_the_printers_plate(self):
+        prof = pp.bambu_profile(self.d)
+        for supports in (False, True):
+            with tempfile.TemporaryDirectory() as out:
+                files = pp.write_flat_presets(prof, out, supports=supports)
+                with open(files["process_file"]) as fh:
+                    proc = json.load(fh)
+            self.assertEqual(proc["curr_bed_type"], "Textured PEI Plate", supports)
+            self.assertEqual(files["bed_type"], "Textured PEI Plate")
+            self.assertNotEqual(proc["curr_bed_type"], "Cool Plate")
+
+    def test_never_a_plate_the_printer_does_not_take(self):
+        self._model(default_bed_type="Cool Plate")          # a contradiction in the file
+        self.assertEqual(self._plate(), "Textured PEI Plate")
+        self._model(default_bed_type=None, not_support_bed_type=["Cool Plate",
+                                                                 "Textured PEI Plate"])
+        self.assertEqual(self._plate(), "High Temp Plate")
+        self._model(not_support_bed_type="Cool Plate;Textured PEI Plate")   # a ";" list
+        self.assertEqual(self._plate(), "High Temp Plate")
+
+    def test_never_a_plate_the_filament_has_no_temperature_for(self):
+        # the printer says nothing: PETG (cool plate 0) still gets a plate it prints on
+        self._model(default_bed_type=None, not_support_bed_type=None)
+        self.assertEqual(self._plate(), "Textured PEI Plate")
+        self.assertEqual(self._plate({"textured_plate_temp": ["0"]}), "High Temp Plate")
+        # the printer's default, but this filament does not print on it
+        self._model(default_bed_type="Textured PEI Plate")
+        self.assertEqual(self._plate({"textured_plate_temp": ["0"]}), "High Temp Plate")
+
+    def test_nothing_known_changes_nothing(self):
+        # no default in the printer's file and a filament that prints on the
+        # cool plate: Bambu Studio's own default, as before
+        self._model(default_bed_type=None, not_support_bed_type=None)
+        self.assertEqual(self._plate({"cool_plate_temp": ["35"]}), "")
+        prof = pp.bambu_profile(self.d)
+        p = os.path.join(self.d, "system", "BBL", "filament", "fdm_filament_petg.json")
+        with open(p) as fh:
+            d = json.load(fh)
+        d["cool_plate_temp"] = ["35"]
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(prof, out)
+            with open(files["process_file"]) as fh:
+                self.assertNotIn("curr_bed_type", json.load(fh))
+        self.assertEqual(files["bed_type"], "")
+        # no machine_model file at all
+        os.unlink(os.path.join(self.d, "system", "BBL", "machine", "Bambu Lab H2S.json"))
+        self.assertEqual(self._plate({"cool_plate_temp": ["35"]}), "")
+        self.assertEqual(self._plate({"cool_plate_temp": ["0"]}), "Textured PEI Plate")
+
+
+class MissingGcode(unittest.TestCase):
+    """R1295 review: when the printer's template files were not found the
+    slice silently carried the generic start G-code - "the entire
+    choose-filament step is gone at the printer" - and was reported as
+    made from whole presets."""
+
+    def setUp(self):
+        self.d = support()
+        self.addCleanup(shutil.rmtree, self.d, True)
+        self.mdir = os.path.join(self.d, "system", "BBL", "machine")
+
+    def _include(self, names):
+        p = os.path.join(self.mdir, MACHINE + ".json")
+        with open(p) as fh:
+            d = json.load(fh)
+        d["include"] = names
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+
+    def test_everything_found_is_not_a_caution(self):
+        self._include([MACHINE + " template machine_start_gcode",
+                       MACHINE + " template machine_end_gcode"])
+        missing = []
+        pp.machine_templates(self.d, [MACHINE], missing=missing)
+        self.assertEqual(missing, [])
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(pp.bambu_profile(self.d), out)
+        self.assertEqual(files["missing_templates"], [])
+
+    def test_an_included_template_that_is_nowhere_is_named(self):
+        self._include([MACHINE + " template machine_start_gcode",
+                       MACHINE + " template change_filament_gcode",
+                       MACHINE + " template layer_change_gcode"])
+        missing = []
+        got = pp.machine_templates(self.d, [MACHINE], dirs=[self.mdir], missing=missing)
+        self.assertEqual(got["machine_start_gcode"], START)
+        self.assertEqual(missing, [MACHINE + " template change_filament_gcode",
+                                   MACHINE + " template layer_change_gcode"])
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(pp.bambu_profile(self.d), out)
+        self.assertEqual(len(files["missing_templates"]), 2)
+        res = {"ok": True, "whole_presets": True, "bed_type": "Textured PEI Plate",
+               "missing_templates": files["missing_templates"], "model_id": "O1S"}
+        text = " ".join(pp.slice_cautions(res))
+        self.assertIn("start and filament-change G-code was not found", text)
+        self.assertIn("change_filament_gcode", text)
+        self.assertIn("Slice it again in Bambu Studio", text)
+
+    def test_no_start_gcode_at_all_is_named(self):
+        for f in os.listdir(self.mdir):
+            if " template " in f or f == "fdm_machine_common.json":
+                os.unlink(os.path.join(self.mdir, f))
+        p = os.path.join(self.mdir, "fdm_bbl_3dp_002_common.json")
+        with open(p) as fh:
+            d = json.load(fh)
+        d.pop("inherits")
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(pp.bambu_profile(self.d), out)
+        self.assertEqual(files["missing_templates"], ["machine_start_gcode"])
+
+    def test_what_the_person_is_told(self):
+        ok = {"ok": True, "whole_presets": True, "bed_type": "Textured PEI Plate",
+              "missing_templates": [], "model_id": "O1S"}
+        self.assertEqual(pp.slice_cautions(ok), ["Sliced for the Textured PEI Plate: use "
+                                                 "that plate."])
+        self.assertEqual(pp.slice_cautions(dict(ok, bed_type="")), [])
+        text = " ".join(pp.slice_cautions(dict(ok, whole_presets=False)))
+        self.assertIn("could not be read in full", text)
+        self.assertIn("Slice it again in Bambu Studio", text)
+        # the file still has an empty model id (no id known for this printer)
+        text = " ".join(pp.slice_cautions(dict(ok, model_id="")))
+        self.assertIn("does not name the printer model", text)
+        self.assertNotIn("does not name", " ".join(pp.slice_cautions(dict(ok, model_id=None))))
+        self.assertEqual(pp.slice_cautions({"ok": False, "missing_templates": ["x"]}), [])
+
+    def test_linux_profile_folders_are_searched(self):
+        root = tempfile.mkdtemp(prefix="atech-flatpak-")
+        self.addCleanup(shutil.rmtree, root, True)
+        mdir = os.path.join(root, "profiles", "BBL", "machine")
+        os.makedirs(mdir)
+        dirs = pp.machine_dirs(self.d, roots=(), linux=(os.path.join(root, "profiles"),
+                                                        "/no/such/place"))
+        self.assertEqual(dirs, [self.mdir, mdir])
+        self.assertTrue(any("flatpak" in d for d in pp.LINUX_PROFILE_DIRS))
+        self.assertTrue(any(d.startswith("/usr/share/") for d in pp.LINUX_PROFILE_DIRS))
+
+
 class ModelId(unittest.TestCase):
 
     def setUp(self):
         self.d = support()
         self.addCleanup(shutil.rmtree, self.d, True)
+
+    def test_what_a_sliced_project_carries(self):
+        with tempfile.TemporaryDirectory() as out:
+            self.assertEqual(pp.project_model_id(project(os.path.join(out, "a.3mf"))), "")
+            self.assertEqual(pp.project_model_id(project(os.path.join(out, "b.3mf"), "O1S")),
+                             "O1S")
+            self.assertIsNone(pp.project_model_id(os.path.join(out, "none.3mf")))
+            with zipfile.ZipFile(os.path.join(out, "c.3mf"), "w") as z:
+                z.writestr("Metadata/slice_info.config", "<config/>")
+            self.assertIsNone(pp.project_model_id(os.path.join(out, "c.3mf")))
 
     def test_profile_knows_the_printers_model_id(self):
         prof = pp.bambu_profile(self.d)
@@ -264,6 +450,23 @@ class Slice(unittest.TestCase):
             self.assertIn('value="O1S"', z.read("Metadata/slice_info.config").decode())
         self.assertFalse(res["supports"])
         self.assertEqual(res["plates"][0]["metres"], 2.5)
+        # R1295: the plate goes in the process, and what the slice was given
+        # is in the result, the sentence and print.json
+        with open(settings[1]) as fh:
+            self.assertEqual(json.load(fh)["curr_bed_type"], "Textured PEI Plate")
+        self.assertEqual(res["bed_type"], "Textured PEI Plate")
+        self.assertEqual(res["missing_templates"], [])
+        self.assertEqual(res["model_id"], "O1S")
+        self.assertEqual(res["cautions"], ["Sliced for the Textured PEI Plate: use that plate."])
+        res.update(seconds=600, grams=7.5, profile=prof)
+        self.assertTrue(pp.summary(res).endswith("Sliced for the Textured PEI Plate: use "
+                                                 "that plate."), pp.summary(res))
+        with open(pp.print_log(self._exported(), prof, res)) as fh:
+            log = json.load(fh)
+        self.assertEqual((log["whole_presets"], log["model_id_set"], log["bed_type"],
+                          log["missing_templates"]),
+                         (True, True, "Textured PEI Plate", []))
+        self.assertEqual(log["cautions"], res["cautions"])
 
     def test_supports_go_in_the_whole_process(self):
         prof = pp.bambu_profile(self.d)
@@ -286,6 +489,28 @@ class Slice(unittest.TestCase):
         self.assertFalse(res["whole_presets"])
         settings = seen[0][seen[0].index("--load-settings") + 1].split(";")
         self.assertEqual(settings[0], prof["machine_file"])
+        # R1295: and that is said, not silent
+        self.assertIn("could not be read in full", " ".join(res["cautions"]))
+        res.update(seconds=600, grams=7.5, profile=prof)
+        self.assertIn("Slice it again in Bambu Studio", pp.summary(res))
+        with open(pp.print_log(self._exported(), prof, res)) as fh:
+            self.assertFalse(json.load(fh)["whole_presets"])
+
+    def test_a_failed_slice_has_no_cautions_and_logs(self):
+        prof = pp.bambu_profile(self.d)
+
+        def run(cmd, out_dir, log_path):
+            with open(os.path.join(out_dir, "result.json"), "w") as fh:
+                json.dump({"return_code": -51, "error_string": "Filaments are not compatible "
+                           "with the plate type"}, fh)
+        res = pp.slice_plates(self._exported(), prof, "/Applications/BambuStudio.app",
+                              runner=run)
+        self.assertFalse(res["ok"])
+        self.assertEqual(res["cautions"], [])
+        with open(pp.print_log(self._exported(), prof, res)) as fh:
+            log = json.load(fh)
+        self.assertFalse(log["ok"])
+        self.assertEqual(log["bed_type"], "Textured PEI Plate")
 
 
 class Linux(unittest.TestCase):
@@ -319,6 +544,37 @@ class Linux(unittest.TestCase):
             seen = []
             pp.open_project("/tmp/car.3mf", app=app, runner=seen.append)
             self.assertEqual(seen, [[app, "/tmp/car.3mf"]])
+
+    def test_two_appimages_the_newer_one(self):
+        # R1295 review: the alphabetically first was taken - the older version
+        with tempfile.TemporaryDirectory() as d:
+            old = os.path.join(d, "Bambu_Studio_linux-v02.02.00.85.AppImage")
+            new = os.path.join(d, "Bambu_Studio_linux-v02.08.02.61.AppImage")
+            for p, when in ((old, 1_700_000_000), (new, 1_780_000_000)):
+                with open(p, "w") as fh:
+                    fh.write("x")
+                os.chmod(p, os.stat(p).st_mode | stat.S_IXUSR)
+                os.utime(p, (when, when))
+            self.assertEqual(pp.linux_studio(which=lambda n: None, dirs=(d,)), new)
+            os.utime(old, (1_790_000_000, 1_790_000_000))
+            self.assertEqual(pp.linux_studio(which=lambda n: None, dirs=(d,)), old)
+
+    def test_no_app_on_linux_uses_the_systems_opener(self):
+        # R1295 review: `open -a` is a macOS command
+        seen = []
+        real, plat = pp.bambu_studio, sys.platform
+        pp.bambu_studio = lambda *a, **k: None
+        try:
+            sys.platform = "linux"
+            pp.open_project("/tmp/car.3mf", runner=seen.append)
+            sys.platform = "darwin"
+            pp.open_project("/tmp/car.3mf", runner=seen.append)
+        finally:
+            pp.bambu_studio, sys.platform = real, plat
+        self.assertEqual(seen, [["xdg-open", "/tmp/car.3mf"],
+                                ["open", "-a", "BambuStudio", "/tmp/car.3mf"]])
+        with open(pp.__file__, encoding="utf-8") as fh:
+            self.assertNotIn('Popen(["open"', fh.read())
 
     def test_a_mac_bundle_is_as_before(self):
         self.assertEqual(pp.bambu_cli("/Applications/BambuStudio.app"),
@@ -389,7 +645,7 @@ class Include(unittest.TestCase):
         res = os.path.join(app, "BambuStudio.app", "Contents", "Resources", "profiles", "BBL",
                            "machine")
         self._put(res, MACHINE + " template machine_start_gcode", {"machine_start_gcode": START})
-        dirs = pp.machine_dirs(self.d, roots=(app,))
+        dirs = pp.machine_dirs(self.d, roots=(app,), linux=())
         self.assertEqual(dirs, [self.mdir, res])
         got = pp.machine_templates(self.d, [MACHINE], dirs=dirs)
         self.assertEqual(got, {"machine_start_gcode": START})

@@ -108,6 +108,14 @@ class Record(_Home):
         self.assertEqual(note, "it fitted")
         with self.assertRaises(ValueError):
             fl.verdict(data, "slide", "wobbly")
+        # R1295 review: a preload is an interference - "too tight" used to
+        # make the hold-down rib press HARDER
+        base = atech_fit.table_value("preload")
+        self.assertEqual(fl.verdict(data, "preload", "tight", 0.05), round(base - 0.05, 2))
+        self.assertEqual(fl.verdict(data, "preload", "loose", 0.1), round(base + 0.05, 2))
+        # and nothing goes below zero
+        with self.assertRaises(ValueError):
+            fl.verdict(data, "preload", "tight", 0.5)
 
     def test_hardware_ports_and_wild_values_are_refused(self):
         data = fl.load(self.home)
@@ -185,27 +193,153 @@ class File(_Home):
 
     def test_copy_into_a_chat_folder(self):
         with tempfile.TemporaryDirectory() as ws:
-            self.assertIsNone(fl.to_workspace(ws, self.home))       # nothing to copy
+            dst = os.path.join(ws, "fit_user.json")
+            # R1295 review: with no results the file is still written
+            # (empty, read-only). The sandbox protects only files that
+            # exist, so a missing one could be planted by a design script.
+            self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
+            with open(dst) as fh:
+                self.assertEqual(json.load(fh), fl.empty())
+            self.assertFalse(os.stat(dst).st_mode & stat.S_IWUSR)   # read-only
+            self.assertIsNone(fl.to_workspace(ws, self.home))       # unchanged
             data = fl.load(self.home)
             fl.use_profile(data, "X1C", "PLA")
             fl.gauge_result(data, "4")
             fl.save(data, self.home)
             self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
-            dst = os.path.join(ws, "fit_user.json")
-            self.assertFalse(os.stat(dst).st_mode & stat.S_IWUSR)   # read-only
+            self.assertFalse(os.stat(dst).st_mode & stat.S_IWUSR)
             self.assertIsNone(fl.to_workspace(ws, self.home))       # unchanged
             fl.gauge_result(data, "2")
             fl.save(data, self.home)
             self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
             with open(dst) as fh:
                 self.assertEqual(json.load(fh), data)
+            # a planted copy is put right
+            os.chmod(dst, 0o644)
+            with open(dst, "w") as fh:
+                json.dump({"active": "x", "profiles": {"x": {"values": {"slide": 1.2}}}}, fh)
+            self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
+            with open(dst) as fh:
+                self.assertEqual(json.load(fh), data)
             os.unlink(fl.path(self.home))
-            fl.to_workspace(ws, self.home)                          # stale copy removed
-            self.assertFalse(os.path.exists(dst))
+            fl.to_workspace(ws, self.home)                          # results gone: empty again
+            with open(dst) as fh:
+                self.assertEqual(json.load(fh), fl.empty())
+            self.assertEqual(atech_fit.load_user(dst), [])
+            atech_fit.reset_user()
+
+    def test_the_filament_that_is_loaded_chooses_the_results(self):
+        """R1295 review: results from PLA were applied to a PETG-CF print
+        (whatever was saved last counted). Gustav keeps a set of sizes per
+        material."""
+        data = fl.load(self.home)
+        fl.use_profile(data, "X1C", "PLA")
+        fl.gauge_result(data, "4")
+        fl.use_profile(data, "H2S", "PETG-CF")
+        fl.gauge_result(data, "2")
+        fl.save(data, self.home)                    # saved last: H2S | PETG-CF
+        self.assertEqual(fl.pick(data), "H2S | PETG-CF")            # nothing known
+        self.assertEqual(fl.pick(data, "X1C", "PLA"), "X1C | PLA")
+        self.assertEqual(fl.pick(data, "Another", "pla"), "X1C | PLA")   # the only PLA one
+        self.assertEqual(fl.pick(data, "H2S", "PETG-CF"), "H2S | PETG-CF")
+        self.assertIsNone(fl.pick(data, "H2S", "PETG"))             # PETG is not PETG-CF
+        self.assertIsNone(fl.pick(data, "H2S", "ASA"))
+        # two PLA profiles: this printer's, else the one saved last, else none
+        fl.use_profile(data, "A1", "PLA")
+        fl.gauge_result(data, "3")
+        self.assertEqual(fl.pick(data, "X1C", "PLA"), "X1C | PLA")
+        self.assertEqual(fl.pick(data, "P1S", "PLA"), "A1 | PLA")   # active
+        fl.use_profile(data, "H2S", "PETG-CF")
+        self.assertIsNone(fl.pick(data, "P1S", "PLA"))              # cannot tell which
+        fl.save(data, self.home)
+        eff = fl.effective(self.home, "H2S", "ASA")
+        self.assertIsNone(eff["active"])
+        self.assertIn("none of your print results is for ASA", eff["unused"])
+        self.assertEqual(atech_fit.apply_user(eff), ([], []))
+        eff = fl.effective(self.home, "X1C", "PLA")
+        self.assertEqual(eff["active"], "X1C | PLA")
+        self.assertNotIn("unused", eff)
+        self.assertEqual(atech_fit.apply_user(eff)[0], ["slide"])
+        self.assertEqual(atech_fit.value("slide"), 0.4)
+        atech_fit.reset_user()
+        with tempfile.TemporaryDirectory() as ws:
+            fl.to_workspace(ws, self.home, "H2S", "ASA")
+            self.assertEqual(atech_fit.load_user(os.path.join(ws, "fit_user.json")), [])
+            fl.to_workspace(ws, self.home, "H2S", "PETG-CF")
+            self.assertEqual(atech_fit.load_user(os.path.join(ws, "fit_user.json")), ["slide"])
+            self.assertEqual(atech_fit.value("slide"), 0.2)
+        atech_fit.reset_user()
+
+    def test_material_from_a_preset_name(self):
+        self.assertEqual(fl.material_of("Bambu PETG-CF @BBL H2S"), "PETG-CF")
+        self.assertEqual(fl.material_of("Bambu PLA Basic @BBL X1C"), "PLA")
+        self.assertEqual(fl.material_of(None), "")
+
+    def test_a_bar_in_a_name_does_not_split_the_profile(self):
+        """R1295 review: a printer called "X1C | office" was read back as
+        printer "X1C" and filament "office | PLA"."""
+        data = fl.load(self.home)
+        name = fl.use_profile(data, "X1C | office", "PLA")
+        self.assertEqual(name, "X1C / office | PLA")
+        prof = data["profiles"][name]
+        self.assertEqual((prof["printer"], prof["material"]), ("X1C / office", "PLA"))
+        self.assertEqual(fl.pick(data, "X1C | office", "PLA"), name)
 
 
 class Studio(_Home):
     """build.py: the file reaches the chat folder and the prompt."""
+
+    #: what Bambu Studio is said to have selected in a test (the machine
+    #: the tests run on may have its own)
+    loaded = ("", "")
+
+    def setUp(self):
+        super().setUp()
+        from acadagent import build
+        self._loaded = build.loaded_filament
+        build.loaded_filament = lambda: self.loaded
+
+    def tearDown(self):
+        from acadagent import build
+        build.loaded_filament = self._loaded
+        super().tearDown()
+
+    def test_the_loaded_filament_chooses_the_results(self):
+        """R1295: PLA results are not drawn into a PETG print, and ./check's
+        copy says why."""
+        from acadagent import build
+        self._record()                              # X1C | PLA
+        self.loaded = ("Bambu Lab H2S", "PETG")
+        self.assertIn("slide 0.3 (A)", build.atech_fit_tables())
+        with tempfile.TemporaryDirectory() as ws:
+            build.fit_to_workspace(ws)
+            with open(os.path.join(ws, "fit_user.json")) as fh:
+                got = json.load(fh)
+            self.assertIsNone(got["active"])
+            self.assertIn("PETG", got["unused"])
+        self.loaded = ("Bambu Lab X1 Carbon", "PLA")
+        self.assertIn("slide 0.4 (U)", build.atech_fit_tables())
+
+    def test_a_rebuild_without_a_turn_gets_the_new_results(self):
+        """R1295 review: Dimensions and "go back to this build" rebuilt
+        with the chat folder's old copy. The panel refreshes it before
+        every final build."""
+        from acadagent import build
+        self._record()
+        with tempfile.TemporaryDirectory() as ws:
+            build.fit_to_workspace(ws)
+            data = fl.load()
+            fl.gauge_result(data, "2")              # a new result, no agent turn
+            fl.save(data)
+            self.assertEqual(build.fit_to_workspace(ws), "fit_user.json")
+            self.assertEqual(atech_fit.load_user(os.path.join(ws, "fit_user.json")),
+                             ["bearing_d3", "dbore_d3", "hole_shrink", "slide"])
+            self.assertEqual(atech_fit.value("slide"), 0.2)
+        with open(os.path.join(ADDON, "acadagent", "panel.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        run = src[src.index("    def _run_build("):]
+        run = run[:run.index("\n    def ", 10)]
+        self.assertIn("build.fit_to_workspace(state.ws)", run)
 
     def _record(self):
         os.environ["ATECH_FIT_USER"] = os.path.join(self.home, "fit_user.json")
@@ -235,7 +369,7 @@ class Studio(_Home):
         self.assertIn("holes print 0.35 mm small", " ".join(section.split()))
         # and without the file, the table's again
         os.unlink(os.environ["ATECH_FIT_USER"])
-        self.assertIn("slide 0.3 (P/A)", build.atech_fit_tables())
+        self.assertIn("slide 0.3 (A)", build.atech_fit_tables())
 
 
 MODEL = textwrap.dedent('''

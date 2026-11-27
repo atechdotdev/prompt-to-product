@@ -5,12 +5,18 @@ Export and share -> Fit test...:
     1. "Make the fit test" opens a new document with the coupon
        (cad.fit_coupon: five pucks with D-bores 3.2 to 3.6 for the DC
        Motor's shaft, and a plate with three windows a module passes
-       through). Print it as any design.
+       through; each is marked with dots, one per tenth of a millimetre).
+       Print it as any design.
     2. Say which puck was snug on the shaft and which window the module
        slid through, for which printer and filament.
-    3. Save. The numbers go to ~/Documents/Atech Products/fit_user.json
+    3. Or, for any printed fit: what it was, whether it fitted, was too
+       tight or too loose, and by about how much (p2p_fitlog.verdict).
+    4. Save. The numbers go to ~/Documents/Atech Products/fit_user.json
        (p2p_fitlog) and every design after uses them: the agent's fit
-       tables, cad.fit(), cad.d_bore() and cad.wheel(flat=True).
+       tables, cad.fit(), cad.d_bore() and cad.wheel(flat=...).
+
+A build uses the results for the filament Bambu Studio has selected, when
+it is set up; otherwise the printer and filament saved last here.
 
 Plain Qt widgets; the logic is agent_kit/p2p_fitlog.py (no FreeCAD there).
 FreeCAD is touched only by make_coupon().
@@ -19,10 +25,11 @@ from PySide6 import QtCore, QtWidgets
 
 from . import p2p_product
 
-MATERIALS = ("PLA", "PETG", "PETG-CF", "ABS", "ASA", "TPU")
 INTRO = ("Printers and filaments differ by a few tenths of a millimetre. Print the fit "
          "test once, tell the app what fitted, and every design after is drawn for "
-         "your printer.")
+         "your printer and that filament.")
+HOW = (("", "Nothing to add"), ("fits", "It fitted"), ("tight", "Too tight"),
+       ("loose", "Too loose"))
 
 
 def _log(msg):
@@ -31,6 +38,11 @@ def _log(msg):
         FreeCAD.Console.PrintLog("Atech fit: %s\n" % msg)
     except Exception:                                     # noqa: BLE001
         pass
+
+
+def material_of(preset_name):
+    """The filament kind in a preset's name (p2p_fitlog.material_of)."""
+    return p2p_product.kit("p2p_fitlog").material_of(preset_name)
 
 
 def default_profile():
@@ -43,16 +55,6 @@ def default_profile():
         _log("no Bambu profile: %r" % (exc,))
         return "", ""
     return str(prof.get("model") or ""), material_of(prof.get("filament"))
-
-
-def material_of(preset_name):
-    """The filament kind in a preset's name ("Bambu PETG-CF @BBL H2S" ->
-    "PETG-CF"), or ""."""
-    name = str(preset_name or "").upper()
-    for m in sorted(MATERIALS, key=len, reverse=True):
-        if m in name:
-            return m
-    return ""
 
 
 def make_coupon():
@@ -69,15 +71,15 @@ def make_coupon():
 
 
 class FitDialog(QtWidgets.QDialog):
-    """Printer, filament, the snug puck and the tightest window; Save
-    writes fit_user.json."""
+    """Printer, filament, the snug puck and the tightest window, or one
+    printed fit and how it turned out; Save writes fit_user.json."""
     saved = QtCore.Signal(str)
 
     def __init__(self, parent=None, home=None):
         super().__init__(parent)
         self.setObjectName("AtechFitTest")
         self.setWindowTitle("Fit test")
-        self.resize(560, 460)
+        self.resize(600, 560)
         self.home = home
         self.L = p2p_product.kit("p2p_fitlog")
         self.data = self.L.load(home)
@@ -105,22 +107,44 @@ class FitDialog(QtWidgets.QDialog):
         self.material = QtWidgets.QComboBox()
         self.material.setObjectName("fitMaterial")
         self.material.setEditable(True)
-        self.material.addItems(MATERIALS)
+        self.material.addItems(self.L.MATERIALS)
         self.material.setCurrentText(material or "PLA")
         self.puck = QtWidgets.QComboBox()
         self.puck.setObjectName("fitPuck")
         self.puck.addItem("Not tried yet", "")
         for p in self.L.PUCKS:
-            self.puck.addItem("%s (%.1f mm)" % (p, int(p) / 10.0), p)
+            self.puck.addItem("%d dots (%.1f mm)" % (int(p) % 10, int(p) / 10.0), p)
         self.window = QtWidgets.QComboBox()
         self.window.setObjectName("fitWindow")
         self.window.addItem("Not tried yet", "")
         for w in self.L.WINDOWS:
-            self.window.addItem("%s (%.1f mm each side)" % (w, int(w) / 10.0), w)
+            self.window.addItem("%s dots (%.1f mm each side)" % (w, int(w) / 10.0), w)
         form.addRow("Printer", self.printer)
         form.addRow("Filament", self.material)
         form.addRow("Puck that is snug on the motor shaft", self.puck)
         form.addRow("Tightest window a module slides through", self.window)
+        # any other printed fit: what, how it turned out, by how much
+        self.what = QtWidgets.QComboBox()
+        self.what.setObjectName("fitWhat")
+        for key in sorted(self.L.WORDS, key=lambda k: self.L.WORDS[k]):
+            self.what.addItem(self.L.WORDS[key], key)
+        self.how = QtWidgets.QComboBox()
+        self.how.setObjectName("fitHow")
+        for val, word in HOW:
+            self.how.addItem(word, val)
+        self.by = QtWidgets.QDoubleSpinBox()
+        self.by.setObjectName("fitBy")
+        self.by.setRange(0.05, 0.5)
+        self.by.setSingleStep(0.05)
+        self.by.setDecimals(2)
+        self.by.setValue(0.1)
+        self.by.setSuffix(" mm")
+        other = QtWidgets.QHBoxLayout()
+        other.addWidget(self.what, 1)
+        other.addWidget(self.how)
+        other.addWidget(QtWidgets.QLabel("by about"))
+        other.addWidget(self.by)
+        form.addRow("A fit in something you printed", other)
         v.addLayout(form)
 
         self.now = QtWidgets.QLabel()
@@ -169,7 +193,8 @@ class FitDialog(QtWidgets.QDialog):
                 (" - " + r["note"]) if r["note"] else ""))
         self.now.setText("<br>".join(lines))
 
-    def set(self, printer=None, material=None, puck=None, window=None):
+    def set(self, printer=None, material=None, puck=None, window=None, what=None,
+            how=None, by=None):
         """For tests and keyboard users: fill the fields."""
         if printer is not None:
             self.printer.setText(printer)
@@ -179,6 +204,12 @@ class FitDialog(QtWidgets.QDialog):
             self.puck.setCurrentIndex(max(0, self.puck.findData(puck)))
         if window is not None:
             self.window.setCurrentIndex(max(0, self.window.findData(window)))
+        if what is not None:
+            self.what.setCurrentIndex(max(0, self.what.findData(what)))
+        if how is not None:
+            self.how.setCurrentIndex(max(0, self.how.findData(how)))
+        if by is not None:
+            self.by.setValue(by)
         self._show()
 
     # ---------------------------------------------------------- actions
@@ -187,35 +218,46 @@ class FitDialog(QtWidgets.QDialog):
         when there was nothing to store or it was refused."""
         self.error.setText("")
         puck, window = self.puck.currentData(), self.window.currentData()
-        if not puck and not window:
-            self.error.setText("Choose the puck or the window first: there is nothing to "
-                               "save yet.")
+        how = self.how.currentData()
+        if not puck and not window and not how:
+            self.error.setText("Choose the puck, the window or how a fit turned out first: "
+                               "there is nothing to save yet.")
             return None
+        # on a copy: a refused value must not leave half of it stored
+        import copy
+        data = copy.deepcopy(self.data)
         try:
-            self.L.use_profile(self.data, self.printer.text(), self.material.currentText())
+            self.L.use_profile(data, self.printer.text(), self.material.currentText())
             if puck:
-                self.L.coupon_result(self.data, puck)
+                self.L.coupon_result(data, puck)
             if window:
-                self.L.gauge_result(self.data, window)
-            self.L.save(self.data, self.home)
+                self.L.gauge_result(data, window)
+            if how:
+                self.L.verdict(data, self.what.currentData(), how, self.by.value())
+            self.L.save(data, self.home)
         except (ValueError, OSError) as exc:
             self.error.setText("Not saved: %s" % exc)
             return None
+        self.data = data
+        self.how.setCurrentIndex(0)           # a verdict is said once, not on every Save
         line = self.L.summary(self.data)
         self._show()
         self.saved.emit(line)
         return line
 
     def forget(self):
-        """Drop the results of the printer and filament in the fields."""
+        """Drop the results of the printer and filament in the fields. No
+        other printer's results take their place: with none chosen, the
+        app's own values are used until results are saved again."""
         self.error.setText("")
         name = self._profile()
         if name in self.data["profiles"]:
             del self.data["profiles"][name]
             if self.data.get("active") == name:
-                self.data["active"] = next(iter(sorted(self.data["profiles"])), None)
+                self.data["active"] = None
             try:
                 self.L.save(self.data, self.home)
+                self.error.setText("Forgotten. The app's own values are used for %s." % name)
             except OSError as exc:
                 self.error.setText("Not saved: %s" % exc)
         self._show()

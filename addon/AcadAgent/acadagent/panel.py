@@ -5902,6 +5902,14 @@ class AgentPanel(QtWidgets.QWidget):
             return None
         if preview:
             self.stats["previews"] += 1
+        else:
+            # R1295: a build without an agent turn (Dimensions, "go back to
+            # this build") read the chat folder's old copy of the person's
+            # print results; bring it up to date first
+            try:
+                build.fit_to_workspace(state.ws)
+            except Exception as exc:                   # noqa: BLE001
+                _log("fit results not refreshed: %r" % (exc,))
         ctx = {"state": state, "files": list(files), "preview": preview,
                "send_fix": send_fix, "then": then,
                "built_hash": self._script_hash(state.ws)

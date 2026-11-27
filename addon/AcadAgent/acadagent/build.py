@@ -299,7 +299,7 @@ def prepare_workspace(workspace, reset_intent=True, doc=None, request=None):
         # R1240: the person's own print results (fit_user.json) go beside
         # the kit, read-only: ./check and the build read them from here,
         # because a design script cannot read the home folder
-        name = _fit_log().to_workspace(workspace)
+        name = fit_to_workspace(workspace)
         if name:
             written.append(name)
     except Exception as exc:                           # noqa: BLE001
@@ -945,7 +945,8 @@ RULES
   atech_gears.centre_distance with shift), and phase - cad.mesh_phase
   turns a tooth (tooth=True) or a space toward the other gear; a belt,
   track or rack a gear drives needs teeth at its pitch pi*m, never a
-  smooth surface; a bore needs a shaft through it (examples/rc_tank.py).
+  smooth surface; a bore needs a shaft through it (examples/rc_tank.py);
+  on a DC Motor's shaft the gear gets cad.d_bore with the shaft's flat.
 {no_assert}{on_error}{no_placeholder}{rename}
 - Alternatively you may export a .step or .brep file into {ws}; it is
   imported the same way. Prefer the script: it is editable and re-runnable.
@@ -1700,13 +1701,37 @@ def _fit_log():
     return p2p_fitlog
 
 
+def loaded_filament():
+    """(printer, filament kind) Bambu Studio has selected, ("", "") when
+    it is not set up: which of the person's print results a build uses
+    (R1295: results from PLA do not fit a PETG-CF print)."""
+    try:
+        from . import print_plates
+        prof = print_plates.bambu_profile() or {}
+        return str(prof.get("model") or ""), _fit_log().material_of(prof.get("filament"))
+    except Exception as exc:                           # noqa: BLE001
+        _log("loaded filament: %r" % (exc,))
+        return "", ""
+
+
+def fit_to_workspace(workspace):
+    """Write the person's print results into a chat's folder as the next
+    build should read them (p2p_fitlog.to_workspace). Called every turn
+    and before every build that has no turn (Dimensions, "go back to this
+    build"), so a result saved in the Fit test window is never one build
+    late. Returns the file's name when it changed."""
+    printer, material = loaded_filament()
+    return _fit_log().to_workspace(workspace, printer=printer, material=material)
+
+
 def _fit_lib():
     """atech_fit with the person's own print results in place (R1240): the
     prompt's numbers are the ones the next build will use."""
     _kit_on_path()
     import atech_fit
     try:
-        atech_fit.load_user(_fit_log().path())
+        printer, material = loaded_filament()
+        atech_fit.apply_user(_fit_log().effective(printer=printer, material=material))
     except Exception as exc:                           # noqa: BLE001
         _log("fit_user: %r" % (exc,))
     return atech_fit

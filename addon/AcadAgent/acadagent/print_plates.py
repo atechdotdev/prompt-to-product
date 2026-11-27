@@ -103,12 +103,19 @@ def linux_studio(which=None, dirs=LINUX_DIRS):
             names = sorted(os.listdir(d))
         except OSError:
             continue
+        found = []
         for name in names:
             low = name.lower()
             p = os.path.join(d, name)
             if "bambu" in low and "studio" in low and os.path.isfile(p) \
                     and os.access(p, os.X_OK):
-                return p
+                try:
+                    found.append((os.path.getmtime(p), p))
+                except OSError:
+                    found.append((0.0, p))
+        if found:
+            # two AppImages side by side: the newer file, not the first name
+            return max(found)[1]
     return None
 
 
@@ -207,9 +214,10 @@ def resolve_preset(support_dir, kind, name):
 
 
 # -------------------------------------------------------------------
-# R1270 what the command line needs. Found by Gustav on real prints
-# (cad-workflow builds/kit_cases/REVISIONS.md, 2026-09-28, Bambu Studio
-# 02.08.02.61):
+# R1270 what the command line needs. The first three were found by Gustav
+# on real prints (cad-workflow builds/kit_cases/REVISIONS.md, 2026-09-28,
+# Bambu Studio 02.08.02.61); the model id is his own guard, which his
+# notes mark "not yet confirmed on a printer":
 #   - the command line loads ONLY the preset file it is given. It does not
 #     follow "inherits", so everything a leaf preset inherits falls back to
 #     a default: every early slice ran with the bed at 45 C, flow 1.0 and
@@ -219,10 +227,17 @@ def resolve_preset(support_dir, kind, name):
 #     separate "<preset> template <key>.json" files the command line never
 #     loads: the print started with the generic start G-code and "the
 #     entire choose-filament step is gone at the printer"
+#   - a process without "curr_bed_type" is sliced for the Cool Plate:
+#     "Filaments are not compatible with the plate type" for PETG and
+#     PETG-CF (bed temperature 0 on that plate), and PLA at the cool
+#     plate's temperature. All 16 of his process files that printed set
+#     "Textured PEI Plate" (R1295)
 #   - Metadata/slice_info.config has an EMPTY printer_model_id in a
-#     command-line slice, and the printer checks it
-# So the three presets are written out whole (flat_preset) and the model
-# id is put in after slicing (fix_model_id).
+#     command-line slice (the printer is said to check it)
+# So the three presets are written out whole (flat_preset), the process
+# names the plate (bed_type) and the model id is put in after slicing
+# (fix_model_id). What could not be done is SAID: a template that was not
+# found, a model id that was not set (summary, print.json).
 # -------------------------------------------------------------------
 #: keys of a preset file that describe the file, not a setting
 _PRESET_META = ("name", "type", "from", "inherits", "setting_id", "instantiation",
@@ -246,23 +261,45 @@ def preset_names(support_dir, kind, name):
     return out
 
 
-def machine_dirs(support_dir, roots=APP_ROOTS):
+#: R1295 Linux: where an installed Bambu Studio keeps its own profiles (a
+#: Flatpak's files, a distro package's share folder). Likely places, not
+#: checked against a real install; an AppImage has no path that can be
+#: read while it is not running, so there the "not found" warning is what
+#: protects the print.
+LINUX_PROFILE_DIRS = (
+    "~/.local/share/flatpak/app/com.bambulab.BambuStudio/current/active/files/share/"
+    "BambuStudio/profiles",
+    "/var/lib/flatpak/app/com.bambulab.BambuStudio/current/active/files/share/"
+    "BambuStudio/profiles",
+    "/usr/share/BambuStudio/profiles", "/usr/share/bambu-studio/profiles",
+    "/usr/local/share/BambuStudio/profiles",
+    "/opt/bambu-studio/resources/profiles", "/opt/BambuStudio/resources/profiles",
+)
+
+
+def machine_dirs(support_dir, roots=APP_ROOTS, linux=LINUX_PROFILE_DIRS):
     """Folders that hold Bambu Studio's machine presets and their template
     files: the user's copy of the system presets, then the app's own
-    (Contents/Resources/profiles/BBL/machine, where Gustav's are)."""
+    (Contents/Resources/profiles/BBL/machine, where Gustav's are; on
+    Linux LINUX_PROFILE_DIRS)."""
     out = [os.path.join(_system_dir(support_dir), "machine")]
     for r in roots:
         for b in APP_BUNDLES:
             p = os.path.join(r, b, "Contents", "Resources", "profiles", "BBL", "machine")
             if p not in out:
                 out.append(p)
+    for d in linux or ():
+        p = os.path.join(os.path.expanduser(d), "BBL", "machine")
+        if p not in out:
+            out.append(p)
     return [d for d in out if os.path.isdir(d)]
 
 
-def machine_templates(support_dir, names, dirs=None):
+def machine_templates(support_dir, names, dirs=None, missing=None):
     """The settings kept in template files for the machine presets `names`
     (leaf first; the leaf's win): the printer's own G-code blocks. {} when
-    this Bambu Studio keeps none.
+    this Bambu Studio keeps none. The names of included templates that no
+    folder has are appended to `missing` (a list), when given.
 
     A preset names its templates in "include" (real file, Bambu Studio
     02.08: "Bambu Lab H2S 0.4 nozzle" includes "Bambu Lab H2S 0.4 nozzle
@@ -290,6 +327,7 @@ def machine_templates(support_dir, names, dirs=None):
         if isinstance(inc, str):
             inc = [inc]
         wanted = [str(x) + ".json" for x in inc or []]
+        named = set(wanted)
         if not wanted:
             seen = set()
             for d in dirs:
@@ -305,6 +343,8 @@ def machine_templates(support_dir, names, dirs=None):
         for f in wanted:
             d = read(f)
             if not d:
+                if f in named and missing is not None and f[:-5] not in missing:
+                    missing.append(f[:-5])
                 continue
             for k, v in d.items():
                 if k not in _PRESET_META and k != "include" and v not in ("", None, []):
@@ -348,10 +388,79 @@ def flat_preset(support_dir, kind, name, extra=None, new_name=None):
     return out
 
 
+#: Bambu Studio's build plates and the filament key that holds each one's
+#: bed temperature (0 = this filament does not print on that plate), in
+#: the order they are tried after the printer's own default
+BED_TYPES = (("Textured PEI Plate", "textured_plate_temp"),
+             ("High Temp Plate", "hot_plate_temp"),
+             ("Engineering Plate", "eng_plate_temp"),
+             ("Supertack Plate", "supertack_plate_temp"),
+             ("Cool Plate", "cool_plate_temp"))
+
+
+def _names(v):
+    """A preset value that is one name, a list of names or a ";" list."""
+    if isinstance(v, str):
+        v = v.split(";")
+    return [str(x).strip() for x in (v or []) if str(x).strip()]
+
+
+def _model_file(support_dir, machine):
+    """The printer's machine_model file as a dict ({} when not found) -
+    `machine` is a resolved machine preset."""
+    model = (machine or {}).get("printer_model")
+    p = _preset_path(support_dir, "machine", model) if model else None
+    if not p:
+        return {}
+    try:
+        with open(p, encoding="utf-8") as fh:
+            got = json.load(fh)
+        return got if isinstance(got, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def bed_type(support_dir, machine, filament=None):
+    """The build plate a command-line slice is made for ("curr_bed_type"):
+    the printer's own default (its machine_model file's default_bed_type:
+    "Textured PEI Plate" on an H2S), then the others in BED_TYPES - never
+    one the printer lists in not_support_bed_type, nor one this filament
+    has no bed temperature for. "" when the printer's file says nothing
+    and the filament rules nothing out (Bambu Studio's default then).
+
+    machine, filament   resolved presets (dicts)."""
+    model = _model_file(support_dir, machine)
+    default = str(model.get("default_bed_type") or "").strip()
+    banned = set(_names(model.get("not_support_bed_type")))
+    keys = dict(BED_TYPES)
+
+    def prints_on(plate):
+        if plate in banned:
+            return False
+        key = keys.get(plate)
+        if not filament or key is None or key not in filament:
+            return True
+        try:
+            return float(_first(filament[key])) > 0
+        except (TypeError, ValueError):
+            return True
+
+    if default and prints_on(default):
+        return default
+    cool_ok = prints_on("Cool Plate")           # what the command line assumes
+    if not default and cool_ok:
+        return ""
+    for plate, _key in BED_TYPES:
+        if prints_on(plate):
+            return plate
+    return default
+
+
 def write_flat_presets(profile, folder, supports=False):
     """machine.json, process.json and filament.json in `folder`, each a
     whole preset (flat_preset); with supports, the process has tree
-    supports on. {"machine_file", "process_file", "filament_file"}, or
+    supports on, and it names the build plate (bed_type). {"machine_file",
+    "process_file", "filament_file", "bed_type", "missing_templates"}, or
     None when the profile's presets cannot be read (the caller then passes
     the system files as before)."""
     sd = profile.get("support_dir")
@@ -361,10 +470,15 @@ def write_flat_presets(profile, folder, supports=False):
     extra = {"print_settings_id": pname, "compatible_printers": [profile["machine"]]}
     if supports:
         extra.update(enable_support="1", support_type="tree(auto)")
+    machine = flat_preset(sd, "machine", profile["machine"])
+    filament = flat_preset(sd, "filament", profile["filament"])
+    plate = bed_type(sd, machine, filament) if machine and filament else ""
+    if plate:
+        extra["curr_bed_type"] = plate
     flats = {
-        "machine": flat_preset(sd, "machine", profile["machine"]),
+        "machine": machine,
         "process": flat_preset(sd, "process", profile["process"], extra, pname),
-        "filament": flat_preset(sd, "filament", profile["filament"]),
+        "filament": filament,
     }
     if not all(flats.values()):
         return None
@@ -374,6 +488,15 @@ def write_flat_presets(profile, folder, supports=False):
         with open(p, "w", encoding="utf-8") as fh:
             json.dump(d, fh, indent=1)
         out["%s_file" % kind] = p
+    # what the printer's own G-code is missing, for the person to be told
+    missing = []
+    machine_templates(sd, preset_names(sd, "machine", profile["machine"]), missing=missing)
+    if not str(_first(machine.get("machine_start_gcode")) or "").strip():
+        missing.append("machine_start_gcode")
+    if missing:
+        _log("printer G-code not found: %s" % ", ".join(missing))
+    out["bed_type"] = plate
+    out["missing_templates"] = missing
     return out
 
 
@@ -381,17 +504,22 @@ def model_id(support_dir, machine):
     """The printer's model id ("O1S" for an H2S, "BL-P001" for an X1
     Carbon) from its machine_model file, or "" - `machine` is a resolved
     machine preset."""
-    model = (machine or {}).get("printer_model")
-    if not model:
-        return ""
-    p = _preset_path(support_dir, "machine", model)
-    if not p:
-        return ""
+    return str(_model_file(support_dir, machine).get("model_id") or "")
+
+
+def project_model_id(project):
+    """The printer_model_id a sliced project carries: its value ("" when
+    the field is there and empty), or None when the file has no such
+    field or cannot be read."""
+    import re
+    import zipfile
     try:
-        with open(p, encoding="utf-8") as fh:
-            return str(json.load(fh).get("model_id") or "")
-    except (OSError, ValueError):
-        return ""
+        with zipfile.ZipFile(project) as z:
+            info = z.read("Metadata/slice_info.config").decode("utf-8", "replace")
+    except (OSError, KeyError, zipfile.BadZipFile):
+        return None
+    m = re.search(r'<metadata key="printer_model_id" value="([^"]*)"', info)
+    return m.group(1) if m else None
 
 
 def fix_model_id(project, mid):
@@ -652,7 +780,8 @@ def slice_plates(exported, profile, app, runner=None, project_name=None):
         _log("whole presets not written: %r" % (exc,))
     if flat:
         proc_file = flat["process_file"] if supports else None
-        cmd = slice_command(app, dict(profile, **flat), exported["files"], out_dir, name)
+        files = {k: v for k, v in flat.items() if k.endswith("_file")}
+        cmd = slice_command(app, dict(profile, **files), exported["files"], out_dir, name)
     else:
         proc_file = supports_process(profile, folder) if supports else None
         cmd = slice_command(app, profile, exported["files"], out_dir, name, proc_file)
@@ -681,9 +810,38 @@ def slice_plates(exported, profile, app, runner=None, project_name=None):
         # R1270: a command-line slice has no printer model id; the printer
         # checks it
         res["model_id_set"] = fix_model_id(project, profile.get("model_id"))
+        # "" = the file has the field and it is still empty; None = no field
+        res["model_id"] = project_model_id(project)
     res.update(project=project, command=cmd, log=log_path, supports=bool(proc_file),
-               whole_presets=bool(flat))
+               whole_presets=bool(flat), bed_type=(flat or {}).get("bed_type") or "",
+               missing_templates=list((flat or {}).get("missing_templates") or []))
+    res["cautions"] = slice_cautions(res, profile)
     return res
+
+
+def slice_cautions(res, profile=None):
+    """R1295: what a command-line slice could not be given, as sentences
+    for the person (also in print.json). [] when everything was in place
+    or the slice failed anyway."""
+    if not res.get("ok"):
+        return []
+    out = []
+    if not res.get("whole_presets"):
+        out.append("Your Bambu Studio presets could not be read in full, so this was sliced "
+                   "from the preset files alone: bed temperature and flow may be defaults.")
+    if res.get("missing_templates"):
+        out.append("The printer's own start and filament-change G-code was not found (%s)."
+                   % ", ".join(res["missing_templates"][:3])
+                   + ("" if len(res["missing_templates"]) <= 3 else " and more"))
+    if out:
+        out.append("Slice it again in Bambu Studio (Slice all) before you send it to the "
+                   "printer.")
+    if res.get("model_id") == "":
+        out.append("The file does not name the printer model; if the printer refuses it, "
+                   "send it from Bambu Studio.")
+    if res.get("bed_type"):
+        out.append("Sliced for the %s: use that plate." % res["bed_type"])
+    return out
 
 
 def print_log(exported, profile, sliced, sizes=None):
@@ -700,6 +858,14 @@ def print_log(exported, profile, sliced, sizes=None):
             "plates": sliced and sliced["plates"], "ok": bool(sliced and sliced["ok"]),
             "error": sliced and sliced.get("error"),
             "project": sliced and sliced.get("project"),
+            # R1295: what the command-line slice was and was not given
+            "whole_presets": bool(sliced and sliced.get("whole_presets")),
+            "bed_type": (sliced and sliced.get("bed_type")) or "",
+            "missing_templates": (sliced and sliced.get("missing_templates")) or [],
+            "model_id_set": bool(sliced and sliced.get("model_id_set")),
+            "cautions": (sliced and sliced.get("cautions")) or [],
+            # for the person to fill in by hand; nothing reads it yet (the
+            # Fit test window is where a result is told to the app)
             "how_it_printed": ""}
     p = os.path.join(exported["folder"], "print.json")
     with open(p, "w", encoding="utf-8") as fh:
@@ -736,12 +902,15 @@ def make_plates(doc, profile=None, app=None, root=None, include_atech=False, run
 
 def open_project(project, app=None, runner=None):
     """R923: the sliced project in Bambu Studio (`open -a` on macOS, the
-    executable with the file on Linux)."""
+    executable with the file on Linux; without one, the system's own
+    opener for .3mf files)."""
     app = app or bambu_studio()
     if app and os.path.isfile(app):
         cmd = [app, project]
-    else:
+    elif app or sys.platform == "darwin":
         cmd = ["open", "-a", app or "BambuStudio", project]
+    else:
+        cmd = [_opener(), project]
     (runner or (lambda c: subprocess.Popen(c)))(cmd)
     return cmd
 
@@ -762,6 +931,7 @@ def summary(res):
     warn = [p["warning"] for p in res["plates"] if p["warning"]]
     if warn:
         bits.append("Bambu Studio says: %s" % " ".join(warn))
+    bits.extend(res.get("cautions") or [])
     return " ".join(bits)
 
 
@@ -953,7 +1123,7 @@ def PrintDialog(parent=None, doc_fn=None, selection_fn=None, app_fn=bambu_studio
 
     def show_folder():
         if d.result and d.result.get("folder"):
-            subprocess.Popen(["open", d.result["folder"]])
+            subprocess.Popen([_opener(), d.result["folder"]])
 
     d.btn_bambu.clicked.connect(lambda _=False: et._guard(bambu))
     d.btn_export.clicked.connect(lambda _=False: et._guard(export))

@@ -115,10 +115,70 @@ def save(data, home=None):
     return p
 
 
+#: filament kinds a preset's name is read for, and the Fit window offers
+MATERIALS = ("PLA", "PETG", "PETG-CF", "ABS", "ASA", "TPU")
+#: values that are an interference, not a clearance: "too tight" makes
+#: them SMALLER (R1295: 'tight' used to raise the hold-down rib's preload)
+INTERFERENCE_KEYS = frozenset(("preload",))
+
+
+def material_of(preset_name):
+    """The filament kind in a preset's name ("Bambu PETG-CF @BBL H2S" ->
+    "PETG-CF"), or ""."""
+    name = str(preset_name or "").upper()
+    for m in sorted(MATERIALS, key=len, reverse=True):
+        if m in name:
+            return m
+    return ""
+
+
+def _clean(text, default):
+    """One line without the profile separator (a printer called
+    "X1C | office" would be split into the wrong printer and filament)."""
+    return " ".join(str(text or "").replace("|", "/").split()) or default
+
+
 def profile_name(printer, material):
-    printer = " ".join(str(printer or "").split()) or "My printer"
-    material = " ".join(str(material or "").split()) or "PLA"
-    return "%s | %s" % (printer, material)
+    return "%s | %s" % (_clean(printer, "My printer"), _clean(material, "PLA"))
+
+
+def pick(data, printer=None, material=None):
+    """The profile a build should use: the one for the filament that is
+    loaded. With `material` known (Bambu Studio's selected filament), a
+    profile of that filament - this printer's first, then the active one,
+    then the only one - and None when there is none: results from PLA do
+    not fit a PETG-CF print (Gustav keeps a set of sizes per material).
+    Without it, the profile saved last ("active")."""
+    profiles = data.get("profiles") or {}
+    active = data.get("active") if data.get("active") in profiles else None
+    want = _clean(material, "").upper()
+    if not want:
+        return active
+    same = sorted(n for n, p in profiles.items()
+                  if _clean(p.get("material"), "").upper() == want)
+    if not same:
+        return None
+    exact = profile_name(printer, material) if printer else None
+    for n in same:
+        if exact and n.upper() == exact.upper():
+            return n
+    if active in same:
+        return active
+    return same[0] if len(same) == 1 else None
+
+
+def effective(home=None, printer=None, material=None):
+    """The record as a build reads it: the same profiles, "active" set to
+    pick()'s choice (None: the table's own values)."""
+    data = load(home)
+    data["active"] = pick(data, printer, material)
+    if data["active"] is None and data["profiles"] and _clean(material, ""):
+        # said by ./check, so nobody wonders where their numbers went
+        data["unused"] = ("none of your print results is for %s (you have: %s) - the "
+                          "table's values are used; print the fit test in %s to get yours"
+                          % (_clean(material, ""), ", ".join(sorted(data["profiles"])),
+                             _clean(material, "")))
+    return data
 
 
 def use_profile(data, printer, material):
@@ -226,11 +286,14 @@ def gauge_result(data, window, date=None):
 def verdict(data, key, how, by=0.1, note="", date=None):
     """How a printed fit turned out: "fits" keeps the value in force as
     proven on this printer; "tight" opens it by `by` mm, "loose" closes it
-    by `by`. Returns the stored value."""
+    by `by` (for a preload, "tight" means less of it). Returns the stored
+    value."""
     if how not in VERDICTS:
         raise ValueError("how it fitted: one of %s" % ", ".join(VERDICTS))
     by = abs(float(by))
     step = {"fits": 0.0, "tight": by, "loose": -by}[how]
+    if key in INTERFERENCE_KEYS:
+        step = -step
     now = current(data, key)
     new = tuple(round(x + step, 2) for x in now) if isinstance(now, tuple) \
         else round(now + step, 2)
@@ -270,21 +333,15 @@ def summary(data):
         "%s %s (table %s)" % (r["key"], _fmt(r["value"]), _fmt(r["table"])) for r in got))
 
 
-def to_workspace(workspace, home=None):
-    """Copy the record into a chat's folder (read-only), or remove a stale
-    copy when there is none. Returns the file's name when written."""
+def to_workspace(workspace, home=None, printer=None, material=None):
+    """Write the record into a chat's folder (read-only) as a build should
+    read it (effective()). The file is ALWAYS there, empty when the person
+    has no results: the sandbox protects only files that exist, and a
+    design script could otherwise plant its own "print results" (R1295).
+    Returns the file's name when it was written or changed."""
     dst = os.path.join(workspace, FILE)
-    try:
-        with open(path(home), "rb") as fh:
-            raw = fh.read()
-    except OSError:
-        raw = None
-    if raw is None:
-        try:
-            os.unlink(dst)
-        except OSError:
-            pass
-        return None
+    raw = (json.dumps(effective(home, printer, material), indent=1, sort_keys=True)
+           + "\n").encode("utf-8")
     try:
         with open(dst, "rb") as fh:
             if fh.read() == raw:

@@ -93,8 +93,60 @@ class Window(unittest.TestCase):
         d.forget()
         data = self._file()
         self.assertEqual(sorted(data["profiles"]), ["H2S | PETG"])
-        self.assertEqual(data["active"], "H2S | PETG")
         self.assertIn("No results yet", d.now.text())
+        # H2S | PETG was saved last and stays the one in use
+        self.assertEqual(data["active"], "H2S | PETG")
+
+    def test_forgetting_the_one_in_use_does_not_put_another_in_its_place(self):
+        """R1295 review: Forget made the alphabetically first other
+        profile active, so another printer's numbers were drawn without
+        anybody choosing them."""
+        d = fit_view.FitDialog(home=self.home)
+        d.set(printer="A1", material="PETG", window="2")
+        d.save()
+        d.set(printer="X1C", material="PLA", puck="35")
+        d.save()                                    # in use: X1C | PLA
+        d.forget()
+        data = self._file()
+        self.assertEqual(sorted(data["profiles"]), ["A1 | PETG"])
+        self.assertIsNone(data["active"])
+        self.assertIn("Forgotten", d.error.text())
+
+    def test_too_tight_by_about(self):
+        """R1295 review: the "how did it fit" verdict had no way in."""
+        d = fit_view.FitDialog(home=self.home)
+        self.assertGreater(d.what.count(), 5)
+        self.assertEqual([d.how.itemData(i) for i in range(d.how.count())],
+                         ["", "fits", "tight", "loose"])
+        d.set(printer="X1C", material="PLA", what="lip_loose", how="tight", by=0.05)
+        line = d.save()
+        self.assertIsNotNone(line, d.error.text())
+        rec = self._file()["profiles"]["X1C | PLA"]["values"]["lip_loose"]
+        self.assertEqual(rec["value"], 0.25)
+        self.assertIn("too tight by about 0.05", rec["note"])
+        # said once: a second Save does not open it again
+        self.assertEqual(d.how.currentData(), "")
+        self.assertIsNone(d.save())
+        self.assertEqual(self._file()["profiles"]["X1C | PLA"]["values"]["lip_loose"]["value"],
+                         0.25)
+
+    def test_a_refused_value_stores_nothing(self):
+        d = fit_view.FitDialog(home=self.home)
+        d.set(printer="X1C", material="PLA", window="4", what="preload", how="tight", by=0.5)
+        self.assertIsNone(d.save())
+        self.assertIn("Not saved", d.error.text())
+        self.assertFalse(os.path.exists(os.path.join(self.home, "fit_user.json"))
+                         and self._file()["profiles"])
+        self.assertEqual(d.data["profiles"], {})
+
+    def test_the_labels_are_the_coupons_dots(self):
+        d = fit_view.FitDialog(home=self.home)
+        pucks = [d.puck.itemText(i) for i in range(1, d.puck.count())]
+        self.assertEqual(pucks[0], "2 dots (3.2 mm)")
+        self.assertEqual(pucks[-1], "6 dots (3.6 mm)")
+        wins = [d.window.itemText(i) for i in range(1, d.window.count())]
+        self.assertEqual(wins, ["2 dots (0.2 mm each side)", "3 dots (0.3 mm each side)",
+                                "4 dots (0.4 mm each side)"])
 
     def test_material_from_a_bambu_preset_name(self):
         self.assertEqual(fit_view.material_of("Bambu PETG-CF @BBL H2S"), "PETG-CF")
