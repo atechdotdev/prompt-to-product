@@ -230,4 +230,38 @@ per step (two for R1240 and R1250).
 
 ### The test suite, before and after
 
-(Filled in when the two runs finish.)
+Every test module, one process each, with the built app's Python and the
+checkout's own module library (`ATECH_ARTIFACTS`), first on the untouched
+checkout (9d7e9e3) and then on this branch:
+
+| | modules | tests | failing tests |
+|---|---|---|---|
+| before | 117 | 2439 | 71 |
+| after | 127 | 2556 | 71 |
+
+The ten new modules (`test_cadwf_r1210` ... `r1290`, 113 tests) all pass.
+`test_build_ws` runs 4 more tests.
+
+Seven tests fail after that passed before. None is caused by the change;
+all come from running in a git worktree:
+
+- `test_port_rules` (1) and `test_agent_integration_r500` (4) look for
+  `dist/build/.../freecadcmd` inside the checkout. A worktree has no `dist/`,
+  so they picked up the system's FreeCAD 1.1.4 from PATH. With
+  `ATECH_FREECADCMD` pointing at the built app's, both modules pass.
+- `test_print_order_r850` (2) reads the site's prices from a `studio`
+  checkout next to the repository. Next to a worktree there is none.
+
+Seven other tests failed before and pass after (five in
+`test_eval_harness`, one each in `test_build_ws` and `test_shell_round10`).
+They are not claimed as fixes: the same modules passed in an earlier run of
+the untouched checkout, so they vary with the machine's load.
+
+The 71 that fail on both sides are the known ones: the examples that break
+the port rules, and the fake-CLI family.
+
+### What was not done
+
+- No live agent run (see Later).
+- Nothing was printed, and Bambu Studio was not run.
+- The existing examples were not changed, as agreed.
