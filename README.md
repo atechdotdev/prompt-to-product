@@ -68,6 +68,13 @@ modules that sit where they really go.
   bring-up checklist, and the firmware: Check, Build, **Run without a board**
   (the Atech SDK's emulator) and **Flash to board**, with the
   [Atech SDK](https://atech.dev/docs) (`uv tool install atech`).
+- **Parts that fit, drawn for your printer.** A wheel pushes onto the DC
+  Motor's D-shaft with the bore that was printed and fitted, not a guessed
+  one. The agent's check says how each part will lie on the bed, what its
+  first layer is and what hangs over air, and what each shaft-in-bore
+  prints as. **Fit test** (Export and share) prints five pucks and a gauge
+  once; say which fitted and every design after uses your printer's own
+  numbers. Most other fit values are still assumptions, and say so.
 - **Get back to your projects anytime.** Click the Atech logo or press
   **Ctrl+0** for Home.
 - **Export** as STEP or STL for printing, or keep the `.FCStd`.
@@ -408,6 +415,7 @@ CAD/` is `~/Library/Preferences/Prompt2Product/`, and the cache is under
 | the design script of every document the agent built into | inside that `.FCStd` file, wherever you save it |
 | Agent Settings (engine, model, budget, `claude` path) | `~/.config/acadagent/settings.json` |
 | app preferences (theme, layout) | `~/.config/Prompt2Product/` and `~/.config/Atech/` |
+| your fit test results, per printer and filament | `~/Documents/Atech Products/fit_user.json` (a copy goes into each chat folder, so the agent's check can read it) |
 | cache | `~/.cache/Prompt2Product/` |
 | Claude Code's own conversation history | `~/.claude/` (managed by Claude Code) |
 

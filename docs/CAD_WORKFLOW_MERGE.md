@@ -6,7 +6,7 @@ several commits along the way, and the Atech rules respected. Plan written
 the same day. Work happens in the worktree `.claude/worktrees/cad-workflow-merge`
 on the branch `cad-workflow-merge` (from `port-rules-8-12`, 9d7e9e3).
 
-Source read: `/home/julius/Atech/cad-workflow` at d0c7386 (snapshot of 26 Nov
+Source read: Gustav's `cad-workflow` repository at d0c7386 (snapshot of 26 Nov
 2026). A side-by-side comparison of the two systems was made first; this plan
 follows from it.
 
@@ -63,7 +63,7 @@ Made here, under that last line:
 
 ## Atech rules this work must respect
 
-Checked against `/home/julius/Atech/python-sdk` (1.0.0a14, 2daa0e3:
+Checked against the `python-sdk` repository (1.0.0a14, 2daa0e3:
 `src/atech/catalog/data/boards/14port.yaml`) and this repo's
 `projects/atech_ports.py`:
 
@@ -155,12 +155,79 @@ R1250, R1230-R1240, R1270, the rest.
 
 ## Later (noted, not done here)
 
-- Move the existing examples to the printed values (`wheel(bore=3.3)` on a DC
-  Motor shaft becomes the D-bore) and to the port rules.
-- Turn the R1250 lines into gates once measured.
+- **Five examples put a part on a motor's D-shaft with a round 3.3 mm bore**
+  (found by R1260's check; it does not drive): `toy_car` (Rim_RL, Rim_RR,
+  Rim_FL, Rim_FR), `rc_tank` (Sprocket_L, Sprocket_R), `desk_fan` (Rotor),
+  `pet_feeder` (Rotor), `photo_turntable` (Pinion). Each needs
+  `cad.motor_shaft` and the D-bore, as `starters/starter_wheels.py` now has.
+  The examples that use the `n20_wheel` hub in a socket (rover, balance bot)
+  are not affected.
+- The examples' port placements (52 of 64, from the port rules commit).
+- Turn the R1250 / R1260 lines into gates. Measured so far: the first-layer
+  warning fires on 5 of 873 parts in the examples, all parts with no flat
+  side (a ball, two grilles, a caster ball, a glow ring).
 - A test print of the fit coupon on our printers, then move values from `P`
-  (Gustav's prints) to confirmed.
+  (Gustav's prints) to confirmed. Until then they are his printers' numbers.
+- Run Print once against a real Bambu Studio: R1270 follows Gustav's notes
+  and was tested with a fake support folder only. The exact names of the
+  machine template files, and whether a process preset's `inherits` is
+  followed, could not be checked here.
+- One live agent run of a wheel request, to see the agent pick up
+  `cad.motor_shaft`. Not done: an agent run costs the user's tokens and the
+  harness is built for hours-long runs.
+- `atech_fit`'s lid lip (0.20 / 0.15) agrees with cad-workflow's egg lid
+  (0.20 snug in PLA) and box lid (0.25) but neither is recorded as a
+  confirmed fit; left tagged A.
 
-## Results
+## Results (27 Nov 2026)
 
-(Filled in as each step lands.)
+All eleven steps are done and committed on `cad-workflow-merge`, one commit
+per step (two for R1240 and R1250).
+
+- **R1200 done.** cad-workflow reproduces on Linux with build123d 0.13:
+  `testfit.py` gives the same 85.99 x 14.0 x 10.0 mm, 7.167 cm3 as the STL in
+  the repo; `wheel.py` gives 16.28 cm3 against 16.26 (another font: Arial
+  Black is a macOS font). Only on Gustav's Mac: the module STEPs, his memory
+  files, the EasyEDA cache (the list above).
+- **R1210 done.** `atech_fit`: tags P and U, `SOURCES`, D-bore 3.4 / 2.9 x 12
+  (was 3.10 / 2.60), `hole_shrink` 0.25, the fit bands, `hole_for`,
+  `fit_word`, user values. The shaft's flat is 2.50, measured here from
+  `models/stl/dc_motor.stl` (2.998 round): cad-workflow's 2.5 was right and
+  this repo's 2.60 was derived from the wrong bore.
+- **R1220 done.** `cad.d_bore`, `cad.shaft_hole`, `cad.fit`,
+  `cad.wheel(flat=)`, `cad.screw_boss(kind=)`. Measured under freecadcmd: the
+  bore's section is 3.400 x 2.900, 12 deep; three sabotage switches are each
+  noticed.
+- **R1230 done.** `cad.fit_coupon`: the row is 86.00 x 14.00 x 10.00 mm and
+  7.179 cm3 against Gustav's 7.167.
+- **R1240 done.** `p2p_fitlog`, `fit_view.FitDialog`, the copy into the chat
+  folder, the load in `./check`. End to end under freecadcmd: with "puck 35"
+  recorded, `cad.d_bore` cuts 3.50 x 3.00; without, 3.40 x 2.90.
+- **R1250 done.** `atech_print`, PRINT lines. Measured on all 64 examples
+  (894 parts, built with the port rules switched off for the measurement
+  only): first run 24 warnings and 79 parts past the time budget; after
+  vectorising the slicing and making trim parts a note, 5 warnings and 21
+  parts past the budget. 418 parts (48 %) have overhangs that need supports
+  in Export's orientation: said in the line, never a warning. `./check`
+  takes the same 60 s median as before.
+- **R1260 done.** `atech_fitcheck`, FIT lines, `cad.motor_shaft`. Found on
+  the way: a D-bore whose flat does not face the shaft's flat overlaps the
+  shaft in the model, so the wheel and the bore take the shaft's own flat,
+  measured from the module. The "Two-wheel base" starter had round 3.3 bores;
+  it now passes `./check` with both wheels read as "D-bore 3.4 / 2.9, the
+  push fit that printed". On the examples: 9 round bores on motor shafts
+  (listed under Later) and 367 pin-in-hole pairs in 56 examples.
+- **R1270 done, not run against a real Bambu Studio.** Whole presets for the
+  command line, the template G-code, the model id, Linux discovery, "On the
+  bed" in the print plan. One more thing found: the supports process
+  inherited from the selected one, so with supports on it would have lost
+  its parent's settings under the same rule.
+- **R1280 done.** TRAPS R33-R42; the prompt's fit section names the calls
+  and stays under its 3500 characters (3484; the fit tables are 2420 of
+  2600).
+- **R1290 done.** `atech_mech`, 12 tests, its own self-test.
+- **R1295: see below.**
+
+### The test suite, before and after
+
+(Filled in when the two runs finish.)
