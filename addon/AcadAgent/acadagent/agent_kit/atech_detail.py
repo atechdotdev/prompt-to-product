@@ -1096,8 +1096,16 @@ def _tyre(R, ri, hw):
 
 
 def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', tread_n=40,
-          hub_d=None, bore=None, axis='+Y', at=(0, 0, 0)):
+          hub_d=None, bore=None, axis='+Y', at=(0, 0, 0), flat=False):
     """A wheel of diameter d as {"tyre", "rim", "cap"}: separate solids (rubber, metal, chrome) that do not overlap, centred at `at`, the cap facing `axis`.
+
+    flat  True when the wheel pushes STRAIGHT onto a dc_motor's shaft (no
+          n20_wheel hub in between): the hub gets the keyed D-bore at the
+          size that printed and fitted (3.4 / 2.9 - cad.d_bore), blind,
+          from the back (the side away from `axis`), and grows to keep
+          2 mm round it. A round bore= on that shaft spins loose or has
+          to be drilled. Seat the hub's back face about 1 mm off the
+          gearbox.
 
     tyre  spline balloon profile; tread 'block' (cross grooves + a centre
           groove), 'chevron' (V grooves), 'rib' (3 rings) or None; tread_n
@@ -1122,6 +1130,19 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
     if ri > R - 1.0:
         raise CadError("wheel: rim_d %g leaves under 1 mm of tyre on d %g - use rim_d <= %g"
                        % (rim_d, d, d - 2.0))
+    d_across = None
+    if flat:
+        # R1220: the printed push fit on the DC Motor's D-shaft; a bore=
+        # given with flat=True keeps the table's round-to-flat difference
+        fb, fa = cad.fit("dbore_d3")
+        bore = float(fb) if bore is None else _num(bore, "wheel: bore", 0)
+        d_across = bore - (float(fb) - float(fa))
+        need = bore + 4.0
+        if hub_d is None:
+            hub_d = max(0.3 * rim_d, 4.0, need)
+        elif _num(hub_d, "wheel: hub_d", 0) < need - 1e-9:
+            raise CadError("wheel: flat=True pushes onto the motor shaft and needs 2 mm of "
+                           "hub round its %g bore - use hub_d >= %g" % (bore, need))
     hub_d = max(0.3 * rim_d, 4.0) if hub_d is None else _num(hub_d, "wheel: hub_d", 0)
     hr = hub_d / 2.0
     if bore is not None and _num(bore, "wheel: bore", 0) >= hub_d - 1.0:
@@ -1228,10 +1249,21 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
         lr = min(0.45, 0.3 * (hr - cap_r))
         lug = Part.makeCylinder(lr, 0.5 + 1, V(((cap_r + hr) / 2.0, 0, top - 0.5)))
         tools += cad.polar_pattern(lug, spokes)
-    if bore:
+    if bore and not flat:
         tools.append(Part.makeCylinder(float(bore) / 2.0, 4 * rw + 4, V((0, 0, -2 * rw - 2))))
     rim = cad.cut(rim, tools)
     rim = soften(rim, min(0.2, 0.5 * rr), new_edges(rim, body), min_r=0.1, budget_s=2)
+    d_depth = None
+    if flat:
+        # after the softening: the bore's edges stay as drawn (its own
+        # lead-in cone is the only rounding a push fit wants)
+        d_depth = min(float(cad.fit("dbore_depth")), 2 * rw + proud - pocket - 1.0)
+        if d_depth < 4.0:
+            raise CadError("wheel: a wheel %g wide leaves a D-bore only %.1f mm deep - the "
+                           "motor shaft needs 4 mm or more; use width >= %g"
+                           % (width, d_depth, math.ceil((4.0 + pocket + 1.0 - proud) / 0.84)))
+        rim = cad.d_bore(rim, (0, 0, -rw), '+Z', depth=d_depth, bore=bore,
+                         across=d_across, flat='+X')
     # ---- cap: in the pocket, 0.05 clear of its floor and wall
     cap_h = pocket - 0.05
     dome = min(0.5 * cap_r, 0.25 * cap_r + 0.3)
@@ -1252,6 +1284,9 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
             raise CadError("wheel: %s and %s overlap by %.3f mm3 (internal error)" % (x, y, ov))
     print("wheel: d %g x %g, %s tread x %d, %d %s spokes, %.2f s" % (
         d, width, tread, tread_n if tread else 0, spokes, spoke_style, time.time() - t0))
+    if flat:
+        print("wheel: D-bore %g / %g x %.1f deep in a %g hub, its mouth %.2f behind `at` "
+              "(the motor shaft is 8.8 long)" % (bore, d_across, d_depth, hub_d, rw))
     return out
 
 
@@ -1638,8 +1673,33 @@ def pilot_depth(d, reach):
     return min(reach, 4.0 * d + 1.0)
 
 
-def screw_boss(case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None):
+#: R1220: heat-set insert lengths screw_boss(kind="insert") assumes when
+#: insert_len is not given (common short brass inserts; not measured)
+INSERT_LEN = {2.0: 3.0, 2.5: 4.0, 3.0: 4.0}
+#: wall round a heat-set insert pocket (mm): the boss OD is hole + 2 x this
+INSERT_WALL = 1.6
+
+
+def insert_d(d):
+    """R1220: the pocket diameter of a heat-set insert for an M`d` screw
+    (the FIT table's "insert" row: M2 3.2, M2.5 3.6, M3 4.0)."""
+    table = _c().fit("insert")
+    for k, v in table.items():
+        if abs(float(str(k).lstrip("Mm")) - float(d)) < 1e-6:
+            return float(v)
+    raise CadError("screw_boss: no heat-set insert size for M%g - kind='insert' takes %s"
+                   % (d, ", ".join(sorted(table))))
+
+
+def screw_boss(case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None,
+               kind='tap', insert_len=None):
     """Fuse a screw boss into `case`: a column from `at` (its top, in air) along `axis` down to the floor it stands on, gussets, a pilot hole and a lead-in.
+
+    kind = 'tap' (default): the screw cuts its own thread in the pilot.
+    kind = 'insert': a pocket for a heat-set brass insert instead (M2 3.2,
+    M2.5 3.6, M3 4.0 wide; at least insert_len + 0.5 deep, insert_len
+    3 / 4 / 4 mm unless given, with room below for the screw's tip) in a
+    wider boss (pocket + 3.2). For a lid that is opened often.
 
     The height is MEASURED along `axis` from `at` to the first material
     (the floor); h, when given, must reach it. OD = 2.2 x d; the pilot is
@@ -1671,7 +1731,15 @@ def screw_boss(case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None):
         if h < t_in - 1e-6:
             raise CadError("screw_boss: h=%g does not reach the floor %.2f mm below `at` - "
                            "leave h=None to measure it" % (h, t_in))
+    if kind not in ("tap", "insert"):
+        raise CadError("screw_boss: kind must be 'tap' (the screw cuts its thread) or "
+                       "'insert' (a heat-set insert pocket), got %r" % (kind,))
     od = 2.2 * d
+    if kind == "insert":
+        ins_d = insert_d(d)
+        ins_len = INSERT_LEN.get(d, 1.5 * d) if insert_len is None \
+            else _num(insert_len, "screw_boss: insert_len", 0)
+        od = max(od, ins_d + 2.0 * INSERT_WALL)
     u, v, _n = _frame(a)
     t_in, sink = _floor_under_rim(case, p, a, od, t_in, sink, u, v)
     L = t_in + sink
@@ -1699,7 +1767,19 @@ def screw_boss(case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None):
     # a blind pilot 4 d deep at most: one run all the way to a CURVED roof
     # ends on that surface and the countersink came back INVALID (R242)
     # R444: the thread-forming pilot (0.85 d), with a lead-in to d + 0.8
-    res = cad.countersink(res, p, a, pilot_d(d), d + 0.8, 90.0, depth=pilot_depth(d, t_in))
+    if kind == "insert":
+        # R1220: the insert's pocket with a 0.3 lead-in so it starts
+        # straight: at least 0.5 deeper than the insert, and as deep as a
+        # tap pilot would be, so the screw's tip has room under the insert.
+        # One width all the way: ./check reads the bore at the screw's tip,
+        # and a narrower relief there read as a pilot that holds nothing
+        if t_in < ins_len + 0.5:
+            raise CadError("screw_boss: a %g mm insert does not fit a boss %.2f mm tall - "
+                           "raise `at` or give a shorter insert_len" % (ins_len, t_in))
+        pocket = max(ins_len + 0.5, pilot_depth(d, t_in))
+        res = cad.countersink(res, p, a, ins_d, ins_d + 0.6, 90.0, depth=pocket)
+    else:
+        res = cad.countersink(res, p, a, pilot_d(d), d + 0.8, 90.0, depth=pilot_depth(d, t_in))
     _valid(res, "screw_boss", solids=len(case.Solids))
     return res
 

@@ -1645,6 +1645,10 @@ as "test on the first print".
   board edge (speaker, dc_motor) also gets {saddle} under it and a strap
   over it; a cabled module sits in a pocket ({slide} mm clearance) with a stop on its
   open side. Backlash within {backlash_max} mm.
+- SHAFTS: a printed wheel or hub straight on a dc_motor shaft takes the
+  D-bore that printed and fitted, cad.wheel(..., flat=True) or cad.d_bore,
+  never a round bore (it spins); a hole a shaft turns in is cad.shaft_hole
+  (a printed hole comes out {hole_shrink} mm small).
 - WORKING FACES OPEN: the opening table B gives, centred on ap.bbox(module),
   through the wall in front only (cad.opening_for(..., axis=...)); lenses,
   light pipes and key caps are their own parts, listed in intent.json

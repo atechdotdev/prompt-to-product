@@ -265,7 +265,7 @@ Sizes are row x up x slide (mm). Features measured from height maps.
 | **microphone** | 39.50x10.84x19.50 | 2 | up | an engraved mic icon mid-plate; no explicit port in the mesh | `cad.speaker_grille(wall, c, n, 14-15, ring_pitch=2.4-2.5, hole=1.5-1.6)` (~20 holes: >= 3 % of the face open, ./check R270) + a ring rib (tube) from the wall to 0.3 mm off the mic face; >= 30 mm from the speaker |
 | **speaker** | 40.00x20.20x40.00 | 2 | up | 38.7 sq top, round surround ~27 centred; hangs **20.6 mm outboard** of the board edge | `cad.speaker_grille(wall, c, n, 32-36, ring_pitch=2.6, hole=1.5)` (95-133 holes, 21-29 % open), 0.5-2 mm air gap |
 | **usbc** | 19.50x10.21x19.75 | 1 | out (its board edge) | receptacle 10.0x3.5, **centre 5.9 mm above the PCB top**, mouth 0.25 proud | `cad.socket_opening(wall, usb, margin=1.5)` = 13 x 6.5. **The wall must be <= ~1.5 mm in front of the mouth**: cut a pocket and fuse a liner whose back wall starts 0.25 mm off the mouth (all three examples) |
-| **dc_motor** (N20 + DRV8833) | 19.50x19.14x48.30 | 1 | out (shaft) | shaft 3.0 D, **10.14 mm above the PCB top**, 8.8 mm beyond the body; body overhangs the board edge 20.4, the shaft tip 29.2 | a hole >= 5 round the shaft (a soft square avoids a "hole through 2 walls" warning); a wheel bore 3.3 |
+| **dc_motor** (N20 + DRV8833) | 19.50x19.14x48.30 | 1 | out (shaft) | shaft 3.0 D, **10.14 mm above the PCB top**, 8.8 mm beyond the body; body overhangs the board edge 20.4, the shaft tip 29.2 | a hole >= 5 round the shaft (a soft square avoids a "hole through 2 walls" warning); a printed wheel or hub straight on the shaft takes the D-bore that printed and fitted, 3.4 / 2.9: `cad.wheel(..., flat=True)` or `cad.d_bore` |
 | **knob** (rotary + LED ring) | 39.50x38.10x39.50 | 2 | up (shaft) | a rotary shaft centred on +Y with an LED ring round it (r ~11-13); hangs ~20 mm past the board edge | seat it on (13, 14): a round well (r ~19) for finger room round a ~12 mm cap, a frosted ring over the LEDs (macro_pad.py, arm_dock.py) |
 
 ---
@@ -274,7 +274,7 @@ Sizes are row x up x slide (mm). Features measured from height maps.
 
 | Part | Measured | Use |
 |---|---|---|
-| **n20_wheel** | 5.40x3.70x6.00 hub, D-bore ~3.16 / 2.68 flat | a shaft coupler, not a road wheel. Road wheels: `cad.wheel(d, width, bore=3.3, axis=..., at=...)` |
+| **n20_wheel** | 5.40x3.70x6.00 hub, D-bore ~3.16 / 2.68 flat | a shaft coupler, not a road wheel. Road wheels: `cad.wheel(d, width, flat=True, axis=..., at=...)` pushes straight onto the shaft (D-bore 3.4 / 2.9, the printed fit), or a wheel with a socket for this hub (examples/rover.py) |
 | **nema17_stepper** | 42.3x64x42.3; face at y 0, shaft +Y 5 x 24, M3 on a 31 square, pilot 22 x 2 | driven by the `stepper_motor` driver module (TMC2209; it needs its own 12-24 V motor supply, see TRAPS R29); on a mount plate (22.5 pilot, 3.2-3.4 holes) |
 
 ---

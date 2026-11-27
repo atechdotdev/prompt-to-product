@@ -43,6 +43,14 @@ merely looks fine. The FreeCAD traps each one closes:
     detail          `with cad.detail("grille"): ...` - a detail that fails
                     with a geometry error is skipped and reported by
                     ./check, not fatal to the whole build (R400).
+    d_bore          the keyed D-bore that pushes onto the DC Motor's shaft,
+                    at the size that PRINTED and fitted (3.4 / 2.9, not the
+                    shaft's own 3.0 / 2.5): hub = cad.d_bore(hub, at, axis)
+    shaft_hole      a round hole drawn so that it prints with the fit you
+                    name ('running', 'press' ...): a printed hole comes out
+                    about 0.25 mm under its drawn size (R1220).
+    fit             a FIT NUMBERS value by its key, cad.fit("slide"): the
+                    person's own print results replace the table's.
 
 Conventions: millimetres and degrees. Points and directions may be tuples or
 FreeCAD Vectors. Shapes are Part.Shape objects; add the final one to the
@@ -62,6 +70,7 @@ __all__ = [
     "last_reason",
     "spur_gear", "gear_shift_for", "bound_of", "place_on", "wedge",
     "pin_hinge", "socket_opening", "detail",
+    "fit", "d_bore", "shaft_hole",
 ]
 
 TOL = 1e-6          # volumes below this (mm^3) are "nothing"
@@ -965,6 +974,131 @@ def hole(shape, at, axis, d, depth=None, through=False):
         raise CadError("hole: depth must be > 0")
     tool = Part.makeCylinder(d / 2.0, L + BACK, p - a * BACK, a)
     return _drill(shape, tool, what, expect, (p, a, d / 2.0))
+
+
+# R1220: the fit numbers the kit applies itself when atech_fit is not
+# beside it (a kit copied alone). Kept equal to atech_fit by
+# test_cadwf_r1220; atech_fit wins, and with it the user's own values.
+_FIT_DEFAULTS = {
+    "dbore_d3": (3.40, 2.90), "dbore_depth": 12.0, "hole_shrink": 0.25,
+    "bearing_d3": 3.5,
+    "insert": {"M2": 3.2, "M2.5": 3.6, "M3": 4.0},
+    "fit_bands": {"press": (-0.20, -0.05), "transition": (-0.05, 0.05),
+                  "running": (0.15, 0.35), "slide": (0.20, 0.50),
+                  "clearance": (0.30, 0.80), "pocket": (0.30, 1.50)},
+}
+
+
+def fit(key):
+    """A print-fit number by its key, e.g. cad.fit("slide") or cad.fit("dbore_d3").
+
+    The keys are the ones in the fit tables (atech_fit). Use it instead of
+    typing the number: when the person's own prints changed a value (tag
+    U), the next build follows."""
+    try:
+        import atech_fit
+        return atech_fit.value(key)
+    except ImportError:
+        if key in _FIT_DEFAULTS:
+            return _FIT_DEFAULTS[key]
+        raise CadError("fit: no value %r here (the FIT NUMBERS table is not "
+                       "beside this kit)" % (key,))
+    except KeyError as exc:
+        raise CadError("fit: %s" % (exc.args[0] if exc.args else key))
+
+
+def _perp(a, hint=None):
+    """A unit vector perpendicular to the unit vector `a`: `hint` projected
+    into the plane across it, else a fixed choice."""
+    if hint is not None:
+        h = _dir(hint, "flat")
+        h = h - a * h.dot(a)
+        if h.Length > 1e-6:
+            h.normalize()
+            return h
+        raise CadError("d_bore: `flat` points along `axis` - it is the side "
+                       "the flat faces, across the bore")
+    ref = V((1, 0, 0)) if abs(a.x) < 0.9 else V((0, 1, 0))
+    u = ref - a * ref.dot(a)
+    u.normalize()
+    return u
+
+
+def d_bore(shape, at, axis, depth=None, bore=None, across=None, flat=None,
+           lead_in=0.5):
+    """Cut the keyed D-bore that pushes onto the DC Motor's shaft, at the fit that printed (3.4 round, 2.9 across the flat).
+
+    at      bore centre ON the entry face (where the shaft goes in)
+    axis    INTO the material, along the shaft: '+Y', (0, 0, -1) ...
+    flat    the side of the bore its flat is on, e.g. '+X' (default: a
+            fixed side; turn the wheel to the shaft when you fit it)
+    depth   blind depth; default the FIT table's (12; the shaft is 8.8 long)
+    bore, across   default the printed fit: 3.4 round, 2.9 across the flat
+            (shaft 3.0 / 2.5 + 0.2 per side - 3.1 had to be drilled open)
+    lead_in a cone this much wider at the mouth, so the shaft finds it
+
+    The wall round it should be 2 mm or more: a push fit splits a thin hub."""
+    bd, af = fit("dbore_d3")
+    bd = float(bd if bore is None else bore)
+    af = float(af if across is None else across)
+    L = float(fit("dbore_depth") if depth is None else depth)
+    if bd <= 0 or L <= 0:
+        raise CadError("d_bore: bore and depth must be > 0")
+    if not (bd / 2.0 < af < bd):
+        raise CadError("d_bore: across=%g must be between bore/2 and bore "
+                       "(%g): it is the width from the round side to the flat"
+                       % (af, bd))
+    lead = max(0.0, float(lead_in))
+    a = _dir(axis)
+    f = _perp(a, flat)
+    p = V(at)
+    what = "d_bore(%g / %g x %g at %s)" % (
+        bd, af, L, tuple(round(c, 3) for c in p))
+    r = bd / 2.0
+    cyl = Part.makeCylinder(r, L + BACK, V((0, 0, -BACK)))
+    keep = Part.makeBox(af + 1.0, bd + 2.0, L + BACK + 2.0,
+                        V((-r - 1.0, -r - 1.0, -BACK - 1.0)))
+    tool = cyl.common(keep)
+    rot = App.Rotation(f, a.cross(f), a, "ZXY")
+    place = App.Placement(p, rot)
+    tool.Placement = place
+    h = bd - af
+    seg = r * r * math.acos((r - h) / r) - (r - h) * math.sqrt(2 * r * h - h * h)
+    expect = (math.pi * r * r - seg) * L
+    res = _drill(shape, tool, what, expect, (p, a, r))
+    if lead > 1e-6:
+        cone = Part.makeCone(r + lead, r, lead)
+        stub = Part.makeCylinder(r + lead, BACK, V((0, 0, -BACK)))
+        for t in (cone, stub):
+            t.Placement = place
+        n = len(res.Solids)
+        res = res.cut(cone.fuse(stub))
+        _check(res, what + " lead-in", solids=n)
+        res = _one(res)
+    return res
+
+
+def shaft_hole(shape, at, axis, shaft_d, fit_class="running", depth=None,
+               through=False):
+    """Drill the round hole for a shaft of diameter shaft_d, drawn so that it PRINTS with the fit you name ('running': the shaft turns in it).
+
+    A printed hole comes out about 0.25 mm under its drawn size, so the
+    hole is drawn that much larger than the fit alone.
+
+    fit_class  'running' a shaft that turns in it (3 mm shaft: drawn 3.5),
+               'press', 'transition', 'slide' or 'clearance' (a bolt)
+    at, axis, depth, through   as cad.hole
+
+    For the DC Motor's own D-shaft carrying a wheel or hub use cad.d_bore."""
+    bands = fit("fit_bands")
+    if fit_class not in bands:
+        raise CadError("shaft_hole: fit_class must be one of %s"
+                       % ", ".join(bands))
+    lo, hi = bands[fit_class]
+    d = float(shaft_d) + (lo + hi) / 2.0 + float(fit("hole_shrink"))
+    d = round(round(d / 0.05) * 0.05, 2)
+    print("shaft_hole: %g mm shaft, %s fit: drawn %g" % (shaft_d, fit_class, d))
+    return hole(shape, at, axis, d, depth=depth, through=through)
 
 
 def counterbore(shape, at, axis, d, cb_d, cb_depth, depth=None, through=True):

@@ -291,6 +291,8 @@ RULE_KEYS = (
     "air_speaker", "fence", "rib", "fence_top_mod", "pad_min", "preload_tip",
     "preload", "backlash_max", "lip_loose", "boss_od_rule", "snap_strain",
 )
+#: R1220: placeholders of the rules added after that plan (SHAFTS).
+RULE_KEYS_R1220 = ("hole_shrink",)
 
 # ----------------------------------------------------------------- sources
 #: R1210: where each printed (P) number comes from. "ref" is a path in

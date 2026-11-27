@@ -50,13 +50,14 @@ API = {
               "through='wall'",
     "speaker_grille": "shape, center, normal, d, ring_pitch=2.5, hole=1.4, through='wall'",
     "wheel": "d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', "
-             "tread_n=40, hub_d=None, bore=None, axis='+Y', at=(0, 0, 0)",
+             "tread_n=40, hub_d=None, bore=None, axis='+Y', at=(0, 0, 0), flat=False",
     "text": "shape, text, at, normal, size, depth=0.6, mode='emboss', up=(0, 0, 1), "
             "halign='center', font=None",
     "color": "name",
     "transparency": "name",
     "screw": "kind='socket', size='M3', length=8, at=(0, 0, 0), axis='-Z'",
-    "screw_boss": "case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None",
+    "screw_boss": "case, at, axis='-Z', size='M3', h=None, ribs=4, rib_len=None, "
+                  "kind='tap', insert_len=None",
     "screw_through": "lid, case, at, size='M3', ribs=4, rib_len=None",
     "button_cap": "d_or_wh, height, dome=0.5, flange=1.0, stem_d=None, at=(0, 0, 0), "
                   "axis='+Z'",
