@@ -10,6 +10,7 @@ cad-workflow repository, 2026-11-27).
 Prints PASS/FAIL per check and ends with ATECH_CADWF_R1230=<failures>.
 ATECH_CADWF_SABOTAGE=same makes every puck's bore 3.4 (the suite must notice).
 """
+import math
 import os
 import sys
 import traceback
@@ -79,7 +80,24 @@ def t_labels_differ():
     vols = [round(got[k].Volume, 2) for k in sorted(got)]
     # a larger bore and another number: no two pucks have the same volume
     check("every puck is its own", len(set(vols)) == 5, repr(vols))
-    check("bigger bore, less plastic (within the lettering)", vols[0] > vols[-1], repr(vols))
+    check("bigger bore, less plastic (within the dots)", vols[0] > vols[-1], repr(vols))
+    # R1295: the labels are round dots in the top face, one per tenth:
+    # 2 on the 3.2 puck ... 6 on the 3.6 puck, 2 / 3 / 4 on the plate
+    def dots(shape, z, d):
+        return [f for f in shape.Faces
+                if type(f.Surface).__name__ == "Plane" and abs(f.Area - math.pi * d * d / 4) < 0.01
+                and abs(f.CenterOfMass.z - (z - det.COUPON_DOT_DEPTH)) < 1e-6]
+    for bd in (3.2, 3.3, 3.4, 3.5, 3.6):
+        n = len(dots(got["Fit_D%d" % round(bd * 10)], 10.0, det.COUPON_DOT_D))
+        check("puck %g carries %d dots" % (bd, round(bd * 10) % 10),
+              n == round(bd * 10) % 10, "%d" % n)
+    plate = cad.fit_coupon("module")["Fit_slide"]
+    n = len(dots(plate, 3.0, det.COUPON_PLATE_DOT_D))
+    check("the plate carries 2 + 3 + 4 dots", n == 9, "%d" % n)
+    # no letters: nothing in the coupon is a spline or a glyph's cusp
+    kinds = {type(f.Surface).__name__ for s in got.values() for f in s.Faces}
+    check("only planes, cylinders and cones", kinds <= {"Plane", "Cylinder", "Cone"},
+          repr(sorted(kinds)))
 
 
 def t_module_gauge():

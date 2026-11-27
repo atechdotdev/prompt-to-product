@@ -10,6 +10,7 @@ ends with ATECH_CADWF_R1260=<failures>.
 ATECH_CADWF_SABOTAGE=noshrink sets the hole shrink to 0 (the classes must
 change, and the suite must notice).
 """
+import math
 import os
 import sys
 import traceback
@@ -49,7 +50,7 @@ def t_pins_in_holes():
     rows = fc.pin_fits(parts)
     by = {r["hole_d"]: r for r in rows}
     check("three pairs", sorted(by) == [3.0, 3.3, 3.6], repr(sorted(by)))
-    want = {3.0: (-0.25, "interference"), 3.3: (0.05, "transition"), 3.6: (0.35, "running")}
+    want = {3.0: (-0.25, "interference"), 3.3: (0.05, "press"), 3.6: (0.35, "running")}
     for d, (printed, word) in want.items():
         r = by.get(d) or {}
         check("3 mm pin in a %g hole prints %g clear: %s" % (d, printed, word),
@@ -111,8 +112,8 @@ def t_motor_old_d_bore_is_a_note():
 
 
 def t_motor_round_bores():
-    for d, level, kind, words in ((3.3, "warning", "round", "does not drive"),
-                                  (3.0, "warning", "round", "does not drive"),
+    for d, level, kind, words in ((3.3, "warning", "round", "has no key"),
+                                  (3.0, "warning", "round", "has no key"),
                                   (3.5, "info", "round", "turns in a round 3.5 hole")):
         _, hub = _hub()
         hub = hub.cut(Part.makeCylinder(d / 2, 14, V(-11, 0, 0), V(1, 0, 0)))
@@ -137,6 +138,40 @@ def t_a_deep_d_bore_the_shaft_only_half_enters():
           and r.get("across") == 2.9 and r.get("engaged_mm") == 4.0, repr(r))
 
 
+def t_the_bores_flat_against_the_shafts():
+    """R1295 review: a D-bore whose flat is turned away from the shaft's
+    overlaps the shaft in the model, and was still called "the push fit
+    that printed"."""
+    def row(bore_flat, shaft_flat):
+        _, hub = _hub()
+        hub = cad.d_bore(hub, (-10, 0, 0), "+X", flat=bore_flat)
+        motor = [dict(MOTOR[0], flat=shaft_flat)]
+        return (fc.motor_fits([{"label": "Hub", "shape": hub}], motor) or [{}])[0]
+    r = row("+Z", (0.0, 0.0, 1.0))
+    check("flat on flat: the push fit, 0 degrees off", r.get("level") == "info"
+          and r.get("flat_off_deg") == 0.0 and "push fit that printed" in r.get("text", ""),
+          repr(r))
+    check("it names the material it was proven in", "PETG and PETG-CF" in r.get("text", ""))
+    for bore_flat, off in (("-Z", 180), ("+Y", 90)):
+        r = row(bore_flat, (0.0, 0.0, 1.0))
+        check("flat turned %d degrees: a note that says so" % off,
+              r.get("level") == "note" and r.get("flat_off_deg") == float(off)
+              and "turned %d degrees" % off in r.get("text", "")
+              and "cad.motor_shaft(motor)" in r.get("text", "")
+              and "push fit that printed" not in r.get("text", ""), repr(r))
+    # 5 degrees off is still the fit (tessellation, a hand-turned wheel)
+    a = math.radians(5.0)
+    r = row("+Z", (0.0, math.sin(a), math.cos(a)))
+    check("5 degrees off is still the fit", r.get("level") == "info"
+          and abs(r.get("flat_off_deg", 99) - 5.0) < 0.2, repr(r))
+    # a motor row without the flat (an older caller): judged as before
+    _, hub = _hub()
+    hub = cad.d_bore(hub, (-10, 0, 0), "+X", flat="-Z")
+    r = (fc.motor_fits([{"label": "Hub", "shape": hub}], MOTOR) or [{}])[0]
+    check("no shaft flat given: no direction verdict", r.get("level") == "info"
+          and "flat_off_deg" not in r, repr(r))
+
+
 def t_motor_elsewhere():
     _, hub = _hub()
     hub = hub.cut(Part.makeCylinder(1.65, 14, V(-11, 0, 0), V(1, 0, 0)))
@@ -151,6 +186,7 @@ def t_motor_elsewhere():
 
 for fn in (t_pins_in_holes, t_what_is_not_a_fit, t_motor_d_bore, t_motor_old_d_bore_is_a_note,
            t_motor_round_bores, t_a_deep_d_bore_the_shaft_only_half_enters,
+           t_the_bores_flat_against_the_shafts,
            t_motor_elsewhere):
     try:
         fn()

@@ -6,19 +6,26 @@ class, and fails a pair whose clearance is in the wrong band. This is the
 part of that idea ./check can measure on its own, for round fits:
 
     a DC Motor's shaft in a printed bore
-        a wheel or hub needs the keyed D-bore that printed (3.4 / 2.9);
-        a round bore does not drive, and one that prints tight has to be
-        drilled open (both happened to cad-workflow's first wheels)
+        a wheel or hub needs the keyed D-bore that printed (3.4 / 2.9, in
+        PETG and PETG-CF), its flat on the shaft's flat. A bore that
+        prints tight has to be drilled open (cad-workflow's first wheels,
+        drawn 3.1: after drilling they were "snug but no key"). A round
+        bore has no key at all: only friction turns the part
     a printed pin in a printed hole
         the clearance as drawn, what is left of it once the hole has
-        shrunk in printing, and the class that is (press, transition,
-        running, slide, clearance)
+        shrunk in printing, and the class that is (interference, press,
+        push, running, clearance)
 
 ./check prints one FIT line per pair. A round bore that grips the motor's
 D-shaft is a WARNING; nothing here fails a build (docs/
 CAD_WORKFLOW_MERGE.md, decision 2). The bands and the shrink are
 atech_fit's ("fit_bands", "hole_shrink"), so a user's own print results
-move the verdicts too.
+move the verdicts too. The press and push bands come from the motor-shaft
+prints; running and clearance are assumed.
+
+What it does not see: a bore that is not a true cylinder (a polygon, a
+spline surface from a STEP round trip) and a bore more than 0.15 mm off the
+shaft's axis get no line.
 
 Needs FreeCAD shapes (cylinder faces); the numbers are numpy.
 """
@@ -45,6 +52,9 @@ MAX_LINES = 6
 FREE_HOLE = 1.5
 #: how far a D-bore may differ from the table's and still be "the" fit
 DBORE_TOL = 0.06
+#: a D-bore whose flat is turned more than this from the shaft's flat does
+#: not go on as drawn (degrees)
+FLAT_TOL_DEG = 10.0
 
 
 def _unit(v):
@@ -93,9 +103,10 @@ def _coaxial(cyl, point, axis):
 
 
 def _flat_across(shape, cyl, lo, hi):
-    """The width of a D-bore from its round side to its flat: a planar
-    face along the bore's axis, inside the bore's radius, within the axial
-    range lo..hi (in the cylinder's own coordinate). None for a round bore."""
+    """(width of a D-bore from its round side to its flat, unit vector from
+    the bore's axis to the flat): a planar face along the bore's axis,
+    inside the bore's radius, within the axial range lo..hi (in the
+    cylinder's own coordinate). None for a round bore."""
     a, c, r = cyl["a"], cyl["c"], cyl["r"]
     best = None
     for f in shape.Faces:
@@ -124,8 +135,12 @@ def _flat_across(shape, cyl, lo, hi):
         if d >= r - 0.02 or float(np.linalg.norm(radial)) > r + 0.02:
             continue
         across = r + d
-        if best is None or across < best:
-            best = across
+        if best is None or across < best[0]:
+            side = radial if float(np.linalg.norm(radial)) > 1e-6 else n
+            # the direction from the axis to the flat: along the plane's
+            # normal, on the side the face's middle is on
+            side = n * (1.0 if float(side @ n) > 0 else -1.0)
+            best = (across, _unit(side))
     return best
 
 
@@ -161,19 +176,35 @@ def motor_fits(parts, motors):
                 continue
             cyl, lo, hi = best
             hole_d = round(2 * cyl["r"], 2)
-            across = _flat_across(p["shape"], cyl, lo, hi)
+            got = _flat_across(p["shape"], cyl, lo, hi)
+            across, side = got if got else (None, None)
             row = {"motor": m["label"], "part": p["label"], "hole_d": hole_d,
                    "across": round(across, 2) if across else None,
                    "engaged_mm": round(hi - lo, 1),
                    "printed": round(hole_d - shrink - shaft_d, 2), "level": "info"}
+            # the bore's flat against the shaft's own (R1295: a D-bore
+            # turned away from the shaft's flat overlaps the shaft, and was
+            # still called "the push fit that printed")
+            turned = None
+            if side is not None and m.get("flat") is not None:
+                sf = _unit(m["flat"])
+                turned = float(np.degrees(np.arccos(max(-1.0, min(1.0, float(side @ sf))))))
+                row["flat_off_deg"] = round(turned, 1)
             if hole_d >= shaft_d + FREE_HOLE:
                 continue                                # a hole it does not touch: no fit
+            elif across is not None and turned is not None and turned > FLAT_TOL_DEG:
+                row["kind"] = "dbore"
+                row["level"] = "note"
+                row["text"] = ("%s on the shaft of %s: its D-bore's flat is turned %g degrees "
+                               "from the shaft's flat, so bore and shaft overlap in the model. "
+                               "Take the shaft's own: s = cad.motor_shaft(motor), flat=s[\"flat\"]"
+                               % (p["label"], m["label"], round(turned)))
             elif across is not None:
                 row["kind"] = "dbore"
                 off = max(abs(hole_d - t_bore), abs(across - t_across))
                 if off <= DBORE_TOL:
                     row["text"] = ("%s on the shaft of %s: D-bore %g / %g, the push fit that "
-                                   "printed; %g mm of the shaft in it"
+                                   "printed (in PETG and PETG-CF); %g mm of the shaft in it"
                                    % (p["label"], m["label"], hole_d, row["across"],
                                       row["engaged_mm"]))
                 else:
@@ -196,8 +227,9 @@ def motor_fits(parts, motors):
                 else:
                     row["level"] = "warning"
                     row["text"] = ("%s sits on the shaft of %s with a ROUND %g bore (prints "
-                                   "about %g clear: %s). The shaft is a D: a round bore does "
-                                   "not drive, and this one may not go on without drilling. "
+                                   "about %g clear: %s). The shaft is a D: a round bore has no "
+                                   "key, so only friction turns the part, and this one may not "
+                                   "go on without drilling. "
                                    "Use s = cad.motor_shaft(motor), then cad.wheel(..., flat=s[\"flat\"]) or "
                                    "cad.d_bore(..., flat=s[\"flat\"]) (%g / %g, the "
                                    "fit that printed)"

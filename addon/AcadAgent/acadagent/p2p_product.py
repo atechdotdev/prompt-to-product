@@ -47,11 +47,19 @@ def _log(msg):
 
 
 # ------------------------------------------------------------------ facts
+#: seconds the "On the bed" measurement may take over all parts of a pack
+BED_BUDGET_S = 6.0
+
+
 def part_rows(doc, bom):
     """bom["printed"] rows with each part's laid-out size and surface, from
     the document: [{"label", "count", "size_mm", "volume_cm3", "area_mm2",
-    "colour"}]."""
+    "colour", "bed"}]."""
+    import time
     out = []
+    # R1295: the bed measurement has ./check's time budget for all parts
+    # together; a part past it is "not measured (time budget)" in the paper
+    deadline = time.time() + BED_BUDGET_S
     for r in (bom or {}).get("printed") or []:
         o = None
         try:
@@ -68,7 +76,11 @@ def part_rows(doc, bom):
             area = float(o.Shape.Area)
             try:
                 # R1270: how it lies on the bed (./check's own measurement)
-                bed = kit("atech_print").shape_report(o.Shape, r["part"])
+                if time.time() > deadline:
+                    bed = {"label": r["part"], "skipped": "time budget", "flags": []}
+                else:
+                    bed = kit("atech_print").shape_report(o.Shape, r["part"],
+                                                          deadline=deadline)
             except Exception as exc:                      # noqa: BLE001
                 _log("bed: %r" % (exc,))
         out.append({"label": r["part"], "count": r["count"], "size_mm": size or [0, 0, 0],

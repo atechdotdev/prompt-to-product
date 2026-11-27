@@ -55,9 +55,18 @@ class Formulas(unittest.TestCase):
         # cad.cantilever_strain: 1.5 t y / L^2
         r = mech.snap_strain("hook", deflection=1.2, L=14, t=1.6, material="PLA")
         self.assertAlmostEqual(r["strain"], round(1.5 * 1.2 * 1.6 / 14 ** 2, 4))
-        self.assertTrue(r["ok"])                              # 1.47 % under PLA's 2 %
+        self.assertTrue(r["ok"])                              # 1.47 % under PLA's 1.5 %
         self.assertFalse(mech.snap_strain("hook", 2.5, 10, 2.0, "PLA")["ok"])
-        self.assertTrue(mech.snap_strain("hook", 2.5, 14, 2.0, "PETG")["ok"])
+        self.assertTrue(mech.snap_strain("hook", 1.9, 14, 2.0, "PETG")["ok"])    # 2.9 %
+        self.assertFalse(mech.snap_strain("hook", 2.5, 14, 2.0, "PETG")["ok"])   # 3.8 %
+
+    def test_one_snap_strain_in_the_kit(self):
+        """R1295 review: atech_mech had partsmith's 2 % / 4 % while the fit
+        table (and cad.snap_fit_cantilever) design to 1.5 % / 3 %: two
+        allowables for the same hook."""
+        import atech_fit
+        for mat, eps in atech_fit.table_value("snap_strain").items():
+            self.assertEqual(mech.ALLOWABLES[mat]["snap_strain"], eps, mat)
 
     def test_pin_and_bearing(self):
         r = mech.pin_double_shear("hinge pin", F=30, d=1.75)
@@ -94,7 +103,9 @@ class Data(unittest.TestCase):
                 self.assertIn(key, a, "%s: %s" % (name, key))
             self.assertLess(a["z_knockdown"], 1.0)
         self.assertIn("unverified", mech.ALLOWABLES["PLA"]["source"])
-        self.assertIn("None of them is verified", " ".join(mech.__doc__.split()))
+        doc = " ".join(mech.__doc__.split())
+        self.assertIn("None is verified on a printer", doc)
+        self.assertIn("the snap strain are design assumptions", doc)
 
     def test_safety_factors(self):
         self.assertEqual(mech.SAFETY_FACTORS, {"static": 2.0, "impact": 3.0, "drop": 1.5})

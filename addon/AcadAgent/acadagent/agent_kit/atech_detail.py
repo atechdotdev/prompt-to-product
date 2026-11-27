@@ -1095,6 +1095,22 @@ def _tyre(R, ri, hw):
     return _revolve_face(face)
 
 
+def _rim_for_windows(hub_d):
+    """The smallest rim_d (to 0.1 mm) that leaves wheel()'s spoke windows
+    their 1.5 mm between a hub of hub_d and the rim's lip - the rule in
+    wheel() itself, solved for the rim, for its error messages."""
+    hr = hub_d / 2.0
+    ri = hr + 2.0
+    while ri < 500.0:
+        lip = max(0.8, min(2.0, 0.08 * ri))
+        rin = hr + max(1.0, 0.1 * ri)
+        rout = ri - RIM_GAP - lip - max(0.6, 0.06 * ri)
+        if rout - rin >= 1.5:
+            break
+        ri += 0.05
+    return math.ceil(ri * 20.0 - 1e-9) / 10.0
+
+
 def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', tread_n=40,
           hub_d=None, bore=None, axis='+Y', at=(0, 0, 0), flat=False):
     """A wheel of diameter d as {"tyre", "rim", "cap"}: separate solids (rubber, metal, chrome) that do not overlap, centred at `at`, the cap facing `axis`.
@@ -1106,7 +1122,7 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
           2 mm round it. Give the shaft's own flat,
           flat=cad.motor_shaft(motor)["flat"], so the D-bore and the
           D-shaft line up in the model (True: a fixed side, for a wheel
-          not yet on a motor). A round bore= on that shaft spins loose or
+          not yet on a motor). A round bore= on that shaft has no key or
           has to be drilled. Seat the hub's back face a little off the
           gearbox.
 
@@ -1147,6 +1163,17 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
         elif _num(hub_d, "wheel: hub_d", 0) < need - 1e-9:
             raise CadError("wheel: flat=True pushes onto the motor shaft and needs 2 mm of "
                            "hub round its %g bore - use hub_d >= %g" % (bore, need))
+        if hub_d / 2.0 > ri - 2.0:
+            # R1295: the general message below said "use hub_d <= 7.16"
+            # when the keyed hub needs >= 7.4: point at what can change
+            bar = hub_d + 4.0
+            win = max(bar, _rim_for_windows(hub_d))
+            raise CadError("wheel: a hub keyed to the motor shaft is %g mm across and does "
+                           "not fit inside rim_d %g - use rim_d >= %g (a wheel of d >= %g "
+                           "with the default rim), or spoke_style='bar' and rim_d >= %g "
+                           "(d >= %g)"
+                           % (hub_d, rim_d, win, math.ceil(win / 0.62), bar,
+                              math.ceil(bar / 0.62)))
     hub_d = max(0.3 * rim_d, 4.0) if hub_d is None else _num(hub_d, "wheel: hub_d", 0)
     hr = hub_d / 2.0
     if bore is not None and _num(bore, "wheel: bore", 0) >= hub_d - 1.0:
@@ -1202,8 +1229,11 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
     if spoke_style == "window":
         rin, rout = hr + max(1.0, 0.1 * ri), ro - lip - max(0.6, 0.06 * ri)
         if rout - rin < 1.5:
-            raise CadError("wheel: no room for spoke windows between hub_d %g and rim_d %g"
-                           % (hub_d, rim_d))
+            need = _rim_for_windows(hub_d)
+            raise CadError("wheel: no room for spoke windows between hub_d %g and rim_d %g "
+                           "- use rim_d >= %g (a wheel of d >= %g with the default rim) or "
+                           "spoke_style='bar'"
+                           % (hub_d, rim_d, need, math.ceil(need / 0.62)))
         sw = max(1.2, 0.16 * ri)
         half = math.pi / spokes
         ai = half - (sw / 2.0) / rin
@@ -2460,38 +2490,38 @@ COUPON_BORES = (3.2, 3.3, 3.4, 3.5, 3.6)
 #: the per-side clearances of the module gauge's three windows (mm)
 COUPON_GAPS = (0.2, 0.3, 0.4)
 COUPON_PUCK_D, COUPON_PUCK_H, COUPON_PITCH = 14.0, 10.0, 18.0
-#: a 1-port module's footprint (atech_fit "module_size", measured)
-COUPON_MODULE = 19.5
+#: the labels: round dots, one per tenth of a millimetre (4 dots = 3.4 mm
+#: bore, 3 dots = 0.3 mm a side). Engraved digits were tried first (as on
+#: Gustav's pucks): the cusps of the glyphs left 0.05 mm "walls" and
+#: ./check failed the coupon (R1295 review). A dot has no cusp, and at
+#: these sizes the walls between dots are two extrusion lines or more.
+COUPON_DOT_D, COUPON_DOT_DEPTH = 1.0, 0.6
+COUPON_DOT_R, COUPON_DOT_STEP_DEG = 5.0, 22.0      # the pucks' arc of dots
+COUPON_PLATE_DOT_D, COUPON_PLATE_DOT_PITCH = 1.2, 2.4
 
 
-def _coupon_label(shape, txt, at, size=3.2):
-    """Engrave `txt` 0.6 deep in a top face; on a font failure, cut one
-    small round dimple per unit of the last digit instead (the coupon must
-    always come out labelled)."""
+def _coupon_dots(shape, points, d):
+    """One blind round dot of diameter d at each point of a top face."""
     cad = _c()
-    try:
-        return text(shape, txt, at, "+Z", size, depth=0.6, mode="deboss", up=(0, 1, 0))
-    except CadError as exc:
-        print("fit_coupon: no lettering (%s) - dimples instead" % exc)
-    n = int(str(txt)[-1]) or 10
-    p = V(at)
-    for k in range(n):
-        shape = cad.hole(shape, (p.x - 0.9 * (n - 1) / 2.0 + 0.9 * k, p.y, p.z), "-Z", 0.6,
-                         depth=0.6)
-    return shape
+    tools = [Part.makeCylinder(d / 2.0, COUPON_DOT_DEPTH + BACK,
+                               V((p[0], p[1], p[2] - COUPON_DOT_DEPTH)))
+             for p in points]
+    return cad.cut(shape, tools)
 
 
 def fit_coupon(kind='shaft', at=(0, 0, 0)):
     """The test-fit prints as {label: solid}: five pucks with D-bores 3.2 to 3.6 for the motor shaft ('shaft'), a plate with three windows for a module ('module'), or 'all'.
 
     Print them once per printer and filament. Push each puck onto a motor
-    shaft: the number on the one that is snug and keyed (34 = 3.4 mm) is
-    this printer's D-bore, and the app keeps it for every wheel after
-    that (cad.fit("dbore_d3")). Pass a module through the plate's windows:
-    the number of the tightest one it slides through (3 = 0.3 mm per side)
-    is the clearance for pockets round hardware (cad.fit("slide")).
+    shaft: the one that is snug and keyed is this printer's D-bore - count
+    its dots (2 dots = 3.2 mm ... 6 dots = 3.6 mm) - and the app keeps it
+    for every wheel after that (cad.fit("dbore_d3")). Pass a module
+    through the plate's windows: the dots of the tightest one it slides
+    through (3 dots = 0.3 mm per side) are the clearance for pockets round
+    hardware (cad.fit("slide")).
     Each puck is 14 across and 10 tall with its flat marked by a notch;
-    they stand in a row from `at`, bed side down."""
+    they stand in a row from `at`, bed side down. The module and the shaft
+    are the measured ones (cad.fit("module_size"), "motor_shaft")."""
     cad = _c()
     if kind not in ("shaft", "module", "all"):
         raise CadError("fit_coupon: kind must be 'shaft', 'module' or 'all'")
@@ -2499,7 +2529,7 @@ def fit_coupon(kind='shaft', at=(0, 0, 0)):
     out = {}
     if kind in ("shaft", "all"):
         r, h = COUPON_PUCK_D / 2.0, COUPON_PUCK_H
-        shaft_d, shaft_flat = 3.0, 2.5
+        shaft_d, shaft_flat = float(cad.fit("motor_shaft")[0]), float(cad.fit("motor_shaft_flat"))
         for i, bd in enumerate(COUPON_BORES):
             c = V((o.x + i * COUPON_PITCH, o.y, o.z))
             puck = Part.makeCylinder(r, h, c)
@@ -2509,11 +2539,17 @@ def fit_coupon(kind='shaft', at=(0, 0, 0)):
             # a notch in the rim at the flat's side, so the D is easy to find
             puck = cad.cut(puck, Part.makeBox(1.4, 1.4, 1.0,
                                               V((c.x + r - 1.1, c.y - 0.7, c.z + h - 0.6))))
-            puck = _coupon_label(puck, "%d" % round(bd * 10), (c.x, c.y - 4.2, c.z + h))
+            n = int(round(bd * 10)) % 10                 # 3.4 -> 4 dots
+            dots = []
+            for k in range(n):
+                ang = math.radians(270.0 + COUPON_DOT_STEP_DEG * (k - (n - 1) / 2.0))
+                dots.append((c.x + COUPON_DOT_R * math.cos(ang),
+                             c.y + COUPON_DOT_R * math.sin(ang), c.z + h))
+            puck = _coupon_dots(puck, dots, COUPON_DOT_D)
             _valid(puck, "fit_coupon puck %g" % bd, solids=1)
             out["Fit_D%d" % round(bd * 10)] = puck
     if kind in ("module", "all"):
-        m, t, edge, strip = COUPON_MODULE, 3.0, 4.0, 7.0
+        m, t, edge, strip = float(cad.fit("module_size")), 3.0, 4.0, 7.0
         wins = [m + 2 * g for g in COUPON_GAPS]
         width = sum(wins) + edge * (len(wins) + 1)
         depth = max(wins) + 2 * edge + strip
@@ -2522,9 +2558,11 @@ def fit_coupon(kind='shaft', at=(0, 0, 0)):
         x = o.x + edge
         for g, w in zip(COUPON_GAPS, wins):
             plate = cad.cut(plate, Part.makeBox(w, w, t + 2, V((x, y0 + edge, o.z - 1))))
-            plate = _coupon_label(plate, "%d" % round(g * 10),
-                                  (x + w / 2.0, y0 + edge + max(wins) + edge + strip / 2.0 - 1.0,
-                                   o.z + t), size=4.0)
+            n = int(round(g * 10))                       # 0.3 -> 3 dots
+            ly = y0 + edge + max(wins) + edge + strip / 2.0 - 1.0
+            plate = _coupon_dots(plate, [
+                (x + w / 2.0 + COUPON_PLATE_DOT_PITCH * (k - (n - 1) / 2.0), ly, o.z + t)
+                for k in range(n)], COUPON_PLATE_DOT_D)
             x += w + edge
         _valid(plate, "fit_coupon plate", solids=1)
         out["Fit_slide"] = plate

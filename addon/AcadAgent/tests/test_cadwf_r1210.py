@@ -65,29 +65,70 @@ class PrintedValues(unittest.TestCase):
 
     def test_fit_classes(self):
         self.assertAlmostEqual(atech_fit.printed_clearance(3.3, 3.0), 0.05)
-        self.assertEqual(atech_fit.fit_word(-0.1), "press")
-        self.assertEqual(atech_fit.fit_word(0.0), "transition")
+        self.assertEqual(atech_fit.fit_word(-0.1), "interference")
+        self.assertEqual(atech_fit.fit_word(0.0), "press")
         self.assertEqual(atech_fit.fit_word(0.25), "running")
-        self.assertEqual(atech_fit.fit_classes(0.32),
-                         ["running", "slide", "clearance", "pocket"])
         self.assertEqual(atech_fit.fit_word(0.6), "clearance")
-        self.assertEqual(atech_fit.fit_word(1.2), "pocket")
         self.assertEqual(atech_fit.fit_word(-0.5), "interference")
         self.assertEqual(atech_fit.fit_word(3.0), "loose")
-        self.assertEqual(atech_fit.fit_word(0.1),
-                         "between transition and running")
-        # the old 3.3 hole for a 3 mm shaft prints as a transition fit:
-        # the shaft does not turn in it
-        self.assertEqual(
-            atech_fit.fit_word(atech_fit.printed_clearance(3.3, 3.0)),
-            "transition")
+        # the bands touch: every clearance has one word
+        self.assertEqual(atech_fit.fit_word(0.1), "push")
+        self.assertEqual(atech_fit.fit_word(0.2), "running")
+        self.assertEqual(atech_fit.fit_word(0.4), "clearance")
+        self.assertFalse(hasattr(atech_fit, "fit_classes"))
+
+    def test_the_bands_agree_with_what_printed(self):
+        """R1295 review: the classes are anchored on the motor-shaft prints
+        (3.0 shaft): 3.1 had to be drilled, 3.3 went on hot, 3.4 is the
+        push fit. The first bands called 3.1 a valid press fit and the
+        proven 3.4 'running'."""
+        def word(d):
+            return atech_fit.fit_word(round(atech_fit.printed_clearance(d, 3.0), 3))
+        self.assertEqual(word(3.1), "interference")
+        self.assertEqual(word(3.3), "press")
+        self.assertEqual(word(3.4), "push")
+        self.assertEqual(word(3.5), "running")
+        # and the hole each class asks for is the one that printed that way
+        self.assertEqual(atech_fit.hole_for(3.0, "press"), 3.3)
+        self.assertEqual(atech_fit.hole_for(3.0, "push"), 3.4)
+        self.assertEqual(atech_fit.hole_for(3.0, "running"), 3.5)
+        self.assertEqual(atech_fit.hole_for(3.0, "running"), atech_fit.value("bearing_d3"))
+        self.assertEqual(atech_fit.hole_for(3.0, "push"), atech_fit.value("dbore_d3")[0])
+        for name in atech_fit.FIT_ORDER:
+            lo, hi = atech_fit.value("fit_bands")[name]
+            self.assertTrue(lo <= atech_fit.value("fit_targets")[name] < hi, name)
+        with self.assertRaises(KeyError):
+            atech_fit.hole_for(3.0, "transition")
+
+    def test_only_what_printed_is_tagged_printed(self):
+        """R1295 review: 'slide' 0.3 and the 3.5 running hole were tagged
+        as printed; no print of either is on record."""
+        self.assertEqual(atech_fit.FIT["slide"][1], "A")
+        self.assertEqual(atech_fit.FIT["bearing_d3"][1], "A")
+        self.assertNotIn("P", atech_fit.FIT["face_dc_motor"][1].split("/"))
+        self.assertEqual(atech_fit.FIT["dbore_d3"][1], "P")
+        for key in ("slide", "bearing_d3", "face_dc_motor"):
+            self.assertNotIn(key, atech_fit.SOURCES)
+        self.assertIn("PETG", atech_fit.FIT["dbore_d3"][2])
+        self.assertIn("no PLA", atech_fit.FIT["dbore_d3"][2])
+
+    def test_a_user_value_must_make_sense(self):
+        """R1295 review: a D-bore that is not a D, and a negative size,
+        were stored and broke every later build."""
+        for bad in ([3.4, 3.6], [3.4, 1.5], [3.4, 3.4]):
+            with self.assertRaises(ValueError, msg=bad):
+                atech_fit.user_value("dbore_d3", bad)
+        self.assertEqual(atech_fit.user_value("dbore_d3", [3.5, 3.0]), (3.5, 3.0))
+        with self.assertRaises(ValueError):
+            atech_fit.user_value("hole_shrink", -0.1)
+        self.assertEqual(atech_fit.user_value("hole_shrink", 0.0), 0.0)
 
     def test_prompt_tables(self):
         out = atech_fit.render_tables()
-        self.assertIn("P printed and fitted", out)
+        self.assertIn("P printed and fitted in PETG / PETG-CF", out)
         self.assertIn("hole_shrink 0.25 (P)", out)
-        self.assertIn("bearing_d3 3.5 (P/A)", out)
-        self.assertIn("slide 0.3 (P/A)", out)
+        self.assertIn("bearing_d3 3.5 (A)", out)
+        self.assertIn("slide 0.3 (A)", out)
         # applied by a kit call, so not in the table
         self.assertNotIn("dbore_d3 ", out)
         self.assertLess(len(out), 2600, len(out))

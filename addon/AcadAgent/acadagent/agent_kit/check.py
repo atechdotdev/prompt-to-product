@@ -1309,6 +1309,7 @@ def main():
     _walls(res, ends, ws)
     _printability(res, ends)                            # R1250
     _shaft_fits(res, doc, ends)                         # R1260
+    _measure_marks(res, code)                           # R1295
     _atech_port_check(doc, res)
     _firmware(res, ws)
     _wiring(res)                                        # R960
@@ -2152,6 +2153,15 @@ def _fit_user(res, ws):
             res["fit_user"] = {k: {"value": atech_fit.USER[k]["value"],
                                    "profile": atech_fit.USER[k]["profile"]}
                                for k in used}
+        else:
+            # R1295: results there are, but none for the filament loaded
+            try:
+                with open(os.path.join(ws, "fit_user.json"), encoding="utf-8") as fh:
+                    why = json.load(fh).get("unused")
+                if isinstance(why, str) and why:
+                    res["fit_user_unused"] = why[:300]
+            except (OSError, ValueError, AttributeError):
+                pass
     except Exception as exc:                            # noqa: BLE001
         res["warnings"].append("your print results could not be read: %s" % exc)
 
@@ -2160,6 +2170,8 @@ def _fit_user_line(res):
     """R1240: one FIT line naming the values that came from the person's
     own prints, or None."""
     fu = res.get("fit_user") or {}
+    if not fu and res.get("fit_user_unused"):
+        return "FIT " + res["fit_user_unused"]
     if not fu:
         return None
     try:
@@ -2225,7 +2237,7 @@ def _shaft_fits(res, doc, ends):
     motor's D-shaft in the printed bore it sits in, and each printed pin in
     a printed hole, with the clearance left once the hole has shrunk in
     printing and the class that is. FIT lines; a ROUND bore gripping a
-    motor's shaft is a WARNING (it does not drive). Never a problem."""
+    motor's shaft is a WARNING (no key: friction only). Never a problem."""
     parts = [{"label": o.Label, "shape": o.Shape} for o in ends if _judged(o)]
     if not parts:
         return
@@ -2245,6 +2257,43 @@ def _shaft_fits(res, doc, ends):
             res["warnings"].append(r["text"])
         elif r["level"] == "note":
             res.setdefault("notes", []).append(r["text"])
+
+
+#: R1295: the most assumed sizes the MEASURE line names
+MEASURE_MAX = 6
+
+
+def _measure_marks(res, code):
+    """R1295 (TRAPS R41, Gustav's rule "a dimension you have not measured
+    is not a dimension"): the sizes model.py itself marks as assumed, in a
+    comment `# MEASURE: <what>, assumed <value>`. res["measure"] lists
+    them; ./check prints one MEASURE line so the reply cannot forget them.
+    Never a problem."""
+    import re
+    found = []
+    for ln in (code or "").splitlines():
+        if "#" not in ln:
+            continue
+        m = re.search(r"\bMEASURE\b\s*:?\s*(.*)", ln.split("#", 1)[1])
+        if m:
+            text = " ".join(m.group(1).split())[:90] or ln.split("#", 1)[0].strip()[:90]
+            if text and text not in found:
+                found.append(text)
+    if found:
+        res["measure"] = found
+
+
+def _measure_line(res):
+    """The MEASURE line, or None."""
+    got = res.get("measure") or []
+    if not got:
+        return None
+    more = len(got) - MEASURE_MAX
+    return ("MEASURE %d size%s in model.py %s assumed, not measured - say so in the "
+            "reply: %s%s" % (len(got), "" if len(got) == 1 else "s",
+                             "is" if len(got) == 1 else "are",
+                             "; ".join(got[:MEASURE_MAX]),
+                             " (and %d more)" % more if more > 0 else ""))
 
 
 def _fit_lines(res):
@@ -2682,6 +2731,9 @@ def _say_summary(res):
     for line in _fit_lines(res):                        # R1260
         _say(line)
     line = _fit_user_line(res)                          # R1240
+    if line:
+        _say(line)
+    line = _measure_line(res)                           # R1295
     if line:
         _say(line)
     fw = res.get("firmware") or {}

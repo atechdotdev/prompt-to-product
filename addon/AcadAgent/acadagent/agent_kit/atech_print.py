@@ -137,7 +137,7 @@ def choose_down(planes):
     if not planes:
         return None
     best = planes[0]
-    down = [p for p in planes if p[1][2] < -1 + 1e-4]
+    down = [p for p in planes if p[1][2] < -1 + 1e-6]     # export_tools.orient_for_print
     if down and down[0][0] >= KEEP_BOTTOM_SHARE * best[0]:
         best = down[0]
     return best
@@ -356,13 +356,26 @@ def line(row):
     return "PRINT %s: %s" % (row["label"], "; ".join(bits))
 
 
+#: a shape with more faces than this is read from its mesh, not face by
+#: face (R1295: a solid sewn from a mesh has thousands of planar faces, and
+#: testing each against every point grew with the square of the count: one
+#: part stalled ./check for tens of seconds)
+MAX_BREP_FACES = 1500
+
+
 def brep_planes(shape, points, tol=PLANE_TOL):
     """[(area mm2, outward unit normal)] of the PLANAR faces of a FreeCAD
     shape that it can rest on (no point of `points`, an (n, 3) array of
     the part's surface, lies beyond the plane), coplanar faces added up,
-    largest first. The rule of export_tools.flat_faces."""
+    largest first. The rule of export_tools.flat_faces. None for a shape
+    with more than MAX_BREP_FACES faces: the caller reads the mesh instead
+    (supporting_planes)."""
+    faces = shape.Faces
+    if len(faces) > MAX_BREP_FACES:
+        return None
+    reach = {}                 # rounded direction -> how far the part reaches along it
     groups = []
-    for f in shape.Faces:
+    for f in faces:
         try:
             if f.Surface.__class__.__name__ != "Plane":
                 continue
@@ -374,7 +387,10 @@ def brep_planes(shape, points, tol=PLANE_TOL):
         for sgn in (1.0, -1.0):
             n = np.array([nv.x, nv.y, nv.z]) * sgn
             d = float(n @ np.array([p0.x, p0.y, p0.z]))
-            if float((points @ n).max()) <= d + tol:
+            key = tuple(np.round(n, 6) + 0.0)
+            if key not in reach:
+                reach[key] = float((points @ n).max())
+            if reach[key] <= d + tol:
                 for g in groups:
                     if float(g[1] @ n) > 1 - 1e-6 and abs(g[2] - d) < tol:
                         g[0] += f.Area
@@ -387,10 +403,12 @@ def brep_planes(shape, points, tol=PLANE_TOL):
             if a >= FLAT_MIN_MM2]
 
 
-def shape_report(shape, label="", deflection=DEFLECTION_MM):
+def shape_report(shape, label="", deflection=DEFLECTION_MM, deadline=None):
     """report() of a FreeCAD shape (tessellated at `deflection` mm), its
-    flat sides taken from its planar faces. A part too fine to judge in
-    time comes back with "skipped"."""
+    flat sides taken from its planar faces. A part too fine to judge, or
+    one that passes `deadline` (a time.time() value) on the way, comes
+    back with "skipped"."""
+    import time
     if np is None:
         return {"label": label, "skipped": "numpy is not available", "flags": []}
     pts, tris = shape.tessellate(deflection)
@@ -398,13 +416,19 @@ def shape_report(shape, label="", deflection=DEFLECTION_MM):
         return {"label": label, "skipped": "no surface", "flags": []}
     if len(tris) > MAX_TRIANGLES:
         return {"label": label, "skipped": "%d facets" % len(tris), "flags": []}
+    if deadline is not None and time.time() > deadline:
+        return {"label": label, "skipped": "time budget", "flags": []}
     P = [(p.x, p.y, p.z) for p in pts]
-    return report(P, tris, label, planes=brep_planes(shape, np.asarray(P, dtype=float)))
+    planes = brep_planes(shape, np.asarray(P, dtype=float))
+    if deadline is not None and time.time() > deadline:
+        return {"label": label, "skipped": "time budget", "flags": []}
+    return report(P, tris, label, planes=planes)
 
 
 def reports(parts, budget_s=6.0):
     """Rows for [{"label", "shape"}]; parts past the time budget are
-    skipped and say so."""
+    skipped and say so. The budget is looked at between parts and between
+    the steps of one part."""
     import time
     t0 = time.time()
     rows = []
@@ -413,7 +437,7 @@ def reports(parts, budget_s=6.0):
             rows.append({"label": p["label"], "skipped": "time budget", "flags": []})
             continue
         try:
-            rows.append(shape_report(p["shape"], p["label"]))
+            rows.append(shape_report(p["shape"], p["label"], deadline=t0 + budget_s))
         except Exception as exc:                        # noqa: BLE001
             rows.append({"label": p["label"], "skipped": "could not measure: %s" % exc,
                          "flags": []})

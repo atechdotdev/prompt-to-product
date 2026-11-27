@@ -73,11 +73,51 @@ class Api(unittest.TestCase):
         # find a tighter or looser printer
         self.assertEqual(bores[len(bores) // 2], atech_fit.value("dbore_d3")[0])
         self.assertIn(atech_fit.value("slide"), consts["COUPON_GAPS"])
-        self.assertEqual(consts["COUPON_MODULE"], atech_fit.value("module_size"))
+        # R1295: the module and the shaft are the measured ones, read from
+        # the fit table, not typed a second time
+        fn = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}["fit_coupon"]
+        body = ast.unparse(fn)
+        self.assertIn("cad.fit('module_size')", body)
+        self.assertIn("cad.fit('motor_shaft')", body)
+        self.assertIn("cad.fit('motor_shaft_flat')", body)
+        self.assertNotIn("COUPON_MODULE", consts)
+        for typed in ("19.5", "2.5"):
+            self.assertNotIn(typed, [ast.unparse(n) for n in ast.walk(fn)
+                                     if isinstance(n, ast.Constant)], typed)
+
+
+COUPON_MODEL = '''
+import FreeCAD as App
+import atech_cad as cad
+doc = App.ActiveDocument
+for label, shape in cad.fit_coupon("all").items():
+    doc.addObject("Part::Feature", label).Shape = shape
+doc.recompute()
+'''
 
 
 @unittest.skipIf(FC is None, "bundled freecadcmd not found")
 class Geometry(unittest.TestCase):
+
+    def test_the_coupon_passes_its_own_check(self):
+        """R1295 review: the first coupon had engraved digits whose cusps
+        left 0.05 mm walls, and ./check FAILED the part the Fit test
+        window makes. It is marked with dots now and must pass."""
+        with tempfile.TemporaryDirectory() as ws:
+            with open(os.path.join(ws, "model.py"), "w") as fh:
+                fh.write(COUPON_MODEL)
+            env = dict(os.environ, ATECH_CHECK_SCRIPT=os.path.join(ws, "model.py"),
+                       ATECH_CHECK_PNG="", ATECH_CHECK_TIMEOUT="200")
+            p = subprocess.run([FC, os.path.join(KIT, "check.py")], env=env, cwd=ws,
+                               capture_output=True, text=True, timeout=400)
+        out = p.stdout + p.stderr
+        self.assertIn("CHECK PASS", out, out[-3500:])
+        self.assertNotIn("CHECK FAIL", out, out[-3500:])
+        self.assertNotIn("thin wall", out.lower(), out[-3500:])
+        # and every part gets its PRINT line with nothing to warn about
+        prints = [ln for ln in out.splitlines() if ln.startswith("PRINT Fit_")]
+        self.assertTrue(all("no supports" in ln for ln in prints), prints)
+        self.assertEqual(len(prints), 6, out[-3500:])
 
     def test_coupon(self):
         out = fc()

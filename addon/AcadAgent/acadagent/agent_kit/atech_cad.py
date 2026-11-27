@@ -986,10 +986,34 @@ _FIT_DEFAULTS = {
     "dbore_d3": (3.40, 2.90), "dbore_depth": 12.0, "hole_shrink": 0.25,
     "bearing_d3": 3.5,
     "insert": {"M2": 3.2, "M2.5": 3.6, "M3": 4.0},
-    "fit_bands": {"press": (-0.20, -0.05), "transition": (-0.05, 0.05),
-                  "running": (0.15, 0.35), "slide": (0.20, 0.50),
-                  "clearance": (0.30, 0.80), "pocket": (0.30, 1.50)},
+    "fit_bands": {"press": (0.00, 0.10), "push": (0.10, 0.20),
+                  "running": (0.20, 0.40), "clearance": (0.40, 1.00)},
+    "fit_targets": {"press": 0.05, "push": 0.15, "running": 0.25,
+                    "clearance": 0.50},
+    # hardware, as measured (atech_fit tags these CAD)
+    "motor_shaft": (3.0, 8.8), "motor_shaft_flat": 2.5, "module_size": 19.5,
 }
+#: R1295: the least a blind D-bore must hold of the shaft, and the floor
+#: left under it, when d_bore chooses its own depth
+DBORE_MIN = 4.0
+DBORE_FLOOR = 1.0
+
+
+def _material_along(shape, p, a, reach):
+    """How far the material runs from `p` along `a` before the first gap
+    (mm, at most `reach`); 0 when `p` is not on the part."""
+    try:
+        got = shape.common(Part.makeLine(p + a * 1e-3, p + a * reach))
+        runs = sorted(((e.Vertexes[0].Point - p).dot(a), (e.Vertexes[-1].Point - p).dot(a))
+                      for e in got.Edges)
+    except Exception:                                   # noqa: BLE001
+        return 0.0
+    end = 0.0
+    for lo, hi in sorted((min(r), max(r)) for r in runs):
+        if lo > end + 0.05:
+            break
+        end = max(end, hi)
+    return end
 
 
 def fit(key):
@@ -1035,7 +1059,9 @@ def d_bore(shape, at, axis, depth=None, bore=None, across=None, flat=None,
     axis    INTO the material, along the shaft: '+Y', (0, 0, -1) ...
     flat    the side of the bore its flat is on, e.g. '+X' (default: a
             fixed side; turn the wheel to the shaft when you fit it)
-    depth   blind depth; default the FIT table's (12; the shaft is 8.8 long)
+    depth   blind depth. Left out: the FIT table's (12; the shaft is 8.8
+            long), or as deep as the part allows with 1 mm of floor left
+            (said in a line). Given: cut as given, through the part too
     bore, across   default the printed fit: 3.4 round, 2.9 across the flat
             (shaft 3.0 / 2.5 + 0.2 per side - 3.1 had to be drilled open)
     lead_in a cone this much wider at the mouth, so the shaft finds it
@@ -1055,6 +1081,21 @@ def d_bore(shape, at, axis, depth=None, bore=None, across=None, flat=None,
     a = _dir(axis)
     f = _perp(a, flat)
     p = V(at)
+    # R1295: how much part there is along the shaft. A bore of the default
+    # depth in a thinner part used to go through without a word, or (3 mm
+    # and under) fail with "most of it is in air - check `at` and `axis`".
+    thick = _material_along(shape, p, a, L + DBORE_FLOOR + 1.0)
+    if depth is None and 0 < thick < L + DBORE_FLOOR:
+        fits = thick - DBORE_FLOOR
+        if fits < DBORE_MIN:
+            raise CadError(
+                "d_bore: the part is only %.1f mm thick along the shaft at `at` - a blind "
+                "D-bore needs %g mm (%g of bore and %g of floor). Make the hub longer, or "
+                "pass depth= to bore through it"
+                % (thick, DBORE_MIN + DBORE_FLOOR, DBORE_MIN, DBORE_FLOOR))
+        print("d_bore: %.1f mm deep, not %g: the part is %.1f mm thick here and %g mm of "
+              "floor stays" % (fits, L, thick, DBORE_FLOOR))
+        L = fits
     what = "d_bore(%g / %g x %g at %s)" % (
         bd, af, L, tuple(round(c, 3) for c in p))
     r = bd / 2.0
@@ -1067,7 +1108,8 @@ def d_bore(shape, at, axis, depth=None, bore=None, across=None, flat=None,
     tool.Placement = place
     h = bd - af
     seg = r * r * math.acos((r - h) / r) - (r - h) * math.sqrt(2 * r * h - h * h)
-    expect = (math.pi * r * r - seg) * L
+    # a depth given past the part's far side removes only what is there
+    expect = (math.pi * r * r - seg) * (min(L, thick) if thick > 0 else L)
     res = _drill(shape, tool, what, expect, (p, a, r))
     if lead > 1e-6:
         cone = Part.makeCone(r + lead, r, lead)
@@ -1088,17 +1130,18 @@ def shaft_hole(shape, at, axis, shaft_d, fit_class="running", depth=None,
     A printed hole comes out about 0.25 mm under its drawn size, so the
     hole is drawn that much larger than the fit alone.
 
-    fit_class  'running' a shaft that turns in it (3 mm shaft: drawn 3.5),
-               'press', 'transition', 'slide' or 'clearance' (a bolt)
+    fit_class  on a 3 mm shaft: 'press' drawn 3.3 (goes on hot or with
+               force) and 'push' 3.4 (snug by hand) are from the
+               motor-shaft prints in PETG; 'running' 3.5 (the shaft turns)
+               and 'clearance' 3.75 (a bolt) are assumed
     at, axis, depth, through   as cad.hole
 
     For the DC Motor's own D-shaft carrying a wheel or hub use cad.d_bore."""
-    bands = fit("fit_bands")
-    if fit_class not in bands:
+    targets = fit("fit_targets")
+    if fit_class not in targets:
         raise CadError("shaft_hole: fit_class must be one of %s"
-                       % ", ".join(bands))
-    lo, hi = bands[fit_class]
-    d = float(shaft_d) + (lo + hi) / 2.0 + float(fit("hole_shrink"))
+                       % ", ".join(targets))
+    d = float(shaft_d) + float(targets[fit_class]) + float(fit("hole_shrink"))
     d = round(round(d / 0.05) * 0.05, 2)
     print("shaft_hole: %g mm shaft, %s fit: drawn %g" % (shaft_d, fit_class, d))
     return hole(shape, at, axis, d, depth=depth, through=through)

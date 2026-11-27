@@ -133,6 +133,48 @@ def t_d_bore_refuses_nonsense():
         check("d_bore refuses the wrong direction", True)
 
 
+def t_d_bore_in_a_thin_part():
+    """R1295 review: the default 12 mm bore in a thinner part went through
+    without a word, or (3 mm and under) failed with "most of it is in air
+    - check `at` and `axis`"."""
+    # 8 mm thick: 7 deep, 1 mm of floor stays
+    disc = Part.makeCylinder(8, 8)
+    res = cad.d_bore(disc, (0, 0, 8), "-Z", flat="+X", lead_in=0)
+    check("8 mm part: the bore stops 1 mm short of the far side",
+          res.isInside(V(0, 0, 0.5), 1e-6, True) and not res.isInside(V(0, 0, 1.5), 1e-6, True))
+    want = d_area(3.4, 2.9) * 7.0
+    removed = disc.Volume - res.Volume
+    check("8 mm part: 7 mm of bore", abs(removed - want) < 0.02 * want,
+          "%.3f vs %.3f" % (removed, want))
+    # 12.5 mm: not room for 12 + 1, so 11.5
+    res = cad.d_bore(Part.makeCylinder(8, 12.5), (0, 0, 12.5), "-Z", flat="+X", lead_in=0)
+    check("12.5 mm part: still blind", res.isInside(V(0, 0, 0.5), 1e-6, True)
+          and not res.isInside(V(0, 0, 1.5), 1e-6, True))
+    # 13 mm and more: the table's 12
+    res = cad.d_bore(Part.makeCylinder(8, 13), (0, 0, 13), "-Z", flat="+X", lead_in=0)
+    check("13 mm part: the full 12", not res.isInside(V(0, 0, 1.5), 1e-6, True)
+          and res.isInside(V(0, 0, 0.5), 1e-6, True))
+    # too thin for a blind bore: said, with what to do
+    for t in (2.0, 3.0, 4.5):
+        try:
+            cad.d_bore(Part.makeCylinder(8, t), (0, 0, t), "-Z", flat="+X")
+            check("%g mm part is refused" % t, False)
+        except cad.CadError as exc:
+            msg = str(exc)
+            check("%g mm part is refused with its thickness and the way out" % t,
+                  "%.1f mm thick" % t in msg and "depth=" in msg and "in air" not in msg, msg)
+    # a depth that is GIVEN is cut as given, through the part too
+    res = cad.d_bore(Part.makeCylinder(8, 4), (0, 0, 4), "-Z", depth=4.5, flat="+X", lead_in=0)
+    check("depth given: through a 4 mm part", not res.isInside(V(0, 0, 0.2), 1e-6, True)
+          and res.isValid())
+    # a step in the part below the bore's mouth does not fool the measure:
+    # a hub standing on a wider, hollow rim
+    hub = Part.makeCylinder(5, 10, V(0, 0, 6)).fuse(Part.makeCylinder(12, 2, V(0, 0, 6)))
+    res = cad.d_bore(hub, (0, 0, 16), "-Z", flat="+X", lead_in=0)
+    check("10 mm hub: 9 deep", res.isInside(V(0, 0, 6.5), 1e-6, True)
+          and not res.isInside(V(0, 0, 7.5), 1e-6, True))
+
+
 def t_d_bore_follows_the_users_value():
     block = Part.makeBox(20, 20, 20, V(-10, -10, 0))
     atech_fit.set_user("dbore_d3", (3.5, 3.0), note="35 was snug")
@@ -167,11 +209,24 @@ def t_shaft_hole():
     want = math.pi * (3.5 / 2) ** 2 * 6
     check("running hole for a 3 mm shaft is drawn 3.5", abs(removed - want) < 0.01 * want,
           "%.3f vs %.3f" % (removed, want))
+    # R1295: the classes are the ones the motor-shaft prints gave. On a
+    # 3 mm shaft press is 3.3 (went on hot), push 3.4 (the fit that
+    # shipped); the first rule drew 3.1 for "press", the bore that had to
+    # be drilled open
+    for cls, want_d in (("press", 3.3), ("push", 3.4), ("running", 3.5), ("clearance", 3.75)):
+        res = cad.shaft_hole(block, (0, 0, 6), "-Z", 3.0, fit_class=cls, through=True)
+        d = math.sqrt((block.Volume - res.Volume) / 6 / math.pi) * 2
+        check("%s hole for a 3 mm shaft is drawn %g" % (cls, want_d), abs(d - want_d) < 0.01,
+              "%.3f" % d)
     res = cad.shaft_hole(block, (0, 0, 6), "-Z", 5.0, fit_class="press", through=True)
-    removed = block.Volume - res.Volume
-    # 5.0 - 0.125 + 0.25 = 5.125 -> 5.1 (rounded to 0.05: 5.15 or 5.1)
-    d = math.sqrt(removed / 6 / math.pi) * 2
-    check("press hole for a 5 mm pin is drawn 5.1-5.15", 5.09 < d < 5.16, "%.3f" % d)
+    d = math.sqrt((block.Volume - res.Volume) / 6 / math.pi) * 2
+    check("press hole for a 5 mm pin is drawn 5.3", abs(d - 5.3) < 0.01, "%.3f" % d)
+    for old in ("transition", "slide", "pocket"):
+        try:
+            cad.shaft_hole(block, (0, 0, 6), "-Z", 3.0, fit_class=old)
+            check("shaft_hole refuses the old class %s" % old, False)
+        except cad.CadError:
+            check("shaft_hole refuses the old class %s" % old, True)
     try:
         cad.shaft_hole(block, (0, 0, 6), "-Z", 3.0, fit_class="tight")
         check("shaft_hole refuses an unknown fit", False)
@@ -233,6 +288,33 @@ def t_wheel_flat_refusals():
         check("thin wheel refused", False)
     except cad.CadError as exc:
         check("thin wheel refused", "deep" in str(exc), str(exc))
+    # R1295 review: at d 18 the message was "use hub_d <= 7.16", when the
+    # keyed hub needs 7.4: it now names what can change
+    try:
+        cad.wheel(18, 10, tread=None, flat=True)
+        check("small keyed wheel refused", False)
+    except cad.CadError as exc:
+        msg = str(exc)
+        check("small keyed wheel: the way out is a larger wheel or bar spokes",
+              "rim_d >= 15.5 (a wheel of d >= 25" in msg and "spoke_style='bar'" in msg
+              and "rim_d >= 11.4 (d >= 19)" in msg and "hub_d <=" not in msg, msg)
+    # between the two sizes the windows do not fit, and that message says the same
+    try:
+        cad.wheel(22, 10, tread=None, flat=True)
+        check("22 mm keyed wheel with windows refused", False)
+    except cad.CadError as exc:
+        msg = str(exc)
+        check("22 mm keyed wheel: windows need d 25, or bars",
+              "no room for spoke windows" in msg and "d >= 25" in msg
+              and "spoke_style='bar'" in msg, msg)
+    # and both wheels the messages name build
+    for d, style in ((25, "window"), (19, "bar")):
+        try:
+            w = cad.wheel(d, 10, tread=None, flat=True, spoke_style=style)
+            check("a %d mm keyed wheel with %s spokes builds" % (d, style),
+                  all(s.isValid() for s in w.values()))
+        except cad.CadError as exc:
+            check("a %d mm keyed wheel with %s spokes builds" % (d, style), False, str(exc))
 
 
 # -------------------------------------------------------------- screw_boss
@@ -292,7 +374,7 @@ def t_screw_boss_tap_is_as_before():
             check("screw_boss refuses %r" % (bad,), True)
 
 
-for fn in (t_d_bore_default_is_the_printed_fit, t_d_bore_lead_in_and_axis,
+for fn in (t_d_bore_default_is_the_printed_fit, t_d_bore_in_a_thin_part, t_d_bore_lead_in_and_axis,
            t_d_bore_refuses_nonsense, t_d_bore_follows_the_users_value,
            t_kit_defaults_equal_the_table, t_shaft_hole, t_wheel_flat,
            t_wheel_unchanged_without_flat, t_wheel_flat_refusals,

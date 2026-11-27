@@ -157,9 +157,9 @@ FIT = {
                            "own chamber at the outer wall; vents on 2 "
                            "faces >= 30 mm2 each"),
     "face_orientation": ({}, "A", "no opening; mount rigidly"),
-    "face_dc_motor": ({"bearing_d": 3.5}, "CAD/P/A",
-                      "shaft through a 3.5 hole it turns in; a wheel or "
-                      "hub goes on with cad.wheel(flat=True) or "
+    "face_dc_motor": ({"bearing_d": 3.5}, "CAD/A",
+                      "shaft through a 3.5 hole it turns in (assumed); a "
+                      "wheel or hub goes on with cad.wheel(flat=...) or "
                       "cad.d_bore; saddle under the gearbox"),
     # ./check FIT faces thresholds (share of rays that reach air).
     "face_open": ({"light": 0.60, "button": 0.60, "speaker": 0.25,
@@ -168,10 +168,12 @@ FIT = {
                   "screen 100 % of the active area"),
 
     # ---- C. FDM fit classes (per side; "Z" = the part's own print Z).
-    "slide": (0.30, "P/A",
-              "cavity round hardware, corridors, cabled pockets (a printed "
-              "sleeve drawn at exactly the board socket's width did not "
-              "slide on; it is drawn 0.30 per side wider since)"),
+    "slide": (0.30, "A",
+              "cavity round hardware, corridors, cabled pockets. Known from "
+              "a print: a sleeve drawn at exactly the board socket's width "
+              "(15.6) did not slide on. It is drawn 0.30 per side wider "
+              "since (cad-workflow module_cases/modules.py), but no fit of "
+              "that is on record: assumed until the fit test says"),
     "fence": (0.25, "A", "fence to board frame edge"),
     "fence_top_mod": (-0.3, "CAD", "fence top y on an edge with modules"),
     "rib": (1.2, "A", "fence and rib width"),
@@ -188,27 +190,39 @@ FIT = {
     "rotate": (0.25, "A", "radial, printed pin turning in a hole"),
     "lip_loose": (0.20, "A", "lid lip, loose"),
     "lip_friction": (0.15, "A", "lid lip, friction"),
-    "bearing_d3": (3.5, "P/A",
-                   "hole a 3 mm shaft TURNS in: one step looser than the "
-                   "3.4 push fit that printed (3.3 prints about 3.05)"),
+    "bearing_d3": (3.5, "A",
+                   "hole a 3 mm shaft TURNS in: assumed, one step looser "
+                   "than the 3.4 push fit that printed. No turning fit was "
+                   "printed"),
     "dbore_d3": ((3.40, 2.90), "P",
                  "push-fit hub on the dc_motor D-shaft: bore / across the "
-                 "flat = shaft 3.0 / 2.5 + 0.2 per side. 3.1 had to be "
-                 "drilled open, 3.3 went on only while warm"),
+                 "flat = shaft 3.0 / 2.5 + 0.2 per side, in PETG and "
+                 "PETG-CF (no PLA record). 3.1 had to be drilled open, "
+                 "3.3 went on only while warm"),
     "dbore_depth": (12.0, "P",
                     "blind D-bore depth (the shaft is 8.8 long), 0.5 "
                     "lead-in at its mouth"),
     "hole_shrink": (0.25, "P",
                     "a printed round hole comes out about this much under "
                     "its drawn diameter (0.4 nozzle)"),
-    "fit_bands": ({"press": (-0.20, -0.05), "transition": (-0.05, 0.05),
-                   "running": (0.15, 0.35), "slide": (0.20, 0.50),
-                   "clearance": (0.30, 0.80), "pocket": (0.30, 1.50)}, "A",
-                  "FDM fit classes, AS PRINTED hole minus shaft "
-                  "(diametral): press pins and bearings, transition "
-                  "located parts, running a turning shaft, slide "
-                  "telescoping parts, clearance a bolt, pocket a body in "
-                  "a recess. Draw the hole hole_shrink larger"),
+    # R1295 (review): these bands are anchored on what printed, not on
+    # partsmith's FIT_BANDS (those are judged on the modelled part and were
+    # never calibrated; read as as-printed they called the 3.1 bore that
+    # had to be drilled a valid press fit). On the 3.0 D-shaft, as printed:
+    # 3.1 drawn = -0.15, drilled open; 3.3 = +0.05, "super tight, worked
+    # when hot"; 3.4 = +0.15, the push fit. The two looser bands are
+    # assumed. The bands touch, so every clearance has one class.
+    "fit_bands": ({"press": (0.00, 0.10), "push": (0.10, 0.20),
+                   "running": (0.20, 0.40), "clearance": (0.40, 1.00)}, "P/A",
+                  "fit classes, AS PRINTED hole minus shaft (diametral): "
+                  "press goes on hot or with force, push is snug by hand "
+                  "(both from the motor-shaft prints, PETG / PETG-CF); "
+                  "running a shaft that turns and clearance a bolt are "
+                  "assumed. Under 0 it has to be drilled"),
+    "fit_targets": ({"press": 0.05, "push": 0.15, "running": 0.25,
+                     "clearance": 0.50}, "P/A",
+                    "the as-printed clearance cad.shaft_hole aims at for "
+                    "each class; the hole is drawn hole_shrink larger"),
     "pilot": ({"M2": 1.7, "M2.5": 2.1, "M3": 2.5}, "A",
               "thread-forming pilot, depth >= 2.5 d"),
     "insert": ({"M2": 3.2, "M2.5": 3.6, "M3": 4.0}, "A",
@@ -320,26 +334,16 @@ SOURCES = {
         "material": "PETG",
         "ref": "builds/wheels/README.md; testfit.py prints bores 3.2-3.6",
         "result": "printed holes come out about 0.25 smaller than drawn"},
-    "slide": {
-        "by": _GUSTAV, "date": "2026-09-07", "printer": "Bambu H2S, 0.4 nozzle",
-        "material": "PETG-CF",
-        "ref": "module_cases/modules.py (SLEEVE_CLEAR 0.3), module_cases/"
-               "print/PRINT.md",
-        "result": "the Integrator shell's sleeve, drawn at the socket's "
-                  "exact width (15.6), did not slide on; redrawn 0.3 per "
-                  "side wider. The repository is the only record: the "
-                  "redrawn shell is reported as 'board fits', the sleeve "
-                  "is not named, and Gustav has no fit report for 0.3 on "
-                  "file (2026-11-27)"},
-    "bearing_d3": {
+    "fit_bands": {
         "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
         "material": "PETG, PETG-CF",
-        "ref": "derived: dbore_d3 and hole_shrink",
-        "result": "3.4 is a push fit, so a hole the shaft turns in is "
-                  "3.0 + 0.25 running clearance + 0.25 shrink = 3.5 "
-                  "(assumed rule, not printed)"},
+        "ref": "builds/wheels/README.md (the bore's history on the 3.0 "
+               "D-shaft)",
+        "result": "press and push only: drawn 3.1 was drilled open, 3.3 "
+                  "was 'super tight, worked when hot', 3.4 is the push fit; "
+                  "running and clearance are assumed"},
 }
-SOURCES["face_dc_motor"] = SOURCES["bearing_d3"]
+SOURCES["fit_targets"] = SOURCES["fit_bands"]
 
 
 def source(key):
@@ -359,40 +363,33 @@ def printed_clearance(hole_d, shaft_d):
     return float(hole_d) - value("hole_shrink") - float(shaft_d)
 
 
-def fit_classes(clearance):
-    """The fit_bands classes an AS-PRINTED diametral clearance is in, tightest
-    first; [] between two bands or outside them all."""
-    c = float(clearance)
-    bands = value("fit_bands")
-    order = ("press", "transition", "running", "slide", "clearance", "pocket")
-    return [n for n in order
-            if bands[n][0] - 1e-9 <= c <= bands[n][1] + 1e-9]
+FIT_ORDER = ("press", "push", "running", "clearance")
 
 
 def fit_word(clearance):
-    """One word for an as-printed diametral clearance: the tightest class it
-    is in, or what it is when it is in none."""
-    got = fit_classes(clearance)
-    if got:
-        return got[0]
-    c = float(clearance)
+    """The class of an AS-PRINTED diametral clearance: "interference" under
+    0 (it has to be drilled), then press, push, running, clearance, and
+    "loose" past the last band. The bands touch: a value on a boundary
+    belongs to the looser one."""
+    c = round(float(clearance), 6)
     bands = value("fit_bands")
-    if c < bands["press"][0]:
+    if c < bands[FIT_ORDER[0]][0]:
         return "interference"
-    if c > bands["pocket"][1]:
-        return "loose"
-    return "between transition and running"
+    for name in FIT_ORDER:
+        if c < bands[name][1]:
+            return name
+    return "loose"
 
 
 def hole_for(shaft_d, fit="running"):
     """The diameter to DRAW a round hole for a shaft of shaft_d so that it
-    prints in the middle of fit's band (shrink added, rounded to 0.05)."""
-    bands = value("fit_bands")
-    if fit not in bands:
+    prints with fit's clearance (fit_targets; shrink added, rounded to
+    0.05). On a 3 mm shaft: press 3.3, push 3.4, running 3.5."""
+    targets = value("fit_targets")
+    if fit not in targets:
         raise KeyError("atech_fit.hole_for: fit must be one of %s"
-                       % ", ".join(bands))
-    lo, hi = bands[fit]
-    d = float(shaft_d) + (lo + hi) / 2.0 + value("hole_shrink")
+                       % ", ".join(FIT_ORDER))
+    d = float(shaft_d) + targets[fit] + value("hole_shrink")
     return round(round(d / 0.05) * 0.05, 2)
 
 
@@ -446,6 +443,13 @@ def user_value(key, val):
         if b != b or abs(b - a) > USER_SPAN + 1e-9:
             raise ValueError("%s: %g is more than %g mm from the table's %g"
                              % (key, b, USER_SPAN, a))
+        if b < 0:
+            raise ValueError("%s: %g is below zero - a clearance or a hole "
+                             "size cannot be negative" % (key, b))
+    if key == "dbore_d3" and not (new[0] / 2.0 < new[1] < new[0]):
+        raise ValueError("dbore_d3: %g across the flat is not a D in a %g bore "
+                         "(it must be between half the bore and the bore)"
+                         % (new[1], new[0]))
     return new[0] if isinstance(base[0], (int, float)) else new
 
 
@@ -481,7 +485,8 @@ def apply_user(data):
         return applied, [("", "fit_user.json is not an object")]
     profiles = data.get("profiles")
     name = data.get("active")
-    prof = profiles.get(name) if isinstance(profiles, dict) else None
+    prof = profiles.get(name) if isinstance(profiles, dict) \
+        and isinstance(name, str) else None
     if not isinstance(prof, dict):
         return applied, refused
     values = prof.get("values")
@@ -703,7 +708,7 @@ def render_tables():
     """The FIT NUMBERS prompt section: tables A-D, without KIT_APPLIED keys.
     A: value and a short fact; B: the rule; C, D: key value(tag) runs."""
     out = ["FIT NUMBERS. Tags: CAD measured, EX example, STD standard, "
-           "P printed and fitted, U your own print, A assumed (test on the "
+           "P printed and fitted in PETG / PETG-CF, U your own print, A assumed (test on the "
            "first print)."]
     out.append(_TITLES["A"])
     for k in _shown("A"):

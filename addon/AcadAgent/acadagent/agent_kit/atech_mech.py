@@ -15,11 +15,15 @@ Every function returns a dict with the load, the governing stress or strain,
 the allowable, the safety factor `sf`, the one asked for (`sf_required`)
 and `ok`. Units: N, mm, MPa.
 
-THE MATERIAL NUMBERS ARE TYPICAL DATA-SHEET VALUES FOR FDM PARTS AT 0.2 mm
-LAYERS. None of them is verified on a printer (partsmith says the same).
-They tell a part that is ten times too weak from one that is plausible;
-they do not prove a part. A load across the layers (direction="z") gets
-the Z knock-down, the usual place a print breaks.
+THE MATERIAL NUMBERS ARE NOT MEASURED. E, the strength and the elongation
+are typical data-sheet values for FDM parts at 0.2 mm layers; the Z
+knock-down, the yield fraction and the snap strain are design assumptions
+(partsmith's, except the snap strain of PLA and PETG, which is the kit's
+own: atech_fit "snap_strain", what cad.snap_fit_cantilever designs to -
+partsmith has 0.02 and 0.04). None is verified on a printer. They tell a
+part that is ten times too weak from one that is plausible; they do not
+prove a part. A load across the layers (direction="z") gets the Z
+knock-down, the usual place a print breaks.
 
 selftest() checks each formula against a textbook case, so a later change
 cannot quietly break one. Plain Python, no FreeCAD.
@@ -28,16 +32,18 @@ import math
 
 #:   E            tensile modulus, MPa
 #:   uts_xy       ultimate tensile strength in the layer plane, MPa
-#:   z_knockdown  multiply strengths for loads across layers (Z direction)
-#:   yield_frac   design "yield" as a fraction of UTS
-#:   snap_strain  most strain a snap or flexure is designed for
+#:   z_knockdown  multiply strengths for loads across layers (Z direction);
+#:                a design assumption
+#:   yield_frac   design "yield" as a fraction of UTS; a design assumption
+#:   snap_strain  most strain a snap or flexure is designed for; a design
+#:                assumption (PLA and PETG: the same as atech_fit's)
 #:   tg_c         glass transition, deg C (a part in a car or at a lamp)
 ALLOWABLES = {
     "PLA":  {"E": 2400.0, "uts_xy": 55.0, "z_knockdown": 0.60, "yield_frac": 0.80,
-             "elong_pct": 3.0, "snap_strain": 0.02, "tg_c": 60,
+             "elong_pct": 3.0, "snap_strain": 0.015, "tg_c": 60,
              "source": "Prusament PLA data sheet (typical), read 2026-08-30; unverified"},
     "PETG": {"E": 1500.0, "uts_xy": 47.0, "z_knockdown": 0.70, "yield_frac": 0.80,
-             "elong_pct": 8.0, "snap_strain": 0.04, "tg_c": 80,
+             "elong_pct": 8.0, "snap_strain": 0.03, "tg_c": 80,
              "source": "Prusament PETG data sheet (typical), read 2026-08-30; unverified"},
     "ASA":  {"E": 1700.0, "uts_xy": 40.0, "z_knockdown": 0.70, "yield_frac": 0.80,
              "elong_pct": 6.0, "snap_strain": 0.03, "tg_c": 100,
