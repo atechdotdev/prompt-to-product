@@ -65,6 +65,7 @@ API = {
     "opening_for": "wall, part_or_bbox, clearance=0.2, chamfer=0.3, axis=None",
     "knurl": "shape, axis, center, r, z0, z1, n=60, kind='straight', depth=0.4",
     "foot": "d, h, style='dome', at=(0, 0, 0)",
+    "fit_coupon": "kind='shaft', at=(0, 0, 0)",
 }
 
 

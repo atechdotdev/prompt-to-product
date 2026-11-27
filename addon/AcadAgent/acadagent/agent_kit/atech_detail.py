@@ -36,7 +36,7 @@ __all__ = [
     "soften", "new_edges", "groove_ring", "groove_outline", "grille",
     "speaker_grille", "wheel", "text", "MATERIALS", "color", "transparency",
     "screw", "screw_boss", "screw_through", "button_cap", "lens",
-    "opening_for", "knurl", "foot", "inlay",
+    "opening_for", "knurl", "foot", "inlay", "fit_coupon",
 ]
 
 BACK = 0.5          # cutters start this far OUTSIDE the surface they enter
@@ -2438,6 +2438,83 @@ def knurl(shape, axis, center, r, z0, z1, n=60, kind='straight', depth=0.4):
     print("knurl: %s, %d cutters, pitch %.2f, %.2f s" % (kind, len(placed), pitch,
                                                           time.time() - t0))
     return res
+
+
+# ---------------------------------------------------------- fit coupon (R1230)
+#: the D-bores of the shaft coupon (mm), as Gustav's testfit.py prints them
+COUPON_BORES = (3.2, 3.3, 3.4, 3.5, 3.6)
+#: the per-side clearances of the module gauge's three windows (mm)
+COUPON_GAPS = (0.2, 0.3, 0.4)
+COUPON_PUCK_D, COUPON_PUCK_H, COUPON_PITCH = 14.0, 10.0, 18.0
+#: a 1-port module's footprint (atech_fit "module_size", measured)
+COUPON_MODULE = 19.5
+
+
+def _coupon_label(shape, txt, at, size=3.2):
+    """Engrave `txt` 0.6 deep in a top face; on a font failure, cut one
+    small round dimple per unit of the last digit instead (the coupon must
+    always come out labelled)."""
+    cad = _c()
+    try:
+        return text(shape, txt, at, "+Z", size, depth=0.6, mode="deboss", up=(0, 1, 0))
+    except CadError as exc:
+        print("fit_coupon: no lettering (%s) - dimples instead" % exc)
+    n = int(str(txt)[-1]) or 10
+    p = V(at)
+    for k in range(n):
+        shape = cad.hole(shape, (p.x - 0.9 * (n - 1) / 2.0 + 0.9 * k, p.y, p.z), "-Z", 0.6,
+                         depth=0.6)
+    return shape
+
+
+def fit_coupon(kind='shaft', at=(0, 0, 0)):
+    """The test-fit prints as {label: solid}: five pucks with D-bores 3.2 to 3.6 for the motor shaft ('shaft'), a plate with three windows for a module ('module'), or 'all'.
+
+    Print them once per printer and filament. Push each puck onto a motor
+    shaft: the number on the one that is snug and keyed (34 = 3.4 mm) is
+    this printer's D-bore, and the app keeps it for every wheel after
+    that (cad.fit("dbore_d3")). Pass a module through the plate's windows:
+    the number of the tightest one it slides through (3 = 0.3 mm per side)
+    is the clearance for pockets round hardware (cad.fit("slide")).
+    Each puck is 14 across and 10 tall with its flat marked by a notch;
+    they stand in a row from `at`, bed side down."""
+    cad = _c()
+    if kind not in ("shaft", "module", "all"):
+        raise CadError("fit_coupon: kind must be 'shaft', 'module' or 'all'")
+    o = V(at)
+    out = {}
+    if kind in ("shaft", "all"):
+        r, h = COUPON_PUCK_D / 2.0, COUPON_PUCK_H
+        shaft_d, shaft_flat = 3.0, 2.5
+        for i, bd in enumerate(COUPON_BORES):
+            c = V((o.x + i * COUPON_PITCH, o.y, o.z))
+            puck = Part.makeCylinder(r, h, c)
+            puck = cad.chamfer_safe(puck, 0.6)
+            puck = cad.d_bore(puck, (c.x, c.y, c.z + h), "-Z", depth=h + 0.5, bore=bd,
+                              across=bd - (shaft_d - shaft_flat), flat="+X")
+            # a notch in the rim at the flat's side, so the D is easy to find
+            puck = cad.cut(puck, Part.makeBox(1.4, 1.4, 1.0,
+                                              V((c.x + r - 1.1, c.y - 0.7, c.z + h - 0.6))))
+            puck = _coupon_label(puck, "%d" % round(bd * 10), (c.x, c.y - 4.2, c.z + h))
+            _valid(puck, "fit_coupon puck %g" % bd, solids=1)
+            out["Fit_D%d" % round(bd * 10)] = puck
+    if kind in ("module", "all"):
+        m, t, edge, strip = COUPON_MODULE, 3.0, 4.0, 7.0
+        wins = [m + 2 * g for g in COUPON_GAPS]
+        width = sum(wins) + edge * (len(wins) + 1)
+        depth = max(wins) + 2 * edge + strip
+        y0 = o.y + (COUPON_PUCK_D if kind == "all" else 0.0) + (4.0 if kind == "all" else 0.0)
+        plate = cad.rounded_box(width, depth, t, 2.0, at=(o.x, y0, o.z))
+        x = o.x + edge
+        for g, w in zip(COUPON_GAPS, wins):
+            plate = cad.cut(plate, Part.makeBox(w, w, t + 2, V((x, y0 + edge, o.z - 1))))
+            plate = _coupon_label(plate, "%d" % round(g * 10),
+                                  (x + w / 2.0, y0 + edge + max(wins) + edge + strip / 2.0 - 1.0,
+                                   o.z + t), size=4.0)
+            x += w + edge
+        _valid(plate, "fit_coupon plate", solids=1)
+        out["Fit_slide"] = plate
+    return out
 
 
 def _register():
