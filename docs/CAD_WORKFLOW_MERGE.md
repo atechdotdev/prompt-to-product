@@ -190,8 +190,13 @@ R1250, R1230-R1240, R1270, the rest.
   printer refuses a file without a model id.
 - The build plate when the printer's file names no default and the
   filament prints on every plate: nothing is set then (Bambu Studio's own
-  default, as before). If BambuStudio.conf records the plate the person
-  chose, read it.
+  default, as before), and the result says so. If BambuStudio.conf records
+  the plate the person chose, read it. Not known: what the command line
+  does with PLA on a plate the printer rules out, and whether a real
+  install can have a printer's preset without its model file.
+- Print results when the fall-back to preset files is taken (the whole
+  presets could not be written): no plate is named on that path; the
+  result says to slice again in Bambu Studio.
 - The app does not ask how a print came out. `print.json` has an empty
   `how_it_printed` that nothing reads, the by-hand test paper (`qa.json`)
   does not feed the fit record, and the Fit test window opens from the menu
@@ -253,7 +258,7 @@ per step (two for R1240 and R1250).
   inherited from the selected one, so with supports on it would have lost
   its parent's settings under the same rule.
 - **R1280 done.** TRAPS R33-R42; the prompt's fit section names the calls
-  and stays under its 3500 characters (3484; the fit tables are 2420 of
+  and stays under its 3500 characters (3489 after the review; the fit tables are 2446 of
   2600).
 - **R1290 done.** `atech_mech`, 12 tests, its own self-test.
 - **R1295: see below.**
@@ -308,7 +313,7 @@ Three were of high or medium weight in what a person would meet:
 1. **A slice of PETG or PETG-CF would have failed.** The process written for
    Bambu Studio's command line did not name the build plate, so it sliced
    for the Cool Plate, which those filaments do not print on (Gustav's note
-   of 8 Nov; all 16 of his process files that printed set the plate). Fixed:
+   of 8 Nov; every process file in cad-workflow's builds sets the plate). Fixed:
    `print_plates.bed_type`.
 2. **The fit test did not pass the app's own check.** Its engraved digits
    left 0.05 mm walls. Fixed: the pucks and the plate are marked with dots,
@@ -323,16 +328,16 @@ The other fixes, by where they are:
 | Where | What was wrong | Now |
 |---|---|---|
 | `atech_fit` fit classes | The bands called the drawn 3.1 bore (drilled open) a valid press fit and the proven 3.4 "running"; `shaft_hole(3.0, "press")` drew 3.1. | Four classes anchored on the motor-shaft prints: press 3.3, push 3.4, running 3.5 (assumed), clearance 3.75 (assumed). The bands touch, so every clearance has one word. |
-| `atech_fit` tags | `slide` 0.3, the 3.5 running hole and the motor face's bearing were tagged as printed. | Tagged assumed. `P` is left on the D-bore, its depth and the hole shrink, and the legend names PETG / PETG-CF. |
+| `atech_fit` tags | `slide` 0.3, the 3.5 running hole and the motor face's bearing were tagged as printed. | Tagged assumed. `P` is left on the D-bore and its depth; the hole shrink is `P/A` (worked out from how the bores fitted, not measured on a hole); the legend names PETG / PETG-CF. |
 | `atech_fit` user values | A D-bore that is not a D, a negative clearance and a broken `active` were accepted. | Refused; `load_user` never raises. |
-| `cad.d_bore` | The default 12 mm went through a thinner part without a word; on 3 mm it blamed `at` and `axis`. | Stops 1 mm short of the far side and says so; under 5 mm it says why and what to do. |
+| `cad.d_bore` | The default 12 mm went through a thinner part without a word; on 3 mm it blamed `at` and `axis`. | Keeps 1 mm of floor when the whole 8.8 mm shaft still goes in (a part of 9.8 mm and up), else goes through as before; a line says which. (The first fix always kept the floor: see the second check.) |
 | `cad.wheel(flat=)` | On a small wheel the error said "use hub_d <= 7.16" when the keyed hub needs 7.4, and the size it led to was refused for its spoke windows. | Both messages name the smallest wheel that builds (25 mm with windows, 19 mm with bar spokes). |
 | `cad.fit_coupon` | Module and shaft sizes were typed. | Read from the measured values. |
 | `./check` FIT lines | A D-bore turned away from the shaft's flat was "the push fit that printed". | A note with the angle and the call that fixes it. |
 | `./check` PRINT lines | A bottom tilted under a degree was "already down"; Export does not agree. | Export's tolerance. |
-| `./check` | A guessed size was a sentence in TRAPS only. | `# MEASURE:` comments in model.py are listed in a MEASURE line. |
+| `./check` | A guessed size was a sentence in TRAPS only. | TRAPS R41 tells the agent to mark the constant `# MEASURE: <what>, assumed <value>`; `./check` lists the marks in a MEASURE line. |
 | Fit record | "Too tight" on the preload made it tighter. A printer name with a bar split the profile. A design script could plant its own record. Results from PLA were used for a PETG-CF print. A rebuild without a turn used the old copy. | Fixed, each with a test: the record is always written (empty when there is none), a build takes the profile of the filament Bambu Studio has selected, and the panel refreshes the copy before every final build. |
-| Fit test window | "Forget" made another printer's results the ones in use. "Too tight / too loose" had no way in. | Forget leaves none in use; the window has the verdict row. |
+| Fit test window | "Forget" made another printer's results the ones in use. "Too tight / too loose" had no way in. | Forget puts none in their place, and the window says whose results the next design uses (another printer's for the same filament may, when it is the only one); the window has the verdict row. |
 | Slicing | Missing template files, the fall-back to preset files and an empty model id were silent. Two AppImages: the older was taken. "Show files" ran `open` on Linux. | Said in the result and in `print.json`; the newer file; the system's opener. |
 | TRAPS, CHANGELOG, README | "Each of these cost a print", "does not drive", "0.3 mm per side did", a first layer "0.3 mm wide", and the wheel plate's times were more than Gustav's records say. | Reworded to what is on record, each number with its step. |
 | `atech_mech` | Its snap strain (2 % / 4 %) disagreed with the fit table's (1.5 % / 3 %). | One value, the fit table's. |
@@ -374,3 +379,39 @@ it passes. No failure comes from the fixes:
     that test's 32 000. Its sibling test fails for the same reason on both
     sides.
   - `test_build_ws` (1): the headless suite, which contains the two above.
+
+## The second check (27 Nov 2026): the fixes themselves
+
+The three fix commits were then checked by four more reviewers, one per
+area, and each of their findings was challenged by another. 32 stood, 4
+were refuted. One was serious, and it was in a fix:
+
+- **`cad.d_bore` could leave a floor where the shaft goes.** The first fix
+  always kept 1 mm of floor in a thin part. On every hub from 5 to 9 mm
+  that floor sat where the 8.8 mm shaft's tip reaches, and the recipe the
+  kit documented drilled from the far side, which put the floor at the
+  gearbox. A real motor under `./check`: "interference FAIL", while the FIT
+  line called the bore "the push fit that printed". Now a floor is kept
+  only when the whole shaft still goes in; otherwise the bore goes through,
+  as it did before this work, and says so. The recipe (TRAPS R33, the
+  `motor_shaft` docstring) drills from the gearbox side, the way the shaft
+  points. A test pushes a model of the shaft into hubs from 2 to 16 mm.
+
+The others, by area:
+
+| Where | What was wrong | Now |
+|---|---|---|
+| Print check | Above 1500 faces a part was read from its mesh, which lost a small flat base: a false "no flat side" on a mesh-made ball with a 36 mm2 base, and another side than Export. | Every planar face is read, in time that grows with the face count (7700 faces in a second); above 20 000 faces or past the time budget the part is "not judged". |
+| `cad.d_bore` | `at` 0.05 mm off the face, or a groove in the far side, slipped past the thickness measure. | Measured on five lines across the bore, from up to 0.3 mm before the face. |
+| FIT lines | A bore with two flats was "the push fit that printed" or "turned 180 degrees", whichever face came first. A round 3.4 bore was told it "may not go on without drilling". The "turned" note claimed an overlap from 10 degrees; it starts at 11.3. | A note of its own for two flats; drilling is named only for a bore that prints under the shaft; "the two D shapes do not line up". |
+| MEASURE line | The agent was never told to write the mark it looks for; a `#` inside a string counted as a comment. | TRAPS R41 shows the mark; comments are read as Python reads them. |
+| Print results | With the person's own filament preset selected in Bambu Studio (or none), the printer's default PLA was taken as loaded and their results were dropped. PLA-CF was read as PLA; "PLA Basic" typed in the window never matched. | Only what is selected counts, a preset of their own is followed to the system preset it inherits, and filament kinds are told apart. |
+| Print results | A later puck result undid a verdict the person had given. "Too loose" by more than a clearance was refused with the whole Save. A link planted at the record's name in a chat folder was written through. The final build could be skipped for a preview built with the older record. | What the person said is kept; a clearance stops at 0 and says so; the file is never written through a link; the final build runs when the record changed. |
+| Fit test window | "Forget" said "the app's own values are used" when another printer's results for the same filament would be. | The window says whose results the next design uses. |
+| Slicing | The Share window slices too and passed none of the cautions on. The printer's model file was looked for in one folder only. With no include list and no template, the generic start G-code was used without a word. The caution said "start and filament-change G-code" whatever was missing. | Share shows the cautions; the app's own folders are searched; the generic start block is named; the sentence names what is missing. |
+| Fit table | `press` 0.00 "as modelled" prints as an interference, the bore that had to be drilled. `hole_shrink` was tagged printed; it was never measured on a hole. "Snug by hand" for 3.4 is on no record. | `press` is 0.15 a side (the press class), assumed; `hole_shrink` is P/A; the wording is what the record says. |
+| TRAPS, CHANGELOG | R38 gave 7 h 08 to the wrong step; R40 said "a sleeve or pocket"; "a round bore spins" was left in two places. | Each number with its step; the sleeve only; reworded. |
+
+Two things this check could not settle are under Later: what Bambu
+Studio's command line does with PLA on a plate the printer rules out, and
+whether a real install keeps a leaf preset without its model file.

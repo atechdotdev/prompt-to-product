@@ -22,19 +22,25 @@ decisions, the measurements and what a review of the work found are in
   and has shipped with kits (in PETG and PETG-CF; there is no PLA print
   on record). `cad.motor_shaft(motor)` measures a seated motor's shaft
   (its tip, its direction, the side its flat is on), `cad.d_bore` cuts the
-  keyed bore and `cad.wheel(..., flat=...)` puts it in the hub. In a part
-  thinner than the bore is deep, `cad.d_bore` stops 1 mm short of the far
-  side and says so. The "Two-wheel base" starter had the round bores; its
-  wheels now push on with the D-bore.
+  keyed bore and `cad.wheel(..., flat=...)` puts it in the hub. The bore
+  goes in from the hub's face toward the gearbox, the way the shaft
+  points. In a part thinner than the bore is deep, `cad.d_bore` keeps
+  1 mm of floor when the whole 8.8 mm shaft still goes in, and goes
+  through the part otherwise; it says which. The "Two-wheel base" starter
+  had the round bores; its wheels now push on with the D-bore.
 - **Fit numbers say where they come from.** A value proven on a print has
   the tag P and a source (who, when, which printer and filament, where it
-  is written down). Only three numbers have it: the D-bore, its depth and
-  how much a printed hole shrinks (about 0.25 mm under its drawn size).
+  is written down). Only two numbers have it: the D-bore and its depth.
+  How much a printed hole shrinks (about 0.25 mm under its drawn size) is
+  worked out from how those bores fitted, not measured on a hole.
   `cad.shaft_hole` draws a hole so that it prints with the fit you name.
-  On a 3 mm shaft `"press"` is 3.3 (it went on warm) and `"push"` 3.4 (snug
-  by hand), as the motor bores printed; `"running"` 3.5 and `"clearance"`
-  3.75 are assumed, and so is the 0.3 mm a sleeve is drawn wider than its
-  hardware.
+  On a 3 mm shaft `"press"` is 3.3 (the motor bore that went on warm) and
+  `"push"` 3.4 (the one the wheels shipped with), carried over from the
+  D-bores to round holes; `"running"` 3.5 and `"clearance"` 3.75 are
+  assumed, and so is the 0.3 mm a sleeve is drawn wider than its
+  hardware. A printed pin pressed into a printed hole was drawn at the
+  hole's own size; it is now drawn 0.15 mm a side smaller, the same press
+  fit.
 - **Fit test.** Export and share > Fit test makes five pucks with bores
   from 3.2 to 3.6 mm and a plate with three windows for a module (as
   Gustav's own test print), each marked with dots: 4 dots is 3.4 mm, 3
@@ -45,8 +51,9 @@ decisions, the measurements and what a review of the work found are in
   numbers. They are kept per printer and filament in
   `~/Documents/Atech Products/fit_user.json`, and a design uses the ones
   for the filament Bambu Studio has selected: results from PLA are not
-  drawn into a PETG print. Only fit values can change, by at most 1 mm;
-  board sizes, ports and seat tolerances cannot.
+  drawn into a PETG print. The window says whose results the next design
+  uses. Only fit values can change, by at most 1 mm; board sizes, ports
+  and seat tolerances cannot.
 - **The agent's check looks at printing.** For each printed part: which
   side goes down (as Export lays it), the first layer's area, how many
   pieces it is in and how wide its lines are, and how much hangs over air.
@@ -62,11 +69,14 @@ decisions, the measurements and what a review of the work found are in
   the printer's own start G-code, which is kept in separate files. Print
   passed it exactly those files. Each preset is now written out whole
   before slicing, and the process names the build plate: without it the
-  command line slices for the Cool Plate, which PETG and PETG-CF do not
-  print on. The plate is the printer's own default, never one the printer
-  or the filament rules out, and the result says which plate to use. When
-  the printer's own G-code files are not found, the result says so and
-  asks you to slice again in Bambu Studio; before, nothing was said. The
+  command line slices for the Cool Plate, and stops for a filament that
+  does not print on it (Gustav's note names PETG-CF; PETG has no bed
+  temperature for that plate either). The plate is the printer's own
+  default, never one the printer or the filament rules out, and the
+  result says which plate to use. When some of the printer's own G-code
+  is not found, the result names it and asks you to slice again in Bambu
+  Studio; before, nothing was said. Print and the Share window both say
+  it. The
   sliced file also gets the printer's model id, as a precaution (Gustav's
   notes do not confirm that a printer refuses a file without it). Bambu
   Studio is also found on Linux; it was looked for as a macOS app only.
