@@ -296,6 +296,15 @@ def prepare_workspace(workspace, reset_intent=True, doc=None, request=None):
     except Exception as exc:                           # noqa: BLE001
         _log("firmware reference failed: %r" % (exc,))
     try:
+        # R1240: the person's own print results (fit_user.json) go beside
+        # the kit, read-only: ./check and the build read them from here,
+        # because a design script cannot read the home folder
+        name = _fit_log().to_workspace(workspace)
+        if name:
+            written.append(name)
+    except Exception as exc:                           # noqa: BLE001
+        _log("fit_user copy failed: %r" % (exc,))
+    try:
         from . import sandbox
         # Twice at most: the wrapper's bwrap argv binds ./check and the kit
         # copies read-only only once they exist, so the first write of a
@@ -1682,9 +1691,21 @@ FIT_PLAIN = """\
 """
 
 
+def _fit_log():
+    _kit_on_path()
+    import p2p_fitlog
+    return p2p_fitlog
+
+
 def _fit_lib():
+    """atech_fit with the person's own print results in place (R1240): the
+    prompt's numbers are the ones the next build will use."""
     _kit_on_path()
     import atech_fit
+    try:
+        atech_fit.load_user(_fit_log().path())
+    except Exception as exc:                           # noqa: BLE001
+        _log("fit_user: %r" % (exc,))
     return atech_fit
 
 

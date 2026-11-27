@@ -418,10 +418,17 @@ def _numbers(v):
     return None
 
 
-def set_user(key, val, note="", date="", profile=""):
-    """Put the user's own printed value for `key` into FIT (tag U). Raises
-    ValueError when the key may not change, the value has another shape
-    than the table's, or a number is more than USER_SPAN from it."""
+def table_value(key):
+    """FIT[key]'s value as the table has it, whatever the user's prints put
+    in its place."""
+    return _BASE.get(key, FIT[key])[0]
+
+
+def user_value(key, val):
+    """`val` as a user value for `key`, shaped like the table's (a number
+    or a tuple). Raises ValueError when the key may not change, the value
+    has another shape than the table's, or a number is more than USER_SPAN
+    from it. Changes nothing."""
     if key not in USER_KEYS:
         raise ValueError("%r is not a value a print result may change "
                          "(only: %s)" % (key, ", ".join(sorted(USER_KEYS))))
@@ -435,8 +442,15 @@ def set_user(key, val, note="", date="", profile=""):
         if b != b or abs(b - a) > USER_SPAN + 1e-9:
             raise ValueError("%s: %g is more than %g mm from the table's %g"
                              % (key, b, USER_SPAN, a))
+    return new[0] if isinstance(base[0], (int, float)) else new
+
+
+def set_user(key, val, note="", date="", profile=""):
+    """Put the user's own printed value for `key` into FIT (tag U). Raises
+    ValueError as user_value does."""
+    shaped = user_value(key, val)
+    base = _BASE.get(key, FIT[key])
     _BASE.setdefault(key, FIT[key])
-    shaped = new[0] if isinstance(base[0], (int, float)) else new
     why = "your print" + ((" (%s)" % profile) if profile else "") \
         + ((", " + date) if date else "") + ((": " + note) if note else "") \
         + "; the table had %s" % _fmt(base[0], key)
@@ -479,13 +493,15 @@ def apply_user(data):
 
 
 def load_user(path):
-    """Read fit_user.json at `path` and apply it. Never raises: a missing
-    or broken file leaves the table as it is. Returns the applied keys."""
+    """Read fit_user.json at `path` and apply it. Never raises: with a
+    missing or broken file the table's own values count (values an earlier
+    call put in are taken out). Returns the applied keys."""
     import json
     try:
         with open(path, encoding="utf-8") as fh:
             data = json.load(fh)
     except (OSError, ValueError):
+        reset_user()
         return []
     return apply_user(data)[0]
 

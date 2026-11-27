@@ -1055,6 +1055,7 @@ def main():
     res = {"ok": False, "script": script, "error": None, "error_lines": [],
            "objects": [], "warnings": [], "problems": [], "notes": [], "png": None,
            "headless_patched": False, "stdout": ""}
+    _fit_user(res, ws)                                  # R1240
     try:
         # utf-8-sig: an editor's byte-order mark is not a syntax error
         # (MEASURED dogfood D45: a BOM at line 1 cost a check round).
@@ -2138,6 +2139,38 @@ def _walls_cached(parts):
             "cached": len(parts) - len(todo)}
 
 
+def _fit_user(res, ws):
+    """R1240: put the person's own print results (fit_user.json beside
+    model.py, copied there by Studio) in place of the fit table's values
+    BEFORE model.py runs, so cad.fit(), cad.d_bore() and
+    cad.wheel(flat=True) build with them. res["fit_user"] says which."""
+    try:
+        import atech_fit
+        used = atech_fit.load_user(os.path.join(ws, "fit_user.json"))
+        if used:
+            res["fit_user"] = {k: {"value": atech_fit.USER[k]["value"],
+                                   "profile": atech_fit.USER[k]["profile"]}
+                               for k in used}
+    except Exception as exc:                            # noqa: BLE001
+        res["warnings"].append("your print results could not be read: %s" % exc)
+
+
+def _fit_user_line(res):
+    """R1240: one FIT line naming the values that came from the person's
+    own prints, or None."""
+    fu = res.get("fit_user") or {}
+    if not fu:
+        return None
+    try:
+        import atech_fit
+        prof = sorted({v.get("profile") or "" for v in fu.values()})
+        return "FIT your own print results are in use (%s): %s" % (
+            ", ".join(p for p in prof if p) or "your printer",
+            "; ".join("%s %s" % (k, atech_fit.text(k)) for k in sorted(fu)))
+    except Exception:                                   # noqa: BLE001
+        return None
+
+
 #: R1250: the time the print check may take over all parts (seconds)
 PRINT_BUDGET_S = 6.0
 
@@ -2583,6 +2616,9 @@ def _say_summary(res):
     if line:
         _say(line)
     for line in _print_part_lines(res):                 # R1250
+        _say(line)
+    line = _fit_user_line(res)                          # R1240
+    if line:
         _say(line)
     fw = res.get("firmware") or {}
     if fw:

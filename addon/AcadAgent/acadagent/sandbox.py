@@ -101,6 +101,7 @@ IN_PROCESS_SETTING = "BuildInProcess"
 # R250: the helper files atech_cad re-exports (build.KIT_MODULES) and the
 # review sheet's code are kit files too - a model.py must not rewrite them.
 PROTECTED = ("check", "atech_cad.py", "atech_form.py", "atech_detail.py",
+             "fit_user.json",                          # R1240: print results
              "review.py", "TRAPS.md", "examples")
 # R140: fonts for Part.makeWireString. The usual host locations first (a
 # stable path - model.py keeps it), then the bundled tree's own copy under
