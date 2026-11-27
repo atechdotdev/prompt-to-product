@@ -351,3 +351,57 @@ R31. **`cad.split(..., lip=...)` on a drafted body returns faces with wrong
 R32. **Slow helpers on curved faces:** `cad.speaker_grille` on a curved insert
     took 17-25 s; cutting the holes yourself in ONE cut took the whole
     build from 60 s to 15 s (ball_launcher.py).
+
+## From parts that were printed (R1280) - each of these cost a print
+
+These come from Gustav's cad-workflow: wheels, cases and trays that were
+printed, did not fit or came loose, and were drawn again. ./check measures
+most of them now (its PRINT and FIT lines).
+
+R33. **A wheel or hub on a DC motor's shaft needs the D-bore, at the size
+    that printed.** The shaft is a D (3.0 round, 2.5 across the flat). A
+    bore drawn 3.1 had to be drilled open, 3.3 went on only while warm;
+    3.4 / 2.9 fits and has shipped. A round bore does not drive at all.
+    `s = cad.motor_shaft(motor)`, then
+    `cad.wheel(..., flat=s["flat"], axis=s["axis"], at=s["tip"] + s["axis"] * 1.3)`
+    or `cad.d_bore(hub, mouth, s["axis"] * -1, flat=s["flat"])`
+    (starters/starter_wheels.py). Give the shaft's own flat, or the bore
+    and the shaft overlap in the model.
+R34. **A printed hole comes out about 0.25 mm under its drawn size.** A
+    3 mm pin in a hole drawn 3.0 is an interference, drawn 3.3 it still
+    does not turn. Name the fit and let the kit add the shrink:
+    `cad.shaft_hole(part, at, axis, 3.0, "running")` draws 3.5. ./check's
+    FIT lines say what each pin-in-hole pair prints as.
+R35. **A rim that stands on the bed is chamfered on ONE side only.** A
+    lead-in on both sides left a first layer 0.3 mm wide: a knife edge,
+    and the print came loose. Keep the first layer two lines (0.8 mm) wide
+    or more; ./check warns below that ("its first layer is a line only").
+R36. **Know which side goes down.** Export lays each part on its largest
+    flat side, and ./check's PRINT line says which that is and what hangs
+    over air. A lid drawn in place is turned over; a part with no flat
+    side prints on supports. Put the face that must look good on the bed
+    side or the top, never on a supported underside.
+R37. **Nothing across the print direction inside a tall part.** Cross bars
+    and end plates in a hull printed standing took the supports from 31 g
+    to 103 g. Ribs run along the print direction; a floor is a separate
+    part.
+R38. **A thick solid part is slow: make it a shell with ribs.** A plate of
+    eight solid wheels was 14 h 36 and 334 g; as cups with six ribs each
+    (and 0.24 mm layers) 4 h 13 and 135 g. Grooves and tread multiply the
+    perimeter and string: leave them off unless they do something.
+R39. **Engrave on the face that lies on the bed, 1 mm deep, in bold
+    letters.** Thin strokes left hairline gaps in the floor of the
+    letters. The wheels' names are 7 mm letters, 1 mm deep:
+    `cad.text(..., mode="deboss", depth=1.0)`.
+R40. **A sleeve or pocket drawn at exactly the hardware's size does not go
+    on.** A case sleeve drawn at the board socket's exact width did not
+    slide over it; 0.3 mm per side did (`cad.fit("slide")`). The numbers
+    are per printer and filament: the fit test (`cad.fit_coupon()`, and
+    Export and share > Fit test) finds this printer's, and the kit uses
+    them from then on.
+R41. **A dimension you have not measured is not a dimension.** When a size
+    comes from memory or a guess (a bought part, a battery, a connector),
+    say so in the reply as "MEASURE: <what>, assumed <value>" and keep it
+    in ONE named constant at the top of model.py, so one number changes
+    when the person has measured it. Atech hardware is never guessed: take
+    it from `ap.bbox`, `cad.bound_of`, `cad.motor_shaft` or `cad.fit`.

@@ -232,7 +232,7 @@ class Studio(_Home):
         self.assertIn("slide 0.4 (U)", tables)
         self.assertIn("hole_shrink 0.35 (U)", tables)
         section = build.atech_fit_section()
-        self.assertIn("comes out 0.35 mm small", " ".join(section.split()))
+        self.assertIn("holes print 0.35 mm small", " ".join(section.split()))
         # and without the file, the table's again
         os.unlink(os.environ["ATECH_FIT_USER"])
         self.assertIn("slide 0.3 (P/A)", build.atech_fit_tables())

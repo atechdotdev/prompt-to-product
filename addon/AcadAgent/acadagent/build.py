@@ -1654,12 +1654,11 @@ as "test on the first print".
   board edge (speaker, dc_motor) also gets {saddle} under it and a strap
   over it; a cabled module sits in a pocket ({slide} mm clearance) with a stop on its
   open side. Backlash within {backlash_max} mm.
-- SHAFTS: a printed wheel or hub straight on a dc_motor shaft takes the
-  D-bore that printed and fitted, with the shaft's own flat:
-  s = cad.motor_shaft(motor), then cad.wheel(..., flat=s["flat"],
-  axis=s["axis"]) or cad.d_bore(..., flat=s["flat"]); never a round bore
-  (it spins). A hole a shaft turns in is cad.shaft_hole (a printed hole
-  comes out {hole_shrink} mm small).
+- SHAFTS: a wheel or hub on a dc_motor shaft takes the printed D-bore
+  with the shaft's own flat: s = cad.motor_shaft(motor), then
+  cad.wheel(..., flat=s["flat"], axis=s["axis"]) or cad.d_bore(...,
+  flat=s["flat"]); a round bore spins. A hole a shaft turns in:
+  cad.shaft_hole (holes print {hole_shrink} mm small).
 - WORKING FACES OPEN: the opening table B gives, centred on ap.bbox(module),
   through the wall in front only (cad.opening_for(..., axis=...)); lenses,
   light pipes and key caps are their own parts, listed in intent.json
@@ -1679,6 +1678,8 @@ as "test on the first print".
   along print Z 0 or >= {layer} mm; holes across the bed +{hole_z} mm in Z or a teardrop;
   no horizontal pin under {pin_min} mm; wheels, axles, key caps and lenses are separate
   parts; it rests at z = 0; {material} unless intent.json says otherwise.
+  ./check's PRINT lines say which side of each part goes down and what
+  hangs over air, its FIT lines what each shaft-in-bore prints as.
 
 """
 
