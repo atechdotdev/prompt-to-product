@@ -39,7 +39,36 @@ from . import export_tools as et
 
 APP_BUNDLES = ("BambuStudio.app", "Bambu Studio.app")
 APP_ROOTS = ("/Applications", os.path.expanduser("~/Applications"))
-SUPPORT_DIR = os.path.expanduser("~/Library/Application Support/BambuStudio")
+#: R1270 Linux: the executable's names on PATH, then folders an AppImage or
+#: a Flatpak's exported launcher sits in (any file with "bambu" and
+#: "studio" in its name)
+LINUX_NAMES = ("bambu-studio", "BambuStudio", "bambustudio", "com.bambulab.BambuStudio")
+LINUX_DIRS = ("~/Applications", "~/.local/bin", "~/bin", "/opt/bambu-studio/bin",
+              "/opt/BambuStudio", "~/.local/share/flatpak/exports/bin",
+              "/var/lib/flatpak/exports/bin")
+
+
+def support_dirs(platform=None, home=None):
+    """Where Bambu Studio keeps BambuStudio.conf and its system presets,
+    most likely first."""
+    platform = sys.platform if platform is None else platform
+    home = os.path.expanduser("~") if home is None else home
+    if platform == "darwin":
+        return [os.path.join(home, "Library", "Application Support", "BambuStudio")]
+    return [os.path.join(home, ".config", "BambuStudio"),
+            os.path.join(home, ".var", "app", "com.bambulab.BambuStudio", "config",
+                         "BambuStudio")]
+
+
+def _support_dir():
+    cands = support_dirs()
+    for c in cands:
+        if os.path.isdir(c):
+            return c
+    return cands[0]
+
+
+SUPPORT_DIR = _support_dir()
 PRINTS_DIR = os.path.expanduser("~/Documents/Atech Prints")
 ENV_PRINTS = "ATECH_PRINTS_DIR"
 
@@ -59,14 +88,46 @@ def _log(msg):
 # ===================================================================
 # R921 Bambu Studio and its profile
 # ===================================================================
+def linux_studio(which=None, dirs=LINUX_DIRS):
+    """R1270: Bambu Studio's executable on Linux (on PATH, an AppImage, a
+    Flatpak's exported launcher), or None."""
+    import shutil
+    which = shutil.which if which is None else which
+    for n in LINUX_NAMES:
+        p = which(n)
+        if p:
+            return p
+    for d in dirs:
+        d = os.path.expanduser(d)
+        try:
+            names = sorted(os.listdir(d))
+        except OSError:
+            continue
+        for name in names:
+            low = name.lower()
+            p = os.path.join(d, name)
+            if "bambu" in low and "studio" in low and os.path.isfile(p) \
+                    and os.access(p, os.X_OK):
+                return p
+    return None
+
+
 def bambu_studio(roots=APP_ROOTS):
-    """The Bambu Studio app bundle, or None."""
+    """Bambu Studio: its app bundle (macOS) or its executable (Linux,
+    R1270), or None."""
     for r in roots:
         for b in APP_BUNDLES:
             p = os.path.join(r, b)
             if os.path.isdir(p):
                 return p
+    if roots is APP_ROOTS and sys.platform.startswith("linux"):
+        return linux_studio()
     return None
+
+
+def _opener():
+    """The command that opens a file or a URL with the system's default app."""
+    return "open" if sys.platform == "darwin" else "xdg-open"
 
 
 #: R1041 Bambu Connect: Bambu's own bridge from other apps to the printer
@@ -105,11 +166,15 @@ def send_to_connect(project, name=None, runner=None):
         project = gp
     name = name or os.path.basename(project)[:-len(".gcode.3mf")]
     url = connect_url(project, name)
-    (runner or (lambda c: subprocess.Popen(c)))(["open", url])
+    (runner or (lambda c: subprocess.Popen(c)))([_opener(), url])
     return url
 
 
 def bambu_cli(app):
+    """The command-line executable of bambu_studio()'s result: the file
+    itself on Linux, the binary inside the bundle on macOS."""
+    if os.path.isfile(app):
+        return app
     return os.path.join(app, "Contents", "MacOS", "BambuStudio")
 
 
@@ -139,6 +204,188 @@ def resolve_preset(support_dir, kind, name):
     for d in reversed(chain):
         out.update(d)
     return out
+
+
+# -------------------------------------------------------------------
+# R1270 what the command line needs. Found by Gustav on real prints
+# (cad-workflow builds/kit_cases/REVISIONS.md, 2026-09-28, Bambu Studio
+# 02.08.02.61):
+#   - the command line loads ONLY the preset file it is given. It does not
+#     follow "inherits", so everything a leaf preset inherits falls back to
+#     a default: every early slice ran with the bed at 45 C, flow 1.0 and
+#     no filament density; a machine preset lost its two-extruder keys
+#     ("some filaments can not be mapped" on the H2D)
+#   - the printer's own start, end and filament-change G-code lives in
+#     separate "<preset> template <key>.json" files the command line never
+#     loads: the print started with the generic start G-code and "the
+#     entire choose-filament step is gone at the printer"
+#   - Metadata/slice_info.config has an EMPTY printer_model_id in a
+#     command-line slice, and the printer checks it
+# So the three presets are written out whole (flat_preset) and the model
+# id is put in after slicing (fix_model_id).
+# -------------------------------------------------------------------
+#: keys of a preset file that describe the file, not a setting
+_PRESET_META = ("name", "type", "from", "inherits", "setting_id", "instantiation",
+                "version", "description")
+
+
+def preset_names(support_dir, kind, name):
+    """The preset and what it inherits from, leaf first."""
+    out, seen = [], set()
+    while name and name not in seen:
+        seen.add(name)
+        p = _preset_path(support_dir, kind, name)
+        if not p:
+            break
+        out.append(name)
+        try:
+            with open(p, encoding="utf-8") as fh:
+                name = json.load(fh).get("inherits")
+        except (OSError, ValueError):
+            break
+    return out
+
+
+def machine_templates(support_dir, names):
+    """The settings kept in "<preset> template <key>.json" files beside the
+    machine presets `names` (leaf first; the leaf's win): the printer's own
+    G-code blocks. {} when this Bambu Studio keeps none."""
+    folder = os.path.join(_system_dir(support_dir), "machine")
+    try:
+        files = sorted(os.listdir(folder))
+    except OSError:
+        return {}
+    out = {}
+    for name in reversed(names):
+        for f in files:
+            if not (f.startswith(name + " template") and f.endswith(".json")):
+                continue
+            try:
+                with open(os.path.join(folder, f), encoding="utf-8") as fh:
+                    d = json.load(fh)
+            except (OSError, ValueError):
+                continue
+            if not isinstance(d, dict):
+                continue
+            for k, v in d.items():
+                if k not in _PRESET_META and v not in ("", None, []):
+                    out[k] = v
+    return out
+
+
+def flat_preset(support_dir, kind, name, extra=None, new_name=None):
+    """A preset written out whole: its "inherits" chain merged in (child
+    wins) and, for a machine, its template G-code files, so the command
+    line gets every setting from the one file. {} when `name` is not a
+    system preset."""
+    out = resolve_preset(support_dir, kind, name)
+    if not out:
+        return {}
+    if kind == "machine":
+        # The template's G-code beats what the chain's roots give (the
+        # generic fdm_machine_common start block is what printed without
+        # the printer's own); only a value the preset's OWN file sets wins.
+        own = {}
+        try:
+            with open(_preset_path(support_dir, kind, name), encoding="utf-8") as fh:
+                own = json.load(fh)
+        except (OSError, ValueError, TypeError):
+            pass
+        for k, v in machine_templates(support_dir, preset_names(support_dir, kind, name)).items():
+            if own.get(k) in ("", None, []):
+                out[k] = v
+        # as cad-workflow's proven machine files: the system preset's own
+        # name, no parent
+        out.pop("inherits", None)
+        out["from"] = "system"
+    elif kind == "filament":
+        out.pop("inherits", None)
+        out["from"] = "User"
+    else:
+        out["inherits"] = name
+        out["from"] = "User"
+    out["name"] = new_name or name
+    out.update(extra or {})
+    return out
+
+
+def write_flat_presets(profile, folder, supports=False):
+    """machine.json, process.json and filament.json in `folder`, each a
+    whole preset (flat_preset); with supports, the process has tree
+    supports on. {"machine_file", "process_file", "filament_file"}, or
+    None when the profile's presets cannot be read (the caller then passes
+    the system files as before)."""
+    sd = profile.get("support_dir")
+    if not sd:
+        return None
+    pname = "%s - Atech%s" % (profile["process"], " supports" if supports else "")
+    extra = {"print_settings_id": pname, "compatible_printers": [profile["machine"]]}
+    if supports:
+        extra.update(enable_support="1", support_type="tree(auto)")
+    flats = {
+        "machine": flat_preset(sd, "machine", profile["machine"]),
+        "process": flat_preset(sd, "process", profile["process"], extra, pname),
+        "filament": flat_preset(sd, "filament", profile["filament"]),
+    }
+    if not all(flats.values()):
+        return None
+    out = {}
+    for kind, d in flats.items():
+        p = os.path.join(folder, "%s.json" % kind)
+        with open(p, "w", encoding="utf-8") as fh:
+            json.dump(d, fh, indent=1)
+        out["%s_file" % kind] = p
+    return out
+
+
+def model_id(support_dir, machine):
+    """The printer's model id ("O1S" for an H2S, "BL-P001" for an X1
+    Carbon) from its machine_model file, or "" - `machine` is a resolved
+    machine preset."""
+    model = (machine or {}).get("printer_model")
+    if not model:
+        return ""
+    p = _preset_path(support_dir, "machine", model)
+    if not p:
+        return ""
+    try:
+        with open(p, encoding="utf-8") as fh:
+            return str(json.load(fh).get("model_id") or "")
+    except (OSError, ValueError):
+        return ""
+
+
+def fix_model_id(project, mid):
+    """Put the printer's model id into a command-line slice whose
+    Metadata/slice_info.config has it empty (the printer rejects the file
+    without it). True when the file was changed; a file that already has
+    one, or has no such field, is left alone."""
+    import re
+    import zipfile
+    if not mid or not os.path.isfile(project):
+        return False
+    pat = re.compile(r'(<metadata key="printer_model_id" value=")("\s*/>)')
+    try:
+        with zipfile.ZipFile(project) as z:
+            names = z.namelist()
+            if "Metadata/slice_info.config" not in names:
+                return False
+            info = z.read("Metadata/slice_info.config").decode("utf-8", "replace")
+            new, n = pat.subn(lambda m: m.group(1) + mid + m.group(2), info)
+            if not n:
+                return False
+            tmp = project + ".tmp"
+            with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as o:
+                for item in z.infolist():
+                    data = z.read(item.filename)
+                    if item.filename == "Metadata/slice_info.config":
+                        data = new.encode("utf-8")
+                    o.writestr(item, data)
+    except (OSError, zipfile.BadZipFile) as exc:
+        _log("model id: %r" % (exc,))
+        return False
+    os.replace(tmp, project)
+    return True
 
 
 def _bed(machine):
@@ -202,7 +449,10 @@ def bambu_profile(support_dir=SUPPORT_DIR):
             "model": machine.get("printer_model") or machine_name,
             "bed": _bed(machine) or (256.0, 256.0, 256.0),
             "density": density,
-            "picked": machine_name == picked.get("machine")}
+            "picked": machine_name == picked.get("machine"),
+            # R1270: what write_flat_presets and fix_model_id need
+            "support_dir": support_dir,
+            "model_id": model_id(support_dir, machine)}
 
 
 def printer_name(profile):
@@ -352,9 +602,21 @@ def slice_plates(exported, profile, app, runner=None, project_name=None):
     out_dir = os.path.join(folder, "sliced")
     os.makedirs(out_dir, exist_ok=True)
     name = project_name or (os.path.basename(os.path.dirname(folder)) + ".3mf")
-    proc_file = (supports_process(profile, folder) if exported.get("needs_supports")
-                 else None)
-    cmd = slice_command(app, profile, exported["files"], out_dir, name, proc_file)
+    supports = bool(exported.get("needs_supports"))
+    # R1270: the command line loads only the files it is given, so each
+    # preset goes in whole (write_flat_presets). When they cannot be read
+    # the system files are passed as before.
+    flat = None
+    try:
+        flat = write_flat_presets(profile, folder, supports)
+    except (OSError, ValueError, KeyError) as exc:
+        _log("whole presets not written: %r" % (exc,))
+    if flat:
+        proc_file = flat["process_file"] if supports else None
+        cmd = slice_command(app, dict(profile, **flat), exported["files"], out_dir, name)
+    else:
+        proc_file = supports_process(profile, folder) if supports else None
+        cmd = slice_command(app, profile, exported["files"], out_dir, name, proc_file)
     log_path = os.path.join(folder, "slicer.log")
     if runner is not None:
         runner(cmd, out_dir, log_path)
@@ -377,7 +639,11 @@ def slice_plates(exported, profile, app, runner=None, project_name=None):
     if res["ok"]:
         _filament_use(project, res["plates"], profile["density"])
         res["grams"] = round(sum(p["grams"] for p in res["plates"]), 1)
-    res.update(project=project, command=cmd, log=log_path, supports=bool(proc_file))
+        # R1270: a command-line slice has no printer model id; the printer
+        # checks it
+        res["model_id_set"] = fix_model_id(project, profile.get("model_id"))
+    res.update(project=project, command=cmd, log=log_path, supports=bool(proc_file),
+               whole_presets=bool(flat))
     return res
 
 
@@ -430,8 +696,13 @@ def make_plates(doc, profile=None, app=None, root=None, include_atech=False, run
 
 
 def open_project(project, app=None, runner=None):
-    """R923: the sliced project in Bambu Studio (`open -a`)."""
-    cmd = ["open", "-a", app or bambu_studio() or "BambuStudio", project]
+    """R923: the sliced project in Bambu Studio (`open -a` on macOS, the
+    executable with the file on Linux)."""
+    app = app or bambu_studio()
+    if app and os.path.isfile(app):
+        cmd = [app, project]
+    else:
+        cmd = ["open", "-a", app or "BambuStudio", project]
     (runner or (lambda c: subprocess.Popen(c)))(cmd)
     return cmd
 

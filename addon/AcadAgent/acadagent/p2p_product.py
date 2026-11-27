@@ -61,14 +61,19 @@ def part_rows(doc, bom):
                     break
         except Exception:                                 # noqa: BLE001
             o = None
-        size, area = None, None
+        size, area, bed = None, None, None
         if o is not None and hasattr(o, "Shape"):
             bb = o.Shape.BoundBox
             size = [round(bb.XLength, 1), round(bb.YLength, 1), round(bb.ZLength, 1)]
             area = float(o.Shape.Area)
+            try:
+                # R1270: how it lies on the bed (./check's own measurement)
+                bed = kit("atech_print").shape_report(o.Shape, r["part"])
+            except Exception as exc:                      # noqa: BLE001
+                _log("bed: %r" % (exc,))
         out.append({"label": r["part"], "count": r["count"], "size_mm": size or [0, 0, 0],
                     "volume_cm3": r.get("volume_cm3") or 0, "area_mm2": area,
-                    "colour": r.get("colour") or ""})
+                    "colour": r.get("colour") or "", "bed": bed})
     return out
 
 
@@ -248,8 +253,12 @@ def papers(f, folder):
             "each 'Done when' criterion: met, not met or not known")
     P = kit("p2p_print")
     if f.get("print_plan") and f["print_plan"]["parts"]:
-        put("print-plan.md", lambda: P.markdown(f["print_plan"]),
-            "which Bambu printer, plates, filament, rough time")
+        # R1270: and how each part goes on the bed (which side down, the
+        # first layer, supports and why), when the document was measured
+        put("print-plan.md", lambda: P.markdown(f["print_plan"])
+            + P.bed_markdown(f.get("parts") or []),
+            "which Bambu printer, plates, filament, rough time; which side of each "
+            "part goes down, and where supports are needed")
     C = kit("p2p_cost")
     if f.get("cost"):
         put("costs.md", lambda: C.markdown(f["cost"]), "what it costs to make")

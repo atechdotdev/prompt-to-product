@@ -214,7 +214,8 @@ class Connect(unittest.TestCase):
         seen = []
         url = pp.send_to_connect(p, "Buddy", seen.append)
         self.assertTrue(os.path.isfile(os.path.join(d, "Buddy.gcode.3mf")))
-        self.assertEqual(seen, [["open", url]])
+        # R1270: the system opener ("open" on macOS, "xdg-open" on Linux)
+        self.assertEqual(seen, [[pp._opener(), url]])
         self.assertIn("Buddy.gcode.3mf", url)
         self.assertIn("name=Buddy&", url)
 

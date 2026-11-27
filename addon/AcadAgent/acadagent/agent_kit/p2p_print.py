@@ -223,6 +223,40 @@ def markdown(p):
     return "\n".join(L) + "\n"
 
 
+def bed_markdown(parts):
+    """R1270: "On the bed" for the print plan - per part, which side goes
+    down, what the first layer is, whether it needs supports and why
+    (parts[i]["bed"]: an atech_print row, as ./check measures it). "" when
+    no part was measured. A sliced plate should say these three things;
+    cad-workflow writes them into a PRINT.md beside every plate."""
+    rows = [(r["label"], r["bed"]) for r in parts or [] if r.get("bed")]
+    if not rows:
+        return ""
+    L = ["", "## On the bed", "",
+         "Measured from the design, in the orientation Export and Print use (the largest "
+         "flat side down). The slicer's own preview wins.", "",
+         "| Part | Side that goes down | First layer | Supports | Watch |", "|---|---|---|---|---|"]
+    for label, b in rows:
+        if b.get("skipped"):
+            L.append("| %s | not measured (%s) | - | - | |" % (label, b["skipped"]))
+            continue
+        fl = b["first_layer"]
+        if not b["flat_face_mm2"]:
+            side = "no flat side"
+        elif b["turned_deg"] < 0.5:
+            side = "as drawn, on its %g mm2 flat side" % round(b["flat_face_mm2"])
+        else:
+            side = "turned %g deg onto its %g mm2 flat side" % (
+                round(b["turned_deg"]), round(b["flat_face_mm2"]))
+        first = "%g mm2 in %d piece%s" % (round(fl["area"], 1), fl["pieces"],
+                                          "" if fl["pieces"] == 1 else "s")
+        sup = ("yes: %g mm2 (%g %%) hang over air steeper than 45 deg"
+               % (round(b["overhang_mm2"]), b["overhang_pct"])) if b["supports"] else "no"
+        watch = "; ".join(t for lvl, t in b.get("flags") or [] if "supports there" not in t)
+        L.append("| %s | %s | %s | %s | %s |" % (label, side, first, sup, watch))
+    return "\n".join(L) + "\n"
+
+
 def parts_from_check(res):
     """./check's result -> parts (size and volume per object)."""
     out = []
