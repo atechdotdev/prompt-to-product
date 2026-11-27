@@ -405,3 +405,13 @@ R41. **A dimension you have not measured is not a dimension.** When a size
     in ONE named constant at the top of model.py, so one number changes
     when the person has measured it. Atech hardware is never guessed: take
     it from `ap.bbox`, `cad.bound_of`, `cad.motor_shaft` or `cad.fit`.
+R42. **A part that carries a load gets one hand number before it is
+    drawn thick or thin.** `import atech_mech as mech`, then
+    `print(mech.cantilever("clip arm", F=5, L=12, b=6, h=1.6, material="PLA"))`
+    gives the stress, the deflection, the safety factor and `ok`; also
+    `mech.ss_beam` (a strip on two supports), `mech.snap_strain`,
+    `mech.pin_double_shear`, `mech.bearing` (a pin on a printed hole) and
+    `mech.press_fit`. Forces in N, sizes in mm. A load ACROSS the layers
+    takes `direction="z"`: that is where a print breaks. The material
+    numbers are data-sheet values, not measured: they find a part that is
+    ten times too weak, they do not prove one.

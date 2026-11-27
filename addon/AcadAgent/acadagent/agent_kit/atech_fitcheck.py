@@ -35,9 +35,12 @@ AXIS_TOL = 0.15
 #: (diametral, mm) and they share at least this much length (mm)
 FIT_MAX = 1.6
 OVERLAP_MIN = 1.5
-#: cylinder faces looked at per check, pairs reported
+#: cylinder faces looked at per check, pairs kept in the result, and pairs
+#: ./check prints (measured on the 64 examples: 367 pairs in 56 of them,
+#: most of them trim pressed into a pocket; the tightest say the most)
 MAX_CYLINDERS = 6000
-MAX_ROWS = 12
+MAX_ROWS = 24
+MAX_LINES = 6
 #: a bore this much wider than the motor's shaft does not touch it
 FREE_HOLE = 1.5
 #: how far a D-bore may differ from the table's and still be "the" fit
@@ -266,12 +269,16 @@ def pin_fits(parts):
 
 
 def lines(motor_rows, pin_rows):
-    """The FIT lines ./check prints."""
+    """The FIT lines ./check prints: every motor row, and the MAX_LINES
+    tightest pin-in-hole pairs (the rest are counted)."""
     out = ["FIT " + r["text"] for r in motor_rows]
+    pins = [r for r in pin_rows if not r.get("skipped")]
     for r in pin_rows:
         if r.get("skipped"):
             out.append("FIT pins in holes: not judged (%s)" % r["skipped"])
-            continue
-        out.append("FIT " + r["text"] + (" (and %d more pairs)" % r["more"]
-                                         if r.get("more") else ""))
+    left = len(pins) - MAX_LINES + sum(r.get("more", 0) for r in pins)
+    for i, r in enumerate(pins[:MAX_LINES]):
+        last = i == min(len(pins), MAX_LINES) - 1
+        out.append("FIT " + r["text"] + (" (and %d looser pairs)" % left
+                                         if last and left > 0 else ""))
     return out

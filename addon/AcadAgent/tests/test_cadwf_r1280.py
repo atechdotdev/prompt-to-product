@@ -49,7 +49,7 @@ class Traps(unittest.TestCase):
                        "shell with ribs", "0.3 mm per side", "MEASURE:"):
             self.assertIn(needle, sec, needle)
         self.assertEqual(re.findall(r"(?m)^R(\d+)\. ", sec),
-                         [str(n) for n in range(33, 42)])
+                         [str(n) for n in range(33, 43)])
 
     def test_every_kit_call_a_trap_names_exists(self):
         have = _kit_functions()
