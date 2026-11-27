@@ -24,8 +24,22 @@ Tags (plan 4.2):
     STD  from a published standard
     A    an assumption for FDM (0.4 nozzle, 0.2 layer) to confirm with the
          fit coupon (T0); ./check lists the A values a build used
+    P    proven on a print (R1210): somebody printed it and it fitted.
+         SOURCES says who, when, in which material and where it is
+         written down. Most come from Gustav's cad-workflow (Bambu H2S /
+         H2D / X2D, 0.4 nozzle): his printers' numbers, to be confirmed on
+         ours with the fit coupon (atech_coupon)
+    U    the user's own print said so (R1240): a value load_user() put in
+         from fit_user.json. It beats every other tag
 A tag may join several with "/" ("CAD/A": the hardware number is
-measured, the clearance on it is assumed).
+measured, the clearance on it is assumed; "P/A": derived from a printed
+number by a rule that is itself assumed).
+
+USER VALUES. load_user(path) reads fit_user.json (written by p2p_fitlog
+from "how did it fit?") and replaces the values of its active printer and
+material profile. Only keys in USER_KEYS can change, each number by at most
+USER_SPAN mm: fit classes and hole sizes, never a hardware datum (tag CAD),
+a port or a seat tolerance. reset_user() puts the table back.
 
 Board datums are the MEASURED ones (GLB, 2026-10-20), not the plan's draft
 row: plan corner radius r 3.0 (ATECH_PRODUCTS.md said ~1), top edge rounded
@@ -53,7 +67,7 @@ import re
 #: ap.board_object(doc) and only set its Placement for the preset.
 BOARD_FIRST = True
 
-TAGS = ("CAD", "EX", "STD", "A")
+TAGS = ("CAD", "EX", "STD", "A", "P", "U")
 
 # --------------------------------------------------------------------- FIT
 # value: a number, a tuple of numbers (sizes "a x b", ranges lo..hi are
@@ -105,6 +119,9 @@ FIT = {
     "motor_shaft": ((3.0, 8.8), "CAD",
                     "dc_motor shaft d 3.0, tip 8.8 past the box "
                     "(29.2 past the board edge)"),
+    "motor_shaft_flat": (2.5, "CAD",
+                         "dc_motor D-shaft across the flat (module STL: "
+                         "2.998 round, 2.500 across; R1210)"),
     "usbc_mouth": ((10.0, 3.5), "CAD",
                    "receptacle, 8.26 deep, 0.25 proud; position from "
                    "atech_geom.socket_face"),
@@ -140,9 +157,10 @@ FIT = {
                            "own chamber at the outer wall; vents on 2 "
                            "faces >= 30 mm2 each"),
     "face_orientation": ({}, "A", "no opening; mount rigidly"),
-    "face_dc_motor": ({"bearing_d": 3.3}, "CAD/A",
-                      "shaft through a 3.3 bearing hole; saddle under the "
-                      "gearbox"),
+    "face_dc_motor": ({"bearing_d": 3.5}, "CAD/P/A",
+                      "shaft through a 3.5 hole it turns in; a wheel or "
+                      "hub goes on with cad.wheel(flat=True) or "
+                      "cad.d_bore; saddle under the gearbox"),
     # ./check FIT faces thresholds (share of rays that reach air).
     "face_open": ({"light": 0.60, "button": 0.60, "speaker": 0.25,
                    "microphone": 0.25, "screen": 1.00}, "A",
@@ -150,7 +168,10 @@ FIT = {
                   "screen 100 % of the active area"),
 
     # ---- C. FDM fit classes (per side; "Z" = the part's own print Z).
-    "slide": (0.30, "A", "cavity round hardware, corridors, cabled pockets"),
+    "slide": (0.30, "P/A",
+              "cavity round hardware, corridors, cabled pockets (a printed "
+              "sleeve drawn at exactly the board socket's width did not "
+              "slide on; it is drawn 0.30 per side wider since)"),
     "fence": (0.25, "A", "fence to board frame edge"),
     "fence_top_mod": (-0.3, "CAD", "fence top y on an edge with modules"),
     "rib": (1.2, "A", "fence and rib width"),
@@ -167,9 +188,27 @@ FIT = {
     "rotate": (0.25, "A", "radial, printed pin turning in a hole"),
     "lip_loose": (0.20, "A", "lid lip, loose"),
     "lip_friction": (0.15, "A", "lid lip, friction"),
-    "bearing_d3": (3.3, "A", "hole for a 3 mm shaft"),
-    "dbore_d3": ((3.10, 2.60), "CAD/A",
-                 "hub on the dc_motor shaft: bore / flat"),
+    "bearing_d3": (3.5, "P/A",
+                   "hole a 3 mm shaft TURNS in: one step looser than the "
+                   "3.4 push fit that printed (3.3 prints about 3.05)"),
+    "dbore_d3": ((3.40, 2.90), "P",
+                 "push-fit hub on the dc_motor D-shaft: bore / across the "
+                 "flat = shaft 3.0 / 2.5 + 0.2 per side. 3.1 had to be "
+                 "drilled open, 3.3 went on only while warm"),
+    "dbore_depth": (12.0, "P",
+                    "blind D-bore depth (the shaft is 8.8 long), 0.5 "
+                    "lead-in at its mouth"),
+    "hole_shrink": (0.25, "P",
+                    "a printed round hole comes out about this much under "
+                    "its drawn diameter (0.4 nozzle)"),
+    "fit_bands": ({"press": (-0.20, -0.05), "transition": (-0.05, 0.05),
+                   "running": (0.15, 0.35), "slide": (0.20, 0.50),
+                   "clearance": (0.30, 0.80), "pocket": (0.30, 1.50)}, "A",
+                  "FDM fit classes, AS PRINTED hole minus shaft "
+                  "(diametral): press pins and bearings, transition "
+                  "located parts, running a turning shaft, slide "
+                  "telescoping parts, clearance a bolt, pocket a body in "
+                  "a recess. Draw the hole hole_shrink larger"),
     "pilot": ({"M2": 1.7, "M2.5": 2.1, "M3": 2.5}, "A",
               "thread-forming pilot, depth >= 2.5 d"),
     "insert": ({"M2": 3.2, "M2.5": 3.6, "M3": 4.0}, "A",
@@ -222,7 +261,8 @@ for _k in ("face_screen", "face_distance_sensor", "face_light",
     TABLE[_k] = "B"
 for _k in ("slide", "fence", "fence_top_mod", "rib", "stop", "backlash_max",
            "preload", "preload_tip", "layer", "hole_z", "press", "rotate",
-           "lip_loose", "lip_friction", "bearing_d3", "dbore_d3", "pilot",
+           "lip_loose", "lip_friction", "bearing_d3", "dbore_d3",
+           "dbore_depth", "hole_shrink", "pilot",
            "insert", "boss_od_rule", "wall", "wall_min", "corner_keepout",
            "air_speaker", "pad_min", "pin_min", "snap_strain", "material"):
     TABLE[_k] = "C"
@@ -239,7 +279,7 @@ KIT_APPLIED = frozenset((
     "preload", "preload_tip",                        # ac.hold_down
     "usbc_r", "usbc_keepout", "usbc_land",           # cad.usbc_port
     "pilot", "insert", "boss_od_rule",               # ad.screw_boss
-    "dbore_d3",                                      # cad.wheel(flat=)
+    "dbore_d3", "dbore_depth",                       # cad.wheel(flat=True), cad.d_bore
     "lip_friction",                                  # cad.split default
 ))
 
@@ -251,6 +291,202 @@ RULE_KEYS = (
     "air_speaker", "fence", "rib", "fence_top_mod", "pad_min", "preload_tip",
     "preload", "backlash_max", "lip_loose", "boss_od_rule", "snap_strain",
 )
+
+# ----------------------------------------------------------------- sources
+#: R1210: where each printed (P) number comes from. "ref" is a path in
+#: Gustav's cad-workflow repository (snapshot of 2026-11-26). A key whose
+#: tag has P must be here (test_cadwf_r1210).
+_GUSTAV = "Gustav (cad-workflow)"
+_BAMBU = "Bambu H2S / H2D / X2D, 0.4 nozzle"
+SOURCES = {
+    "dbore_d3": {
+        "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
+        "material": "PETG, PETG-CF",
+        "ref": "builds/wheels/wheel.py (BORE_CLR 0.2), builds/wheels/"
+               "README.md",
+        "result": "wheels printed and shipped with kits; 3.1 had to be "
+                  "drilled open, 3.3 went on only while warm"},
+    "dbore_depth": {
+        "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
+        "material": "PETG, PETG-CF",
+        "ref": "builds/wheels/wheel.py (BORE_DEPTH 12)",
+        "result": "the same wheels"},
+    "hole_shrink": {
+        "by": _GUSTAV, "date": "2026-10-20", "printer": _BAMBU,
+        "material": "PETG",
+        "ref": "builds/wheels/README.md; testfit.py prints bores 3.2-3.6",
+        "result": "printed holes come out about 0.25 smaller than drawn"},
+    "slide": {
+        "by": _GUSTAV, "date": "2026-09-07", "printer": "Bambu H2S, 0.4 nozzle",
+        "material": "PETG-CF",
+        "ref": "module_cases/modules.py (SLEEVE_CLEAR 0.3), module_cases/"
+               "print/PRINT.md",
+        "result": "the Integrator shell's sleeve, drawn at the socket's "
+                  "exact width, did not slide on; redrawn 0.3 per side "
+                  "wider. The fit of the redrawn shell is reported as "
+                  "'board fits', the sleeve is not named"},
+    "bearing_d3": {
+        "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
+        "material": "PETG, PETG-CF",
+        "ref": "derived: dbore_d3 and hole_shrink",
+        "result": "3.4 is a push fit, so a hole the shaft turns in is "
+                  "3.0 + 0.25 running clearance + 0.25 shrink = 3.5 "
+                  "(assumed rule, not printed)"},
+}
+SOURCES["face_dc_motor"] = SOURCES["bearing_d3"]
+
+
+def source(key):
+    """SOURCES[key] as one line, or "" when the key has no print source."""
+    s = SOURCES.get(key)
+    if not s:
+        return ""
+    return "%s, %s, %s, %s: %s (%s)" % (
+        s["by"], s["date"], s["material"], s["printer"], s["result"],
+        s["ref"])
+
+
+# ------------------------------------------------------------- fit classes
+def printed_clearance(hole_d, shaft_d):
+    """The diametral clearance a hole drawn hole_d leaves round a shaft of
+    shaft_d once printed (the hole shrinks by hole_shrink)."""
+    return float(hole_d) - value("hole_shrink") - float(shaft_d)
+
+
+def fit_classes(clearance):
+    """The fit_bands classes an AS-PRINTED diametral clearance is in, tightest
+    first; [] between two bands or outside them all."""
+    c = float(clearance)
+    bands = value("fit_bands")
+    order = ("press", "transition", "running", "slide", "clearance", "pocket")
+    return [n for n in order
+            if bands[n][0] - 1e-9 <= c <= bands[n][1] + 1e-9]
+
+
+def fit_word(clearance):
+    """One word for an as-printed diametral clearance: the tightest class it
+    is in, or what it is when it is in none."""
+    got = fit_classes(clearance)
+    if got:
+        return got[0]
+    c = float(clearance)
+    bands = value("fit_bands")
+    if c < bands["press"][0]:
+        return "interference"
+    if c > bands["pocket"][1]:
+        return "loose"
+    return "between transition and running"
+
+
+def hole_for(shaft_d, fit="running"):
+    """The diameter to DRAW a round hole for a shaft of shaft_d so that it
+    prints in the middle of fit's band (shrink added, rounded to 0.05)."""
+    bands = value("fit_bands")
+    if fit not in bands:
+        raise KeyError("atech_fit.hole_for: fit must be one of %s"
+                       % ", ".join(bands))
+    lo, hi = bands[fit]
+    d = float(shaft_d) + (lo + hi) / 2.0 + value("hole_shrink")
+    return round(round(d / 0.05) * 0.05, 2)
+
+
+# ------------------------------------------------------------- user values
+#: R1240: the fit values a user's own prints may replace, and by how much.
+#: Fit classes and hole sizes only: no hardware datum, port or seat number.
+USER_KEYS = frozenset((
+    "slide", "fence", "stop", "press", "rotate", "lip_loose", "lip_friction",
+    "bearing_d3", "dbore_d3", "hole_shrink", "hole_z", "preload",
+))
+USER_SPAN = 1.0
+#: key -> {"value", "note", "date", "profile"} of the user values now in FIT
+USER = {}
+_BASE = {}
+
+
+def _numbers(v):
+    """v as a tuple of floats when it is a number or a flat tuple/list of
+    numbers, else None."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return (float(v),)
+    if isinstance(v, (tuple, list)) and v and all(
+            isinstance(x, (int, float)) and not isinstance(x, bool) for x in v):
+        return tuple(float(x) for x in v)
+    return None
+
+
+def set_user(key, val, note="", date="", profile=""):
+    """Put the user's own printed value for `key` into FIT (tag U). Raises
+    ValueError when the key may not change, the value has another shape
+    than the table's, or a number is more than USER_SPAN from it."""
+    if key not in USER_KEYS:
+        raise ValueError("%r is not a value a print result may change "
+                         "(only: %s)" % (key, ", ".join(sorted(USER_KEYS))))
+    base = _BASE.get(key, FIT[key])
+    old = _numbers(base[0])
+    new = _numbers(val)
+    if old is None or new is None or len(old) != len(new):
+        raise ValueError("%s: expected %d number(s) like %r, got %r"
+                         % (key, len(old or ()), base[0], val))
+    for a, b in zip(old, new):
+        if b != b or abs(b - a) > USER_SPAN + 1e-9:
+            raise ValueError("%s: %g is more than %g mm from the table's %g"
+                             % (key, b, USER_SPAN, a))
+    _BASE.setdefault(key, FIT[key])
+    shaped = new[0] if isinstance(base[0], (int, float)) else new
+    why = "your print" + ((" (%s)" % profile) if profile else "") \
+        + ((", " + date) if date else "") + ((": " + note) if note else "") \
+        + "; the table had %s" % _fmt(base[0], key)
+    FIT[key] = (shaped, "U", why)
+    USER[key] = {"value": shaped, "note": note, "date": date,
+                 "profile": profile}
+    return shaped
+
+
+def reset_user():
+    """Take every user value out again."""
+    for key, entry in _BASE.items():
+        FIT[key] = entry
+    _BASE.clear()
+    USER.clear()
+
+
+def apply_user(data):
+    """Apply a parsed fit_user.json: the values of its active profile.
+    Returns (applied keys, [(key, why refused)]). Starts from the table."""
+    reset_user()
+    applied, refused = [], []
+    if not isinstance(data, dict):
+        return applied, [("", "fit_user.json is not an object")]
+    profiles = data.get("profiles")
+    name = data.get("active")
+    prof = profiles.get(name) if isinstance(profiles, dict) else None
+    if not isinstance(prof, dict):
+        return applied, refused
+    values = prof.get("values")
+    for key, rec in sorted((values if isinstance(values, dict) else {}).items()):
+        rec = rec if isinstance(rec, dict) else {"value": rec}
+        try:
+            set_user(key, rec.get("value"), note=str(rec.get("note") or ""),
+                     date=str(rec.get("date") or ""), profile=str(name or ""))
+            applied.append(key)
+        except (ValueError, KeyError) as exc:
+            refused.append((key, str(exc)))
+    return applied, refused
+
+
+def load_user(path):
+    """Read fit_user.json at `path` and apply it. Never raises: a missing
+    or broken file leaves the table as it is. Returns the applied keys."""
+    import json
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return []
+    return apply_user(data)[0]
+
 
 # ------------------------------------------------------------------ stages
 #: Minute of the turn each stage starts (assumed; retune from Phase 0).
@@ -445,7 +681,8 @@ def render_tables():
     """The FIT NUMBERS prompt section: tables A-D, without KIT_APPLIED keys.
     A: value and a short fact; B: the rule; C, D: key value(tag) runs."""
     out = ["FIT NUMBERS. Tags: CAD measured, EX example, STD standard, "
-           "A assumed (test on the first print)."]
+           "P printed and fitted, U your own print, A assumed (test on the "
+           "first print)."]
     out.append(_TITLES["A"])
     for k in _shown("A"):
         val, tag, note = FIT[k]
