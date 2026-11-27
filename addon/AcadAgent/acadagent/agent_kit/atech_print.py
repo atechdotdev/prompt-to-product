@@ -35,8 +35,15 @@ except ImportError:                                     # pragma: no cover
 FIRST_LAYER_Z = 0.1013
 #: one extrusion line of a 0.4 mm nozzle
 LINE_MM = 0.4
-#: a first layer narrower than this on average (two lines) is a knife edge
+#: a first layer narrower than this on average (two lines) is a knife edge;
+#: a wall drawn at exactly two lines measures a hair under it, hence the
+#: tolerance (the alarm clock's snooze key: 0.79)
 KNIFE_MM = 2 * LINE_MM
+KNIFE_TOL = 0.05
+#: below these a part is trim: its first-layer trouble is a note, not a
+#: warning (a glint with no flat side, a 2 mm2 letter)
+SMALL_MM3 = 2000.0
+SMALL_FIRST_MM2 = 10.0
 #: Export's own numbers (export_tools), kept equal by test_cadwf_r1250
 OVERHANG_DEG = 45.0
 OVERHANG_TOL_DEG = 0.5
@@ -174,32 +181,56 @@ def bed_contact(P, T):
     return float(A[on].sum())
 
 
-def section(P, T, z):
-    """The slice of a closed mesh at height z: {"area" mm2 (holes taken
-    out), "perimeter" mm (outer and inner), "pieces" (separate islands),
-    "holes"}."""
+def _segments(P, T, z):
+    """The oriented segments (material on the left, seen from +Z) where the
+    plane at height z cuts the mesh: (p (k, 2), q (k, 2)), or None."""
     N, _A = tri_normals(P, T)
     tri = P[T]
     s = tri[:, :, 2] - z
     s = np.where(s == 0.0, 1e-9, s)
-    cross = (s.min(axis=1) < 0) & (s.max(axis=1) > 0)
-    tri, s, N = tri[cross], s[cross], N[cross]
+    neg = s < 0
+    cross = neg.any(axis=1) & ~neg.all(axis=1)
+    tri, s, N, neg = tri[cross], s[cross], N[cross], neg[cross]
     if not len(tri):
+        return None
+    # the vertex alone on its side of the plane, and the two across from it
+    lone_neg = neg.sum(axis=1) == 1
+    alone = np.where(lone_neg[:, None], neg, ~neg)
+    i0 = alone.argmax(axis=1)
+    rows = np.arange(len(tri))
+    i1, i2 = (i0 + 1) % 3, (i0 + 2) % 3
+    a, sa = tri[rows, i0], s[rows, i0]
+    out = []
+    for j in (i1, i2):
+        b, sb = tri[rows, j], s[rows, j]
+        t = (sa / (sa - sb))[:, None]
+        out.append((a + t * (b - a))[:, :2])
+    p, q = out
+    # material on the left: walk along k x n, k = +Z
+    flip = (q[:, 0] - p[:, 0]) * -N[:, 1] + (q[:, 1] - p[:, 1]) * N[:, 0] < 0
+    p2 = np.where(flip[:, None], q, p)
+    q2 = np.where(flip[:, None], p, q)
+    return p2, q2
+
+
+def section_area(P, T, z):
+    """The area (mm2, holes taken out) of a closed mesh's slice at z."""
+    seg = _segments(P, T, z)
+    if seg is None:
+        return 0.0
+    p, q = seg
+    return max(0.0, float((p[:, 0] * q[:, 1] - q[:, 0] * p[:, 1]).sum() / 2.0))
+
+
+def section(P, T, z):
+    """The slice of a closed mesh at height z: {"area" mm2 (holes taken
+    out), "perimeter" mm (outer and inner), "pieces" (separate islands),
+    "holes"}."""
+    seg = _segments(P, T, z)
+    if seg is None:
         return {"area": 0.0, "perimeter": 0.0, "pieces": 0, "holes": 0}
-    segs = np.empty((len(tri), 2, 2))
-    for k in range(len(tri)):
-        pts = []
-        for i in range(3):
-            j = (i + 1) % 3
-            if (s[k, i] < 0) != (s[k, j] < 0):
-                t = s[k, i] / (s[k, i] - s[k, j])
-                pts.append(tri[k, i, :2] + t * (tri[k, j, :2] - tri[k, i, :2]))
-        p, q = pts[0], pts[1]
-        # material on the left: walk along k x n, k = +Z
-        if (q[0] - p[0]) * -N[k, 1] + (q[1] - p[1]) * N[k, 0] < 0:
-            p, q = q, p
-        segs[k, 0], segs[k, 1] = p, q
-    p, q = segs[:, 0], segs[:, 1]
+    p, q = seg
+    segs = np.stack([p, q], axis=1)
     twice = p[:, 0] * q[:, 1] - q[:, 0] * p[:, 1]
     length = np.hypot(q[:, 0] - p[:, 0], q[:, 1] - p[:, 1])
     # loops: join segments at shared end points
@@ -211,9 +242,10 @@ def section(P, T, z):
             parent[i] = parent[parent[i]]
             i = parent[i]
         return i
+    ends = np.round(segs * 2000).astype(np.int64).tolist()
     for k in range(len(segs)):
         for end in (0, 1):
-            key = (int(round(segs[k, end, 0] * 2000)), int(round(segs[k, end, 1] * 2000)))
+            key = (ends[k][end][0], ends[k][end][1])
             other = keys.get(key)
             if other is None:
                 keys[key] = k
@@ -250,7 +282,7 @@ def report(points, tris, label="", planes=None):
         if first["perimeter"] > 0 else 0.0
     widest = first["area"]
     for i in range(1, 10):
-        widest = max(widest, section(Q, T, height * i / 10.0 + 1e-4)["area"])
+        widest = max(widest, section_area(Q, T, height * i / 10.0 + 1e-4))
     over, tot = overhang(Q, T)
     turned = 0.0 if n is None else math.degrees(math.acos(max(-1.0, min(1.0, -n[2]))))
     row = {
@@ -259,6 +291,7 @@ def report(points, tris, label="", planes=None):
         "down": [round(c, 4) for c in n] if n is not None else None,
         "turned_deg": round(turned, 1),
         "height_mm": round(height, 2),
+        "volume_mm3": round(abs(signed_volume(P, T)), 1),
         "first_layer": {k: (round(v, 2) if isinstance(v, float) else v)
                         for k, v in first.items()},
         "widest_mm2": round(widest, 1),
@@ -275,12 +308,15 @@ def flags(row):
     not hold as drawn. level "note": worth knowing before it is sliced."""
     out = []
     fl = row["first_layer"]
+    # R1250, measured on the 64 examples: a small trim part (an eye, a
+    # glint, a letter) with no flat side or a thin first layer is said in
+    # a note; the warning is for a part that costs a print when it fails
     if not row["flat_face_mm2"]:
-        out.append(("warning",
+        out.append(("warning" if row.get("volume_mm3", SMALL_MM3) >= SMALL_MM3 else "note",
                     "no flat side to rest on: it will print on supports or a raft - "
                     "give it a flat base, or split it where it is widest"))
-    elif fl["area"] > 0 and fl["line_mm"] < KNIFE_MM:
-        out.append(("warning",
+    elif fl["area"] > 0 and fl["line_mm"] < KNIFE_MM - KNIFE_TOL:
+        out.append(("warning" if fl["area"] >= SMALL_FIRST_MM2 else "note",
                     "its first layer is a line only %.2f mm wide (%g mm2 in %d piece%s): "
                     "under two 0.4 mm lines it will not stick - widen the face it stands on, "
                     "and chamfer that edge on ONE side only"

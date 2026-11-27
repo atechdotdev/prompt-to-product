@@ -197,6 +197,30 @@ class FirstLayer(unittest.TestCase):
         self.assertIn("no flat side", row["flags"][0][1])
         self.assertIn("no flat side", atech_print.line(row))
 
+    def test_trim_parts_get_a_note_not_a_warning(self):
+        # measured on the 64 examples: eyes, glints and letters have no flat
+        # side or a thin first layer; they cost little when they fail
+        arc = [(4 * math.sin(PI * i / 24), 4 - 4 * math.cos(PI * i / 24)) for i in range(25)]
+        row = atech_print.report(*lathe(arc), label="Glint")       # a ball 8 across
+        self.assertLess(row["volume_mm3"], atech_print.SMALL_MM3)
+        self.assertEqual(levels(row)[0], "note")
+        dot = atech_print.report(*lathe([(1.0, 0), (1.6, 0), (1.6, 3), (1.0, 3)]), label="Dot")
+        self.assertLess(dot["first_layer"]["area"], atech_print.SMALL_FIRST_MM2)
+        self.assertEqual(levels(dot), ["note"])
+
+    def test_a_wall_of_exactly_two_lines_is_not_a_knife_edge(self):
+        row = atech_print.report(*lathe([(19.21, 0), (20, 0), (20, 5), (19.21, 5)]), label="Key")
+        self.assertAlmostEqual(row["first_layer"]["line_mm"], 0.79, delta=0.01)
+        self.assertEqual(row["flags"], [])
+
+    def test_section_area_is_the_sections_area(self):
+        P, T = atech_print.arrays(*lathe([(0, 0), (20, 0), (20, 30), (18, 30), (18, 2), (0, 2)]))
+        if atech_print.signed_volume(P, T) < 0:
+            T = T[:, ::-1]
+        for z in (1.0, 2.5, 15.0, 29.9):
+            self.assertAlmostEqual(atech_print.section_area(P, T, z),
+                                   atech_print.section(P, T, z)["area"], places=6)
+
     def test_a_small_foot_under_a_wide_body(self):
         dome = [(20 * math.cos(PI / 2 * i / 24), 25 + 10 * math.sin(PI / 2 * i / 24))
                 for i in range(25)]
