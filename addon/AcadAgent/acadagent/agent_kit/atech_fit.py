@@ -305,9 +305,11 @@ SOURCES = {
         "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
         "material": "PETG, PETG-CF",
         "ref": "builds/wheels/wheel.py (BORE_CLR 0.2), builds/wheels/"
-               "README.md",
-        "result": "wheels printed and shipped with kits; 3.1 had to be "
-                  "drilled open, 3.3 went on only while warm"},
+               "README.md; confirmed by Gustav 2026-11-27",
+        "result": "customer wheels printed on the X2D, H2S and H2D and "
+                  "shipped with kits; drawn 3.1 / 2.6 had to be drilled "
+                  "open, 3.3 / 2.8 (PETG, H2S / H2D) was 'super tight, "
+                  "worked when hot'. No PLA fit on record"},
     "dbore_depth": {
         "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
         "material": "PETG, PETG-CF",
@@ -324,9 +326,11 @@ SOURCES = {
         "ref": "module_cases/modules.py (SLEEVE_CLEAR 0.3), module_cases/"
                "print/PRINT.md",
         "result": "the Integrator shell's sleeve, drawn at the socket's "
-                  "exact width, did not slide on; redrawn 0.3 per side "
-                  "wider. The fit of the redrawn shell is reported as "
-                  "'board fits', the sleeve is not named"},
+                  "exact width (15.6), did not slide on; redrawn 0.3 per "
+                  "side wider. The repository is the only record: the "
+                  "redrawn shell is reported as 'board fits', the sleeve "
+                  "is not named, and Gustav has no fit report for 0.3 on "
+                  "file (2026-11-27)"},
     "bearing_d3": {
         "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
         "material": "PETG, PETG-CF",

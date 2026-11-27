@@ -246,29 +246,68 @@ def preset_names(support_dir, kind, name):
     return out
 
 
-def machine_templates(support_dir, names):
-    """The settings kept in "<preset> template <key>.json" files beside the
-    machine presets `names` (leaf first; the leaf's win): the printer's own
-    G-code blocks. {} when this Bambu Studio keeps none."""
-    folder = os.path.join(_system_dir(support_dir), "machine")
-    try:
-        files = sorted(os.listdir(folder))
-    except OSError:
-        return {}
-    out = {}
-    for name in reversed(names):
-        for f in files:
-            if not (f.startswith(name + " template") and f.endswith(".json")):
-                continue
+def machine_dirs(support_dir, roots=APP_ROOTS):
+    """Folders that hold Bambu Studio's machine presets and their template
+    files: the user's copy of the system presets, then the app's own
+    (Contents/Resources/profiles/BBL/machine, where Gustav's are)."""
+    out = [os.path.join(_system_dir(support_dir), "machine")]
+    for r in roots:
+        for b in APP_BUNDLES:
+            p = os.path.join(r, b, "Contents", "Resources", "profiles", "BBL", "machine")
+            if p not in out:
+                out.append(p)
+    return [d for d in out if os.path.isdir(d)]
+
+
+def machine_templates(support_dir, names, dirs=None):
+    """The settings kept in template files for the machine presets `names`
+    (leaf first; the leaf's win): the printer's own G-code blocks. {} when
+    this Bambu Studio keeps none.
+
+    A preset names its templates in "include" (real file, Bambu Studio
+    02.08: "Bambu Lab H2S 0.4 nozzle" includes "Bambu Lab H2S 0.4 nozzle
+    template machine_start_gcode" and five more; each is {name,
+    instantiation, <key>: "..."}). Another nozzle of the same printer may
+    include the 0.4 nozzle's templates, so the list is followed, not
+    guessed from the preset's name; only a preset without "include" falls
+    back to "<its name> template *.json"."""
+    dirs = machine_dirs(support_dir) if dirs is None else dirs
+
+    def read(fname):
+        for d in dirs:
             try:
-                with open(os.path.join(folder, f), encoding="utf-8") as fh:
-                    d = json.load(fh)
+                with open(os.path.join(d, fname), encoding="utf-8") as fh:
+                    got = json.load(fh)
+                return got if isinstance(got, dict) else None
             except (OSError, ValueError):
                 continue
-            if not isinstance(d, dict):
+        return None
+
+    out = {}
+    for name in reversed(names):
+        own = read(name + ".json") or {}
+        inc = own.get("include")
+        if isinstance(inc, str):
+            inc = [inc]
+        wanted = [str(x) + ".json" for x in inc or []]
+        if not wanted:
+            seen = set()
+            for d in dirs:
+                try:
+                    listing = sorted(os.listdir(d))
+                except OSError:
+                    continue
+                for f in listing:
+                    if f.startswith(name + " template") and f.endswith(".json") \
+                            and f not in seen:
+                        seen.add(f)
+                        wanted.append(f)
+        for f in wanted:
+            d = read(f)
+            if not d:
                 continue
             for k, v in d.items():
-                if k not in _PRESET_META and v not in ("", None, []):
+                if k not in _PRESET_META and k != "include" and v not in ("", None, []):
                     out[k] = v
     return out
 

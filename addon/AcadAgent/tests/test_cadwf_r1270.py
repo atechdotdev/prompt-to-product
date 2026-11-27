@@ -328,6 +328,98 @@ class Linux(unittest.TestCase):
         self.assertEqual(seen, [["open", "-a", "/Applications/BambuStudio.app", "/tmp/car.3mf"]])
 
 
+class Include(unittest.TestCase):
+    """The real layout (Bambu Studio 02.08.02.61, Gustav's H2S files,
+    2026-11-27): a machine preset lists its templates in "include"; each
+    template is {name, instantiation, <key>}; they sit in the app's own
+    profiles folder."""
+
+    def setUp(self):
+        self.d = support()
+        self.addCleanup(shutil.rmtree, self.d, True)
+        self.mdir = os.path.join(self.d, "system", "BBL", "machine")
+
+    def _put(self, folder, name, data):
+        os.makedirs(folder, exist_ok=True)
+        with open(os.path.join(folder, name + ".json"), "w") as fh:
+            json.dump(dict(data, name=name), fh)
+
+    def test_another_nozzle_includes_the_04_templates(self):
+        # there is no "... 0.2 nozzle template ..." file: the 0.2 preset
+        # names the 0.4 nozzle's
+        self._put(self.mdir, "Bambu Lab H2S 0.2 nozzle", {
+            "type": "machine", "inherits": "fdm_bbl_3dp_002_common", "from": "system",
+            "printer_model": "Bambu Lab H2S", "printable_height": "340",
+            "include": [MACHINE + " template machine_start_gcode",
+                        MACHINE + " template machine_end_gcode"]})
+        m = pp.flat_preset(self.d, "machine", "Bambu Lab H2S 0.2 nozzle")
+        self.assertEqual(m["machine_start_gcode"], START)
+        self.assertEqual(m["machine_end_gcode"], "; H2S end\n")
+        self.assertEqual(m["name"], "Bambu Lab H2S 0.2 nozzle")
+        # the list stays in the file, as in Gustav's proven machine files
+        self.assertEqual(len(m["include"]), 2)
+
+    def test_only_the_included_templates_are_taken(self):
+        p = os.path.join(self.mdir, MACHINE + ".json")
+        with open(p) as fh:
+            d = json.load(fh)
+        d["include"] = [MACHINE + " template machine_start_gcode"]
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+        m = pp.flat_preset(self.d, "machine", MACHINE)
+        self.assertEqual(m["machine_start_gcode"], START)
+        self.assertEqual(m["machine_end_gcode"], "")          # not included: the chain's
+
+    def test_real_template_shape(self):
+        self._put(self.mdir, MACHINE + " template time_lapse_gcode", {
+            "instantiation": "false", "time_lapse_gcode": "; lapse\n"})
+        got = pp.machine_templates(self.d, [MACHINE])
+        self.assertEqual(got["time_lapse_gcode"], "; lapse\n")
+        self.assertNotIn("instantiation", got)
+        self.assertNotIn("name", got)
+
+    def test_templates_in_the_apps_own_folder(self):
+        # the user's copy has the presets but not the templates
+        for f in os.listdir(self.mdir):
+            if " template " in f:
+                os.unlink(os.path.join(self.mdir, f))
+        self.assertEqual(pp.machine_templates(self.d, [MACHINE]), {})
+        app = tempfile.mkdtemp(prefix="atech-app-")
+        self.addCleanup(shutil.rmtree, app, True)
+        res = os.path.join(app, "BambuStudio.app", "Contents", "Resources", "profiles", "BBL",
+                           "machine")
+        self._put(res, MACHINE + " template machine_start_gcode", {"machine_start_gcode": START})
+        dirs = pp.machine_dirs(self.d, roots=(app,))
+        self.assertEqual(dirs, [self.mdir, res])
+        got = pp.machine_templates(self.d, [MACHINE], dirs=dirs)
+        self.assertEqual(got, {"machine_start_gcode": START})
+
+    def test_gustavs_real_files_when_given(self):
+        # ATECH_BAMBU_FILES=<folder with "Bambu Lab H2S 0.4 nozzle.json", its
+        # start template and "Bambu Lab H2S.json">. Bambu's own files are
+        # not kept in this repository.
+        src = os.environ.get("ATECH_BAMBU_FILES")
+        if not src or not os.path.isfile(os.path.join(src, MACHINE + ".json")):
+            self.skipTest("set ATECH_BAMBU_FILES to a folder with the real H2S presets")
+        d = tempfile.mkdtemp(prefix="atech-real-")
+        self.addCleanup(shutil.rmtree, d, True)
+        mdir = os.path.join(d, "system", "BBL", "machine")
+        os.makedirs(mdir)
+        for f in os.listdir(src):
+            if f.endswith(".json"):
+                shutil.copy(os.path.join(src, f), mdir)
+        with open(os.path.join(src, MACHINE + " template machine_start_gcode.json")) as fh:
+            want = json.load(fh)["machine_start_gcode"]
+        m = pp.flat_preset(d, "machine", MACHINE)
+        self.assertEqual(m["machine_start_gcode"], want)
+        self.assertGreater(len(want), 5000)
+        self.assertIn("M620", want)
+        self.assertEqual((m["from"], m["name"]), ("system", MACHINE))
+        self.assertNotIn("inherits", m)
+        self.assertEqual(m["printable_height"], "340")
+        self.assertEqual(pp.model_id(d, m), "O1S")
+
+
 class OnTheBed(unittest.TestCase):
     """The print plan says which side of each part goes down, and why
     supports are needed (p2p_print.bed_markdown)."""
