@@ -23,11 +23,10 @@ SLOT = 4.0                             # the shaft slots' width (shaft: 3 mm)
 COLOURS = {"Chassis": "graphite", "Cover": "toy_yellow", "Tyre": "rubber",
            "Rim": "matte_white", "Screw": "chrome"}
 
-# Wheels: ONE build, measured first - the tread blocks stand proud of R, so
-# the axle height comes from the tread's bottom, not from R.
-w = cad.wheel(2 * R, WHEEL_W, spokes=5, tread="block", tread_n=22, bore=3.3,
-              axis="-X", at=(0, 0, 0))
-AXLE = -w["tyre"].BoundBox.ZMin        # the shaft centre over the desk
+# The wheel, measured first: the tread blocks stand proud of R, so the axle
+# height comes from the tread's bottom, not from R.
+WHEEL = dict(spokes=5, tread="block", tread_n=22)
+AXLE = -cad.wheel(2 * R, WHEEL_W, axis="-X", **WHEEL)["tyre"].BoundBox.ZMin
 board = ap.board_object(doc)
 L = AXLE - 10.14                       # PCB top: shaft centre 10.14 above it
 board.Placement = Placement(Vector(0, 0, L), FLAT)
@@ -50,13 +49,24 @@ FLOOR = pcb.ZMin - WALL
 DECK = pcb.ZMin + RIM                  # the chassis top: the cover stands on it
 TOP = mb.ZMax + TOP_AIR + WALL
 
-# The wheel onto the left shaft (its bore on the shaft, its centre 1.33 mm
-# past the shaft's tip, as the toy car's); mirrored to the right below.
-for k in w:
-    w[k].translate(V(tip - 1.33, SHAFT_Y, AXLE))
-cap = w["cap"].copy()
-cap.translate(V(0.6, 0, 0))            # pressed into the hub pocket, fused
-rim = cad.fuse_one(w["rim"], cap)
+
+
+def wheel_on(motor):
+    """A wheel pushed straight onto a motor's D-shaft, as (tyre, rim): the
+    hub's keyed D-bore is the size that printed and fitted (3.4 / 2.9; a
+    round bore would not drive) and takes the shaft's OWN flat, measured
+    from the module, so bore and shaft line up. The wheel's centre is 1.33 mm
+    past the shaft's tip (as the toy car's): 4.5 mm of the shaft in the hub."""
+    s = cad.motor_shaft(motor)
+    w = cad.wheel(2 * R, WHEEL_W, flat=s["flat"], axis=s["axis"],
+                  at=s["tip"] + s["axis"] * 1.33, **WHEEL)
+    cap = w["cap"].copy()
+    cap.translate(s["axis"] * -0.6)    # pressed into the hub pocket, fused
+    return w["tyre"], cad.fuse_one(w["rim"], cap)
+
+
+tyre_l, rim_l = wheel_on(mot_l)
+tyre_r, rim_r = wheel_on(mot_r)
 
 # Chassis: a plate with the skid under the far end, then the pocket the
 # board drops into (0.3 mm clear all round) - cut last, so the skid's dome
@@ -91,9 +101,8 @@ for x in (X0 + MARGIN / 2 + 0.5, X1 - MARGIN / 2 - 0.5):
         # the length screw_through prints for this boss
         screws.append(cad.screw("csk_phillips", "M2", 11, at=(x, y, FLOOR), axis="+Z"))
 
-parts = {"Chassis": chassis, "Cover": cover, "Tyre_L": w["tyre"], "Rim_L": rim,
-         "Tyre_R": cad.mirror(w["tyre"], "YZ", (MID_X, 0, 0)),
-         "Rim_R": cad.mirror(rim, "YZ", (MID_X, 0, 0))}
+parts = {"Chassis": chassis, "Cover": cover, "Tyre_L": tyre_l, "Rim_L": rim_l,
+         "Tyre_R": tyre_r, "Rim_R": rim_r}
 parts.update({"Screw_%d" % (i + 1): s for i, s in enumerate(screws)})
 for name, shape in parts.items():
     o = doc.addObject("Part::Feature", name)

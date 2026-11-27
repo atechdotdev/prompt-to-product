@@ -46,6 +46,9 @@ merely looks fine. The FreeCAD traps each one closes:
     d_bore          the keyed D-bore that pushes onto the DC Motor's shaft,
                     at the size that PRINTED and fitted (3.4 / 2.9, not the
                     shaft's own 3.0 / 2.5): hub = cad.d_bore(hub, at, axis)
+    motor_shaft     a seated dc_motor's shaft as measured from the module:
+                    its tip, its direction and the side its flat is on -
+                    the flat a D-bore or cad.wheel(flat=...) must take.
     shaft_hole      a round hole drawn so that it prints with the fit you
                     name ('running', 'press' ...): a printed hole comes out
                     about 0.25 mm under its drawn size (R1220).
@@ -70,7 +73,7 @@ __all__ = [
     "last_reason",
     "spur_gear", "gear_shift_for", "bound_of", "place_on", "wedge",
     "pin_hinge", "socket_opening", "detail",
-    "fit", "d_bore", "shaft_hole",
+    "fit", "d_bore", "shaft_hole", "motor_shaft",
 ]
 
 TOL = 1e-6          # volumes below this (mm^3) are "nothing"
@@ -1099,6 +1102,73 @@ def shaft_hole(shape, at, axis, shaft_d, fit_class="running", depth=None,
     d = round(round(d / 0.05) * 0.05, 2)
     print("shaft_hole: %g mm shaft, %s fit: drawn %g" % (shaft_d, fit_class, d))
     return hole(shape, at, axis, d, depth=depth, through=through)
+
+
+def motor_shaft(motor):
+    """Where a seated dc_motor's shaft is, MEASURED from the module: {"tip", "axis", "flat", "d", "across", "length"}.
+
+    tip     the centre of the shaft's end (a Vector, world)
+    axis    unit Vector along the shaft, OUT of the gearbox
+    flat    unit Vector from the shaft's centre to its flat side
+    d, across, length   3.0, 2.5 and 8.8 as measured on this module
+
+    A wheel or hub that pushes onto it takes the shaft's own flat, or the
+    D-bore and the D-shaft overlap in the model:
+        s = cad.motor_shaft(mot)
+        hub = cad.d_bore(hub, mouth, s["axis"] * -1, flat=s["flat"])
+        w = cad.wheel(d, width, flat=s["flat"], axis=s["axis"], at=...)"""
+    import numpy as np
+    name = getattr(motor, "AtechModule", None)
+    try:
+        import atech_ports as ap
+        faces = ap.working_faces(name, motor.Placement)
+        out = [f["world"] for f in faces if f.get("word") == "out" and f.get("world")]
+        pts = np.array([(p.x, p.y, p.z) for p in motor.Mesh.Points], dtype=float)
+    except Exception as exc:                            # noqa: BLE001
+        raise CadError("motor_shaft: %r is not a seated Atech module with a shaft (%s) - "
+                       "pass what ap.seat(doc, 'dc_motor', port) returned"
+                       % (getattr(motor, "Label", motor), exc))
+    if not out or not len(pts):
+        raise CadError("motor_shaft: %s has no shaft (only a dc_motor does)"
+                       % (name or getattr(motor, "Label", motor)))
+    ax = np.array(out[0], dtype=float)
+    ax /= np.linalg.norm(ax)
+    proj = pts @ ax
+    top = float(proj.max())
+    end = pts[proj >= top - 3.0]                        # the last 3 mm: shaft only
+    ref = np.array([1.0, 0.0, 0.0]) if abs(ax[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
+    u = ref - ax * (ref @ ax)
+    u /= np.linalg.norm(u)
+    v = np.cross(ax, u)
+    x, y = end @ u, end @ v
+    best = None
+    for k in range(180):
+        t = math.radians(k)
+        s = x * math.cos(t) + y * math.sin(t)
+        w = float(s.max() - s.min())
+        if best is None or w < best[0]:
+            best = (w, t)
+    across, t0 = best
+    widest = max(float(np.ptp(x * math.cos(math.radians(k)) + y * math.sin(math.radians(k))))
+                 for k in range(0, 180, 15))
+    s = x * math.cos(t0) + y * math.sin(t0)
+    p = -x * math.sin(t0) + y * math.cos(t0)
+    # the flat is the side where the section ends in a straight chord
+    plus = float(np.ptp(p[s >= s.max() - 0.02]))
+    minus = float(np.ptp(p[s <= s.min() + 0.02]))
+    sign = 1.0 if plus >= minus else -1.0
+    r = widest / 2.0
+    s_c = (float(s.max()) - (across - r)) if sign > 0 else (float(s.min()) + (across - r))
+    p_c = (float(p.max()) + float(p.min())) / 2.0
+    e0 = u * math.cos(t0) + v * math.sin(t0)
+    e1 = -u * math.sin(t0) + v * math.cos(t0)
+    tip = ax * top + e0 * s_c + e1 * p_c
+    # the gearbox face: the furthest point along the shaft that is not shaft
+    wide = np.hypot(pts @ e0 - s_c, pts @ e1 - p_c) > r + 0.5
+    base = float(proj[wide].max()) if wide.any() else top
+    return {"tip": V(tuple(tip)), "axis": V(tuple(ax)), "flat": V(tuple(e0 * sign)),
+            "d": round(widest, 2), "across": round(across, 2),
+            "length": round(top - base, 2)}
 
 
 def counterbore(shape, at, axis, d, cb_d, cb_depth, depth=None, through=True):

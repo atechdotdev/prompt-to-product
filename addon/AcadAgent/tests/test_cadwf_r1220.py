@@ -77,7 +77,7 @@ class Api(unittest.TestCase):
     def test_on_the_helper_card(self):
         build._HELPERS = None
         card = build.helper_card()
-        for name in ("d_bore", "shaft_hole", "fit"):
+        for name in ("d_bore", "shaft_hole", "fit", "motor_shaft"):
             line = next((ln for ln in card.splitlines()
                          if ln.startswith("  cad.%s(" % name)), None)
             self.assertIsNotNone(line, name)
@@ -98,7 +98,8 @@ class Api(unittest.TestCase):
     def test_the_prompt_sends_motor_wheels_to_the_d_bore(self):
         section = build.atech_fit_section()
         self.assertTrue(section, "no fit section")
-        self.assertIn("flat=True", section)
+        self.assertIn('flat=s["flat"]', section)
+        self.assertIn("cad.motor_shaft(motor)", section)
         self.assertIn("cad.d_bore", section)
         self.assertIn("cad.shaft_hole", section)
 
@@ -107,7 +108,7 @@ class Api(unittest.TestCase):
                   encoding="utf-8") as fh:
             ref = fh.read()
         self.assertNotIn("bore=3.3", ref)
-        self.assertIn("flat=True", ref)
+        self.assertIn("cad.motor_shaft(motor)", ref)
 
 
 @unittest.skipIf(FC is None, "bundled freecadcmd not found")

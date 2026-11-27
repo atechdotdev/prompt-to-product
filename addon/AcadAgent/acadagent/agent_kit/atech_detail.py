@@ -1099,12 +1099,15 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
           hub_d=None, bore=None, axis='+Y', at=(0, 0, 0), flat=False):
     """A wheel of diameter d as {"tyre", "rim", "cap"}: separate solids (rubber, metal, chrome) that do not overlap, centred at `at`, the cap facing `axis`.
 
-    flat  True when the wheel pushes STRAIGHT onto a dc_motor's shaft (no
+    flat  set it when the wheel pushes STRAIGHT onto a dc_motor's shaft (no
           n20_wheel hub in between): the hub gets the keyed D-bore at the
           size that printed and fitted (3.4 / 2.9 - cad.d_bore), blind,
           from the back (the side away from `axis`), and grows to keep
-          2 mm round it. A round bore= on that shaft spins loose or has
-          to be drilled. Seat the hub's back face about 1 mm off the
+          2 mm round it. Give the shaft's own flat,
+          flat=cad.motor_shaft(motor)["flat"], so the D-bore and the
+          D-shaft line up in the model (True: a fixed side, for a wheel
+          not yet on a motor). A round bore= on that shaft spins loose or
+          has to be drilled. Seat the hub's back face a little off the
           gearbox.
 
     tyre  spline balloon profile; tread 'block' (cross grooves + a centre
@@ -1131,7 +1134,8 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
         raise CadError("wheel: rim_d %g leaves under 1 mm of tyre on d %g - use rim_d <= %g"
                        % (rim_d, d, d - 2.0))
     d_across = None
-    if flat:
+    keyed = not (flat is False or flat is None)
+    if keyed:
         # R1220: the printed push fit on the DC Motor's D-shaft; a bore=
         # given with flat=True keeps the table's round-to-flat difference
         fb, fa = cad.fit("dbore_d3")
@@ -1249,12 +1253,12 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
         lr = min(0.45, 0.3 * (hr - cap_r))
         lug = Part.makeCylinder(lr, 0.5 + 1, V(((cap_r + hr) / 2.0, 0, top - 0.5)))
         tools += cad.polar_pattern(lug, spokes)
-    if bore and not flat:
+    if bore and not keyed:
         tools.append(Part.makeCylinder(float(bore) / 2.0, 4 * rw + 4, V((0, 0, -2 * rw - 2))))
     rim = cad.cut(rim, tools)
     rim = soften(rim, min(0.2, 0.5 * rr), new_edges(rim, body), min_r=0.1, budget_s=2)
     d_depth = None
-    if flat:
+    if keyed:
         # after the softening: the bore's edges stay as drawn (its own
         # lead-in cone is the only rounding a push fit wants)
         d_depth = min(float(cad.fit("dbore_depth")), 2 * rw + proud - pocket - 1.0)
@@ -1262,8 +1266,18 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
             raise CadError("wheel: a wheel %g wide leaves a D-bore only %.1f mm deep - the "
                            "motor shaft needs 4 mm or more; use width >= %g"
                            % (width, d_depth, math.ceil((4.0 + pocket + 1.0 - proud) / 0.84)))
+        side = '+X'
+        if flat is not True:
+            # the side the shaft's own flat is on (cad.motor_shaft(mot)["flat"]),
+            # a world direction: turned into the wheel's own frame (axis = +Z)
+            wf = App.Rotation(V((0, 0, 1)), _dir(axis)).inverted().multVec(_dir(flat, "flat"))
+            if math.hypot(wf.x, wf.y) < 1e-3:
+                raise CadError("wheel: `flat` points along the wheel's axis - it is the side "
+                               "the shaft's flat is on, across the axle "
+                               "(cad.motor_shaft(motor)[\"flat\"])")
+            side = (wf.x, wf.y, 0.0)
         rim = cad.d_bore(rim, (0, 0, -rw), '+Z', depth=d_depth, bore=bore,
-                         across=d_across, flat='+X')
+                         across=d_across, flat=side)
     # ---- cap: in the pocket, 0.05 clear of its floor and wall
     cap_h = pocket - 0.05
     dome = min(0.5 * cap_r, 0.25 * cap_r + 0.3)
@@ -1284,7 +1298,7 @@ def wheel(d, width, rim_d=None, spokes=5, spoke_style='window', tread='block', t
             raise CadError("wheel: %s and %s overlap by %.3f mm3 (internal error)" % (x, y, ov))
     print("wheel: d %g x %g, %s tread x %d, %d %s spokes, %.2f s" % (
         d, width, tread, tread_n if tread else 0, spokes, spoke_style, time.time() - t0))
-    if flat:
+    if keyed:
         print("wheel: D-bore %g / %g x %.1f deep in a %g hub, its mouth %.2f behind `at` "
               "(the motor shaft is 8.8 long)" % (bore, d_across, d_depth, hub_d, rw))
     return out

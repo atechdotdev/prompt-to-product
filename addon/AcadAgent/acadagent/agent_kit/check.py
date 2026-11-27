@@ -1308,6 +1308,7 @@ def main():
     res["geometry_seconds"] = round(time.time() - t_g, 3)
     _walls(res, ends, ws)
     _printability(res, ends)                            # R1250
+    _shaft_fits(res, doc, ends)                         # R1260
     _atech_port_check(doc, res)
     _firmware(res, ws)
     _wiring(res)                                        # R960
@@ -2198,6 +2199,67 @@ def _printability(res, ends):
                 res["warnings"].append("%s: %s" % (r["label"], text))
 
 
+def _motor_shafts(doc):
+    """R1260: [{"label", "tip", "axis"}] of every dc_motor in the document:
+    the shaft's tip (the middle of the mesh points furthest along its
+    working face) and its direction out of the gearbox, in the world."""
+    out = []
+    try:
+        import atech_cad
+    except Exception:                                   # noqa: BLE001
+        return out
+    for o in doc.Objects:
+        if getattr(o, "AtechModule", None) != "dc_motor":
+            continue
+        try:
+            s = atech_cad.motor_shaft(o)                # the kit's own measurement
+            out.append({"label": o.Label, "tip": tuple(s["tip"]), "axis": tuple(s["axis"]),
+                        "flat": tuple(s["flat"])})
+        except Exception:                               # noqa: BLE001
+            continue
+    return out
+
+
+def _shaft_fits(res, doc, ends):
+    """R1260: the fit of every shaft in a bore (atech_fitcheck): each DC
+    motor's D-shaft in the printed bore it sits in, and each printed pin in
+    a printed hole, with the clearance left once the hole has shrunk in
+    printing and the class that is. FIT lines; a ROUND bore gripping a
+    motor's shaft is a WARNING (it does not drive). Never a problem."""
+    parts = [{"label": o.Label, "shape": o.Shape} for o in ends if _judged(o)]
+    if not parts:
+        return
+    try:
+        import atech_fitcheck
+        motors = _motor_shafts(doc)
+        mrows = atech_fitcheck.motor_fits(parts, motors) if motors else []
+        prows = atech_fitcheck.pin_fits(parts)
+    except Exception as exc:                            # noqa: BLE001
+        res["warnings"].append("fit check could not run: %s" % exc)
+        return
+    if not mrows and not prows:
+        return
+    res["fits"] = {"motors": mrows, "pins": prows}
+    for r in mrows:
+        if r["level"] == "warning":
+            res["warnings"].append(r["text"])
+        elif r["level"] == "note":
+            res.setdefault("notes", []).append(r["text"])
+
+
+def _fit_lines(res):
+    """R1260: the FIT lines (a row already said as a WARNING or a NOTE is
+    not said twice), or []."""
+    fits = res.get("fits") or {}
+    try:
+        import atech_fitcheck
+        return atech_fitcheck.lines(
+            [r for r in fits.get("motors") or [] if r.get("level") == "info"],
+            fits.get("pins") or [])
+    except Exception:                                   # noqa: BLE001
+        return []
+
+
 def _print_part_lines(res):
     """R1250: the PRINT line of each part, or []."""
     try:
@@ -2616,6 +2678,8 @@ def _say_summary(res):
     if line:
         _say(line)
     for line in _print_part_lines(res):                 # R1250
+        _say(line)
+    for line in _fit_lines(res):                        # R1260
         _say(line)
     line = _fit_user_line(res)                          # R1240
     if line:
