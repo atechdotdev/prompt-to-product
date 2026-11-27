@@ -329,7 +329,11 @@ class Window(unittest.TestCase):
         self.assertEqual(made[0]["title"], "Robot")
         self.assertTrue(d.targets.isVisibleTo(d))
         d.send()
-        self.assertEqual(ran[-1], ["open", "-R", os.path.join(d0, "x - share.zip")])
+        # R1295: "open -R" reveals a file on macOS; elsewhere the folder opens
+        if sys.platform == "darwin":
+            self.assertEqual(ran[-1], ["open", "-R", os.path.join(d0, "x - share.zip")])
+        else:
+            self.assertEqual(ran[-1], ["xdg-open", d0])
         from PySide6 import QtWidgets
         self.assertEqual(QtWidgets.QApplication.clipboard().text(), "hello")
         d.maker_world()

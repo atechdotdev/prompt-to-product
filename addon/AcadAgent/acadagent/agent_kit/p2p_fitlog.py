@@ -32,6 +32,7 @@ Plain Python, no FreeCAD, no Qt.
 import datetime
 import json
 import os
+import re
 
 import atech_fit
 
@@ -57,6 +58,8 @@ WORDS = {
     "preload": "hold-down rib into the spine",
 }
 VERDICTS = ("fits", "tight", "loose")
+#: how a note ends when the value was worked out from the snug puck
+DERIVED_NOTE = " (follows the D-bore)"
 
 
 def folder(home=None):
@@ -115,8 +118,15 @@ def save(data, home=None):
     return p
 
 
-#: filament kinds a preset's name is read for, and the Fit window offers
+#: filament kinds the Fit window offers
 MATERIALS = ("PLA", "PETG", "PETG-CF", "ABS", "ASA", "TPU")
+#: ... and every kind a preset's or a typed name is read for. A filled
+#: filament is its own kind: PLA-CF is not PLA (R1295: it was read as PLA,
+#: and PC, PA and PET-CF as nothing at all)
+KINDS = MATERIALS + ("PLA-CF", "PLA-GF", "PETG-GF", "PET-CF", "PET-GF", "ABS-GF", "ASA-CF",
+                     "ASA-GF", "PAHT-CF", "PA6-CF", "PA6-GF", "PA12-CF", "PA-CF", "PA-GF",
+                     "PPA-CF", "PPA-GF", "PPS-CF", "PC-CF", "PCTG", "PC", "PA", "PVA",
+                     "HIPS", "PPS", "PP", "PET")
 #: values that are an interference, not a clearance: "too tight" makes
 #: them SMALLER (R1295: 'tight' used to raise the hold-down rib's preload)
 INTERFERENCE_KEYS = frozenset(("preload",))
@@ -126,10 +136,17 @@ def material_of(preset_name):
     """The filament kind in a preset's name ("Bambu PETG-CF @BBL H2S" ->
     "PETG-CF"), or ""."""
     name = str(preset_name or "").upper()
-    for m in sorted(MATERIALS, key=len, reverse=True):
-        if m in name:
+    for m in sorted(KINDS, key=len, reverse=True):
+        # a whole word: "PA" is not in "PAHT-CF", nor "PC" in "PCTG"
+        if re.search(r"(?<![A-Z0-9])%s(?![A-Z0-9])" % re.escape(m), name):
             return m
     return ""
+
+
+def kind(material):
+    """A material as it is compared: its filament kind ("PLA Basic" ->
+    "PLA"), else the text itself in capitals."""
+    return material_of(material) or _clean(material, "").upper()
 
 
 def _clean(text, default):
@@ -139,7 +156,20 @@ def _clean(text, default):
 
 
 def profile_name(printer, material):
-    return "%s | %s" % (_clean(printer, "My printer"), _clean(material, "PLA"))
+    """ "<printer> | <filament kind>". A filament typed as Bambu names it
+    ("PLA Basic") is stored as its kind, or no build would match it."""
+    return "%s | %s" % (_clean(printer, "My printer"),
+                        material_of(material) or _clean(material, "PLA"))
+
+
+def match(data, printer, material):
+    """The stored profile for this printer and filament, whatever the
+    capitals ("x1c | pla" is "X1C | PLA"), or None."""
+    want = profile_name(printer, material).upper()
+    for name in data.get("profiles") or {}:
+        if name.upper() == want:
+            return name
+    return None
 
 
 def pick(data, printer=None, material=None):
@@ -151,17 +181,15 @@ def pick(data, printer=None, material=None):
     Without it, the profile saved last ("active")."""
     profiles = data.get("profiles") or {}
     active = data.get("active") if data.get("active") in profiles else None
-    want = _clean(material, "").upper()
+    want = kind(material)
     if not want:
         return active
-    same = sorted(n for n, p in profiles.items()
-                  if _clean(p.get("material"), "").upper() == want)
+    same = sorted(n for n, p in profiles.items() if kind(p.get("material")) == want)
     if not same:
         return None
-    exact = profile_name(printer, material) if printer else None
-    for n in same:
-        if exact and n.upper() == exact.upper():
-            return n
+    exact = match(data, printer, material) if printer else None
+    if exact in same:
+        return exact
     if active in same:
         return active
     return same[0] if len(same) == 1 else None
@@ -174,17 +202,26 @@ def effective(home=None, printer=None, material=None):
     data["active"] = pick(data, printer, material)
     if data["active"] is None and data["profiles"] and _clean(material, ""):
         # said by ./check, so nobody wonders where their numbers went
-        data["unused"] = ("none of your print results is for %s (you have: %s) - the "
-                          "table's values are used; print the fit test in %s to get yours"
-                          % (_clean(material, ""), ", ".join(sorted(data["profiles"])),
-                             _clean(material, "")))
+        want = kind(material)
+        same = sorted(n for n, p in data["profiles"].items()
+                      if kind(p.get("material")) == want)
+        if same:
+            data["unused"] = ("you have print results for %s from more than one printer "
+                              "(%s) and none is for this one - the table's values are used; "
+                              "save the one to use in Export and share > Fit test"
+                              % (want, ", ".join(same)))
+        else:
+            data["unused"] = ("none of your print results is for %s (you have: %s) - the "
+                              "table's values are used; print the fit test in %s to get yours"
+                              % (_clean(material, ""), ", ".join(sorted(data["profiles"])),
+                                 _clean(material, "")))
     return data
 
 
 def use_profile(data, printer, material):
     """Make the profile of this printer and filament the active one
     (created when new). Returns its name."""
-    name = profile_name(printer, material)
+    name = match(data, printer, material) or profile_name(printer, material)
     prof = data["profiles"].setdefault(name, {"values": {}})
     prof.setdefault("values", {})
     prof["printer"], prof["material"] = name.split(" | ", 1)
@@ -207,15 +244,23 @@ def _plain(v):
     return list(v) if isinstance(v, tuple) else v
 
 
-def record(data, key, value, note="", date=None):
+def record(data, key, value, note="", date=None, derived=False):
     """Store the user's value for `key` in the active profile. Raises
     ValueError when atech_fit refuses it (not a fit value, wrong shape, too
-    far from the table). Returns the stored value."""
+    far from the table). `derived`: worked out from another result, not
+    said by the person (it gives way to what they say). Returns the stored
+    value."""
     _name, prof = _active(data)
     shaped = atech_fit.user_value(key, value)
     prof["values"][key] = {"value": _plain(shaped), "note": str(note or ""),
                            "date": date or _today()}
+    if derived:
+        prof["values"][key]["derived"] = True
     return shaped
+
+
+def _is_derived(rec):
+    return bool(rec.get("derived")) or str(rec.get("note") or "").endswith(DERIVED_NOTE)
 
 
 def forget(data, key=None):
@@ -261,13 +306,17 @@ def coupon_result(data, snug, date=None):
     note = "fit test: puck %s was snug on the motor shaft" % label
     out = {"dbore_d3": record(data, "dbore_d3",
                               (round(bore, 2), round(t_across + delta, 2)), note, date)}
-    derived = note + " (follows the D-bore)"
+    vals = _active(data)[1]["values"]
     for key in ("hole_shrink", "bearing_d3"):
+        # R1295: what the person said themselves (a verdict on the turning
+        # hole) is theirs; only a value an earlier puck derived follows
+        if key in vals and not _is_derived(vals[key]):
+            continue
         if abs(delta) < 1e-9:
-            _active(data)[1]["values"].pop(key, None)
+            vals.pop(key, None)
             continue
         out[key] = record(data, key, round(atech_fit.table_value(key) + delta, 2),
-                          derived, date)
+                          note + DERIVED_NOTE, date, derived=True)
     return out
 
 
@@ -286,8 +335,8 @@ def gauge_result(data, window, date=None):
 def verdict(data, key, how, by=0.1, note="", date=None):
     """How a printed fit turned out: "fits" keeps the value in force as
     proven on this printer; "tight" opens it by `by` mm, "loose" closes it
-    by `by` (for a preload, "tight" means less of it). Returns the stored
-    value."""
+    by `by` (for a preload, "tight" means less of it). A clearance stops at
+    0, and the note says so. Returns the stored value."""
     if how not in VERDICTS:
         raise ValueError("how it fitted: one of %s" % ", ".join(VERDICTS))
     by = abs(float(by))
@@ -295,10 +344,15 @@ def verdict(data, key, how, by=0.1, note="", date=None):
     if key in INTERFERENCE_KEYS:
         step = -step
     now = current(data, key)
-    new = tuple(round(x + step, 2) for x in now) if isinstance(now, tuple) \
+    moved = tuple(round(x + step, 2) for x in now) if isinstance(now, tuple) \
         else round(now + step, 2)
+    # R1295: "too loose by 0.25" on a 0.2 clearance was refused outright
+    # (below zero), and the whole Save with it
+    new = tuple(max(0.0, x) for x in moved) if isinstance(moved, tuple) else max(0.0, moved)
     words = {"fits": "it fitted", "tight": "too tight by about %g" % by,
              "loose": "too loose by about %g" % by}[how]
+    if new != moved:
+        words += " (kept at 0: it cannot go below)"
     return record(data, key, new, (note + "; " if note else "") + words, date)
 
 
@@ -342,17 +396,39 @@ def to_workspace(workspace, home=None, printer=None, material=None):
     dst = os.path.join(workspace, FILE)
     raw = (json.dumps(effective(home, printer, material), indent=1, sort_keys=True)
            + "\n").encode("utf-8")
+    return FILE if _write_plain(dst, raw, 0o444) else None
+
+
+def _write_plain(dst, raw, mode):
+    """Put `raw` at `dst` as a plain file of `mode`, never through a link:
+    a link or a folder planted at that name is removed first, the new file
+    is made beside it (O_EXCL, O_NOFOLLOW) and moved into place. A file
+    that already holds `raw` only gets its mode put right. True when the
+    file was written (as build._write_if_changed, which the kit cannot
+    import)."""
+    import shutil
+    if os.path.islink(dst):
+        os.unlink(dst)
+    elif os.path.isdir(dst):
+        shutil.rmtree(dst)
     try:
         with open(dst, "rb") as fh:
             if fh.read() == raw:
-                return None
+                if (os.lstat(dst).st_mode & 0o777) != mode:
+                    os.chmod(dst, mode)
+                return False
     except OSError:
         pass
-    try:
-        os.chmod(dst, 0o644)
-    except OSError:
-        pass
-    with open(dst, "wb") as fh:
+    tmp = dst + ".tmp"
+    if os.path.lexists(tmp):
+        if os.path.isdir(tmp) and not os.path.islink(tmp):
+            shutil.rmtree(tmp)
+        else:
+            os.unlink(tmp)
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                 0o600)
+    with os.fdopen(fd, "wb") as fh:
         fh.write(raw)
-    os.chmod(dst, 0o444)
-    return FILE
+        os.fchmod(fh.fileno(), mode)
+    os.replace(tmp, dst)
+    return True

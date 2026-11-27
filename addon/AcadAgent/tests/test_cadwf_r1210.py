@@ -111,6 +111,20 @@ class PrintedValues(unittest.TestCase):
             self.assertNotIn(key, atech_fit.SOURCES)
         self.assertIn("PETG", atech_fit.FIT["dbore_d3"][2])
         self.assertIn("no PLA", atech_fit.FIT["dbore_d3"][2])
+        # second review: the shrink was worked out from how the bores fitted,
+        # never measured on a hole; "press 0.00" drawn printed as an
+        # interference, which the fit classes call "has to be drilled"
+        self.assertEqual(atech_fit.FIT["hole_shrink"][1], "P/A")
+        self.assertIn("not measured", atech_fit.SOURCES["hole_shrink"]["result"])
+        self.assertEqual(atech_fit.FIT["press"][:2], (0.15, "A"))
+        d = 3.0 + 2 * atech_fit.value("press")
+        self.assertEqual(round(d, 2), atech_fit.hole_for(3.0, "press"))
+        self.assertEqual(atech_fit.fit_word(round(atech_fit.printed_clearance(d, 3.0), 3)),
+                         "press")
+        self.assertEqual(sorted(k for k, v in atech_fit.FIT.items() if v[1] == "P"),
+                         ["dbore_d3", "dbore_depth"])
+        text = " ".join(str(v[2]) for v in atech_fit.FIT.values())
+        self.assertNotIn("snug by hand", text)
 
     def test_a_user_value_must_make_sense(self):
         """R1295 review: a D-bore that is not a D, and a negative size,
@@ -126,7 +140,8 @@ class PrintedValues(unittest.TestCase):
     def test_prompt_tables(self):
         out = atech_fit.render_tables()
         self.assertIn("P printed and fitted in PETG / PETG-CF", out)
-        self.assertIn("hole_shrink 0.25 (P)", out)
+        self.assertIn("hole_shrink 0.25 (P/A)", out)
+        self.assertIn("press 0.15 (A)", out)
         self.assertIn("bearing_d3 3.5 (A)", out)
         self.assertIn("slide 0.3 (A)", out)
         # applied by a kit call, so not in the table

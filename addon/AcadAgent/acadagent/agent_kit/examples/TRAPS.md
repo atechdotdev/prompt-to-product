@@ -367,13 +367,16 @@ R33. **A wheel or hub on a DC motor's shaft needs the D-bore, at the size
     drilled first wheel was "snug but no key").
     `s = cad.motor_shaft(motor)`, then
     `cad.wheel(..., flat=s["flat"], axis=s["axis"], at=s["tip"] + s["axis"] * 1.3)`
-    or `cad.d_bore(hub, mouth, s["axis"] * -1, flat=s["flat"])`
-    (starters/starter_wheels.py). Give the shaft's own flat, or the bore
-    and the shaft overlap in the model.
-R34. **A printed hole comes out about 0.25 mm under its drawn size.** A
-    3 mm pin in a hole drawn 3.0 is an interference. Name the fit and let
-    the kit add the shrink: `cad.shaft_hole(part, at, axis, 3.0, "push")`
-    draws 3.4 (snug by hand, as the motor bore printed), `"press"` 3.3,
+    or `cad.d_bore(hub, mouth, s["axis"], flat=s["flat"])` with `mouth` on
+    the hub's face toward the gearbox: the bore goes in the way the shaft
+    points, never from the far side (starters/starter_wheels.py). Give
+    the shaft's own flat, or the bore and the shaft overlap in the model.
+R34. **A printed hole comes out about 0.25 mm under its drawn size**
+    (worked out from how the motor bores fitted, not measured on a hole).
+    A 3 mm pin in a hole drawn 3.0 is an interference. Name the fit and
+    let the kit add the shrink:
+    `cad.shaft_hole(part, at, axis, 3.0, "push")`
+    draws 3.4 (the size the motor's D-bore shipped with), `"press"` 3.3,
     `"running"` 3.5 - the running size is assumed, no turning hole has
     been printed yet. ./check's FIT lines say what each pin-in-hole pair
     prints as.
@@ -393,28 +396,33 @@ R37. **Nothing across the print direction inside a tall part.** Cross bars
     part.
 R38. **A thick solid part is slow: make it a shell with ribs.** A plate of
     eight solid wheels was 14 h 36 and 334 g; as cups with six ribs each
-    at 0.24 mm layers 7 h 08 and 171 g; smaller and without tread, 4 h 13
-    and 135 g. Grooves and tread multiply the perimeter and string: leave
-    them off unless they do something.
+    10 h 27 and 206 g; with 0.24 mm layers, fewer chevrons and a thinner
+    rim and face 7 h 08 and 171 g; smaller and slick (no tread, no
+    groove) about 4 h 13 and 135 g. Grooves and tread multiply the
+    perimeter and string: leave them off unless they do something.
 R39. **Lettering: on the face that lies on the bed, 1 mm deep, strokes
     0.8 mm or wider.** The wheels' names are 7 mm letters, 1 mm deep:
     `cad.text(..., mode="deboss", depth=1.0)`. Small or thin letters
     leave walls thinner than one extrusion line between strokes, and
     ./check fails those (the fit test's first labels did: it is marked
     with dots now).
-R40. **A sleeve or pocket drawn at exactly the hardware's size does not go
-    on.** A case sleeve drawn at the board socket's exact width did not
-    slide over it. 0.3 mm per side is what is drawn now
+R40. **A sleeve drawn at exactly its hardware's size did not go on.** A
+    case sleeve drawn at the board socket's exact width did not slide
+    over it (a board in a pocket 0.02 mm wider than itself was accepted:
+    a part that slides needs more than one that is dropped in). 0.3 mm
+    per side is what is drawn now
     (`cad.fit("slide")`); that size is assumed, its print is not on
     record. The numbers are per printer and filament: the fit test
     (`cad.fit_coupon()`, and Export and share > Fit test) finds this
     printer's, and the kit uses them from then on.
 R41. **A dimension you have not measured is not a dimension.** When a size
     comes from memory or a guess (a bought part, a battery, a connector),
-    say so in the reply as "MEASURE: <what>, assumed <value>" and keep it
-    in ONE named constant at the top of model.py, so one number changes
-    when the person has measured it. Atech hardware is never guessed: take
-    it from `ap.bbox`, `cad.bound_of`, `cad.motor_shaft` or `cad.fit`.
+    keep it in ONE named constant at the top of model.py with the mark
+    `JACK_D = 6.2  # MEASURE: the jack's thread, assumed 6.2`, so one
+    number changes when the person has measured it. ./check lists every
+    such mark in a MEASURE line: say them in the reply. Atech hardware
+    is never guessed: take it from `ap.bbox`, `cad.bound_of`,
+    `cad.motor_shaft` or `cad.fit`.
 R42. **A part that carries a load gets one hand number before it is
     drawn thick or thin.** `import atech_mech as mech`, then
     `print(mech.cantilever("clip arm", F=5, L=12, b=6, h=1.6, material="PLA"))`

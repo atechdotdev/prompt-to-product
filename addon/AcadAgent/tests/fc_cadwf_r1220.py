@@ -133,45 +133,66 @@ def t_d_bore_refuses_nonsense():
         check("d_bore refuses the wrong direction", True)
 
 
+def _shaft(tip_z):
+    """The DC Motor's shaft as a solid (3.0 round, 2.5 across the flat on
+    +X, 8.8 long), pointing +Z with its tip at tip_z."""
+    cyl = Part.makeCylinder(1.5, 8.8, V(0, 0, tip_z - 8.8))
+    return cyl.common(Part.makeBox(2.5, 4, 9, V(-1.5, -2, tip_z - 8.9)))
+
+
 def t_d_bore_in_a_thin_part():
     """R1295 review: the default 12 mm bore in a thinner part went through
     without a word, or (3 mm and under) failed with "most of it is in air
-    - check `at` and `axis`"."""
-    # 8 mm thick: 7 deep, 1 mm of floor stays
-    disc = Part.makeCylinder(8, 8)
-    res = cad.d_bore(disc, (0, 0, 8), "-Z", flat="+X", lead_in=0)
-    check("8 mm part: the bore stops 1 mm short of the far side",
-          res.isInside(V(0, 0, 0.5), 1e-6, True) and not res.isInside(V(0, 0, 1.5), 1e-6, True))
-    want = d_area(3.4, 2.9) * 7.0
-    removed = disc.Volume - res.Volume
-    check("8 mm part: 7 mm of bore", abs(removed - want) < 0.02 * want,
-          "%.3f vs %.3f" % (removed, want))
-    # 12.5 mm: not room for 12 + 1, so 11.5
-    res = cad.d_bore(Part.makeCylinder(8, 12.5), (0, 0, 12.5), "-Z", flat="+X", lead_in=0)
-    check("12.5 mm part: still blind", res.isInside(V(0, 0, 0.5), 1e-6, True)
-          and not res.isInside(V(0, 0, 1.5), 1e-6, True))
-    # 13 mm and more: the table's 12
-    res = cad.d_bore(Part.makeCylinder(8, 13), (0, 0, 13), "-Z", flat="+X", lead_in=0)
-    check("13 mm part: the full 12", not res.isInside(V(0, 0, 1.5), 1e-6, True)
-          and res.isInside(V(0, 0, 0.5), 1e-6, True))
-    # too thin for a blind bore: said, with what to do
-    for t in (2.0, 3.0, 4.5):
-        try:
-            cad.d_bore(Part.makeCylinder(8, t), (0, 0, t), "-Z", flat="+X")
-            check("%g mm part is refused" % t, False)
-        except cad.CadError as exc:
-            msg = str(exc)
-            check("%g mm part is refused with its thickness and the way out" % t,
-                  "%.1f mm thick" % t in msg and "depth=" in msg and "in air" not in msg, msg)
-    # a depth that is GIVEN is cut as given, through the part too
+    - check `at` and `axis`". The first fix always kept a 1 mm floor; the
+    second review found that floor in the shaft's way on every hub from 5
+    to 9 mm. A floor is kept only when the whole 8.8 mm shaft goes in."""
+    # the hub sits 0.5 off the gearbox, the bore goes in the way the shaft
+    # points (+Z): whatever the hub's thickness the shaft must go in
+    for t in (2.0, 3.0, 4.5, 5.0, 6.0, 8.0, 9.0, 9.5, 9.8, 10.0, 11.0, 12.5, 13.0, 16.0):
+        hub = Part.makeCylinder(8, t, V(0, 0, 0.5))
+        res = cad.d_bore(hub, (0, 0, 0.5), "+Z", flat="+X", lead_in=0)
+        over = res.common(_shaft(8.8)).Volume
+        check("%g mm hub: the shaft goes in (no overlap)" % t, over < 1e-6, "%.4f mm3" % over)
+        top = 0.5 + t
+        open_top = not res.isInside(V(0, 0, top - 0.5), 1e-6, True)
+        if t - 1.0 >= 8.8 - 1e-9:
+            check("%g mm hub: blind, a floor stays" % t, not open_top
+                  and (t >= 13 or not res.isInside(V(0, 0, top - 1.5), 1e-6, True)))
+        else:
+            check("%g mm hub: through, as it always was" % t, open_top)
+        check("%g mm hub: one valid solid" % t, res.isValid() and len(res.Solids) == 1)
+    # the depths: 10 mm -> 9, 12.5 -> 11.5, 13 and more -> the table's 12
+    for t, deep in ((10.0, 9.0), (12.5, 11.5), (13.0, 12.0), (16.0, 12.0)):
+        hub = Part.makeCylinder(8, t)
+        res = cad.d_bore(hub, (0, 0, t), "-Z", flat="+X", lead_in=0)
+        want = d_area(3.4, 2.9) * deep
+        removed = hub.Volume - res.Volume
+        check("%g mm part: %g deep" % (t, deep), abs(removed - want) < 0.02 * want,
+              "%.3f vs %.3f" % (removed, want))
+    # a depth that is GIVEN is cut as given: blind in a thin part too
+    res = cad.d_bore(Part.makeCylinder(8, 8), (0, 0, 8), "-Z", depth=5, flat="+X", lead_in=0)
+    check("depth given: 5 deep in an 8 mm part", res.isInside(V(0, 0, 2.5), 1e-6, True)
+          and not res.isInside(V(0, 0, 3.5), 1e-6, True))
     res = cad.d_bore(Part.makeCylinder(8, 4), (0, 0, 4), "-Z", depth=4.5, flat="+X", lead_in=0)
     check("depth given: through a 4 mm part", not res.isInside(V(0, 0, 0.2), 1e-6, True)
           and res.isValid())
-    # a step in the part below the bore's mouth does not fool the measure:
-    # a hub standing on a wider, hollow rim
+    # `at` a little off the face is still on it
+    for off in (0.05, 0.1, 0.25, -0.1):
+        hub = Part.makeCylinder(8, 11)
+        res = cad.d_bore(hub, (0, 0, 11 + off), "-Z", flat="+X", lead_in=0)
+        check("`at` %+g mm off the face: still blind" % off,
+              res.isInside(V(0, 0, 0.5), 1e-6, True), "")
+    # a groove in the far side is seen: the bore does not break into it
+    hub = Part.makeCylinder(8, 11)
+    ring = Part.makeCylinder(1.6, 2.5).cut(Part.makeCylinder(1.0, 2.5))
+    hub = hub.cut(ring)                                  # a ring groove 2.5 deep from below
+    res = cad.d_bore(hub, (0, 0, 11), "-Z", flat="+X", lead_in=0)
+    check("far-side groove: one solid, the shaft still goes in",
+          res.isValid() and len(res.Solids) == 1, "%d solids" % len(res.Solids))
+    # a hub standing on a wider flange: measured where the bore is
     hub = Part.makeCylinder(5, 10, V(0, 0, 6)).fuse(Part.makeCylinder(12, 2, V(0, 0, 6)))
     res = cad.d_bore(hub, (0, 0, 16), "-Z", flat="+X", lead_in=0)
-    check("10 mm hub: 9 deep", res.isInside(V(0, 0, 6.5), 1e-6, True)
+    check("10 mm hub on a flange: 9 deep", res.isInside(V(0, 0, 6.5), 1e-6, True)
           and not res.isInside(V(0, 0, 7.5), 1e-6, True))
 
 

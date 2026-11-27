@@ -99,35 +99,65 @@ class NoStall(unittest.TestCase):
         self.assertAlmostEqual(got[0][0], 200.0, places=6)
         self.assertEqual(sorted(round(a) for a, _n in got), [50, 50, 100, 100, 200, 200])
 
-    def test_each_direction_is_measured_once(self):
-        """The part's reach along a direction was worked out again for
-        every face: faces x points. It is kept per direction now."""
-        pts = np.asarray(_box_mesh()[0], dtype=float)
-
-        class Counting(np.ndarray):
-            calls = 0
-
-            def __matmul__(self, other):
-                Counting.calls += 1
-                return np.asarray(self).__matmul__(other)
-        P = pts.view(Counting)
-        atech_print.brep_planes(_Shape(_box_faces(split=200)), P)
-        # 1200 faces, 6 directions (an inward-facing normal costs one more)
-        self.assertLessEqual(Counting.calls, 12, Counting.calls)
-
-    def test_too_many_faces_are_read_from_the_mesh(self):
-        pts, tris = _box_mesh()
-        n = atech_print.MAX_BREP_FACES // 6 + 1
-        shape = _Shape(_box_faces(split=n), (pts, tris))
-        self.assertGreater(len(shape.Faces), atech_print.MAX_BREP_FACES)
-        self.assertIsNone(atech_print.brep_planes(shape, np.asarray(pts, dtype=float)))
+    def test_many_faces_in_many_directions_do_not_stall(self):
+        """The part's reach was worked out again for every face, and every
+        face was compared with every group of faces: both grew with the
+        square of the face count. 6000 faces in 6000 directions (a ball
+        sewn from its mesh) are read in well under a second now."""
+        import math
+        n = 6000
+        dirs, pts = [], []
+        for i in range(n):                      # points spread over a sphere of radius 20
+            z = 1 - 2 * (i + 0.5) / n
+            r = math.sqrt(max(0.0, 1 - z * z))
+            a = i * math.pi * (3 - math.sqrt(5))
+            dirs.append((r * math.cos(a), r * math.sin(a), z))
+        pts = [(20 * x, 20 * y, 20 * z) for x, y, z in dirs]
+        faces = [_Face(d, q, 0.2) for d, q in zip(dirs, pts)]
+        faces += _box_faces(8.0, 8.0, 1.0)      # ... and six real flat sides inside it
         t0 = time.time()
-        row = atech_print.shape_report(shape, "Sewn")
-        self.assertLess(time.time() - t0, 2.0)
-        # judged all the same, from the mesh: on its 200 mm2 side, no supports
-        self.assertNotIn("skipped", row)
+        got = atech_print.brep_planes(_Shape(faces), np.asarray(pts, dtype=float))
+        self.assertLess(time.time() - t0, 3.0)
+        # every facet of the ball is a resting side of 0.2 mm2: under the
+        # 1 mm2 floor; the box inside the ball rests on nothing
+        self.assertEqual(got, [])
+
+    def test_too_many_faces_are_not_judged(self):
+        """Above MAX_BREP_FACES the part is not judged, and says so. (The
+        first fix read such a part from its mesh instead: a small flat
+        base was lost and the line said "no flat side to rest on".)"""
+        pts, tris = _box_mesh()
+        keep = atech_print.MAX_BREP_FACES
+        atech_print.MAX_BREP_FACES = 60
+        try:
+            shape = _Shape(_box_faces(split=11), (pts, tris))
+            self.assertIsNone(atech_print.brep_planes(shape, np.asarray(pts, dtype=float)))
+            row = atech_print.shape_report(shape, "Sewn")
+        finally:
+            atech_print.MAX_BREP_FACES = keep
+        self.assertEqual(row, {"label": "Sewn", "skipped": "66 faces", "flags": []})
+        self.assertGreaterEqual(keep, 20000)
+        # under the limit the same shape is judged from its faces
+        row = atech_print.shape_report(_Shape(_box_faces(split=11), (pts, tris)), "Sewn")
         self.assertEqual(round(row["flat_face_mm2"]), 200)
         self.assertFalse(row["supports"])
+
+    def test_the_deadline_is_looked_at_between_faces(self):
+        pts, tris = _box_mesh()
+        shape = _Shape(_box_faces(split=100), (pts, tris))          # 600 faces
+        with self.assertRaises(atech_print._Late):
+            atech_print.brep_planes(shape, np.asarray(pts, dtype=float),
+                                    deadline=time.time() - 1.0)
+
+    def test_a_face_stored_inside_out_still_counts(self):
+        pts = np.asarray(_box_mesh()[0], dtype=float)
+        faces = _box_faces()
+        faces[0] = _Face((0, 0, 1), (0, 0, 0), 200.0)               # the bottom, normal reversed
+        got = atech_print.brep_planes(_Shape(faces), pts)
+        self.assertEqual(len(got), 6)
+        down = [g for g in got if g[1][2] < -0.99]
+        self.assertEqual(len(down), 1)
+        self.assertAlmostEqual(down[0][0], 200.0)
 
     def test_a_part_past_the_deadline_is_skipped_not_waited_for(self):
         pts, tris = _box_mesh()
@@ -223,13 +253,44 @@ MODEL = textwrap.dedent('''
     BATTERY_L = 65.0        # MEASURE: the 18650 cell's length, assumed 65
     JACK_D = 6.2            # MEASURE the jack's thread, assumed 6.2
     note = "MEASURE: this is a string, not a comment"
+    tag = "#7 MEASURE: a hash inside a string is not a comment either"
+    LED_D = 5.0             # measure: the LED's body, assumed 5.0
+    SLOT = 3.0              # I will measure this later (no mark: no colon, no capitals)
     tray = Part.makeBox(BATTERY_L + 6, 24, 3)
     doc.addObject("Part::Feature", "Tray").Shape = tray
     doc.recompute()
 ''')
 
 
+class MeshMadePart(unittest.TestCase):
+
+    def test_a_ball_sewn_from_its_mesh(self):
+        from acadagent import sandbox
+        fc = sandbox.find_freecadcmd()
+        if fc is None:
+            if os.environ.get("ATECH_REQUIRE_FREECADCMD") == "1":
+                self.fail("no freecadcmd")
+            self.skipTest("bundled freecadcmd not found")
+        p = subprocess.run([fc, os.path.join(HERE, "fc_cadwf_r1295.py")],
+                           capture_output=True, text=True, timeout=300,
+                           cwd=tempfile.gettempdir(),
+                           env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
+        out = p.stdout + p.stderr
+        self.assertIn("ATECH_CADWF_R1295=0", out, out[-3000:])
+        self.assertGreaterEqual(out.count("\nPASS "), 8)
+
+
 class Measure(unittest.TestCase):
+
+    def test_the_agent_is_told_to_write_the_mark(self):
+        """Second review: ./check looked for a comment nobody was told to
+        write (TRAPS R41 asked for a sentence in the reply only)."""
+        with open(os.path.join(KIT, "examples", "TRAPS.md"), encoding="utf-8") as fh:
+            traps = fh.read()
+        r41 = traps[traps.index("R41. "):traps.index("R42. ")]
+        self.assertIn("# MEASURE: the jack's thread, assumed 6.2", r41)
+        self.assertIn("./check lists every", " ".join(r41.split()))
+
 
 
     def test_check_names_the_assumed_sizes(self):
@@ -252,7 +313,10 @@ class Measure(unittest.TestCase):
         out = run(MODEL)
         lines = [ln for ln in out.splitlines() if ln.startswith("MEASURE ")]
         self.assertEqual(len(lines), 1, out[-3000:])
-        self.assertIn("2 sizes in model.py are assumed, not measured", lines[0])
+        self.assertIn("3 sizes in model.py are assumed, not measured", lines[0])
+        self.assertIn("the LED's body, assumed 5.0", lines[0])
+        self.assertNotIn("a hash inside a string", lines[0])
+        self.assertNotIn("later", lines[0])
         self.assertIn("the 18650 cell's length, assumed 65", lines[0])
         self.assertIn("the jack's thread, assumed 6.2", lines[0])
         self.assertNotIn("this is a string", lines[0])
@@ -260,7 +324,8 @@ class Measure(unittest.TestCase):
         self.assertFalse([ln for ln in out.splitlines()
                           if ln.startswith("PROBLEM") and "MEASURE" in ln])
         # and a script without a mark gets no line
-        clean = "\n".join(ln.split("# MEASURE")[0] for ln in MODEL.splitlines())
+        clean = "\n".join(ln.split("# MEASURE")[0].split("# measure")[0]
+                          for ln in MODEL.splitlines())
         self.assertFalse([ln for ln in run(clean).splitlines() if ln.startswith("MEASURE ")])
 
 

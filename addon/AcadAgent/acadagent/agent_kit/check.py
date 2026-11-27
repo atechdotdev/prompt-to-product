@@ -2269,16 +2269,25 @@ def _measure_marks(res, code):
     comment `# MEASURE: <what>, assumed <value>`. res["measure"] lists
     them; ./check prints one MEASURE line so the reply cannot forget them.
     Never a problem."""
+    import io
     import re
+    import tokenize
     found = []
-    for ln in (code or "").splitlines():
-        if "#" not in ln:
-            continue
-        m = re.search(r"\bMEASURE\b\s*:?\s*(.*)", ln.split("#", 1)[1])
+    try:
+        # real comments only: a "#" inside a string is not one
+        comments = [(t.string, t.line) for t in
+                    tokenize.generate_tokens(io.StringIO(code or "").readline)
+                    if t.type == tokenize.COMMENT]
+    except (tokenize.TokenError, SyntaxError, IndentationError):
+        comments = []
+    for text, src in comments:
+        # MEASURE in capitals, or "measure:" with its colon in any case
+        m = re.search(r"\bMEASURE\b\s*:?\s*(.*)|\b[Mm]easure\s*:\s*(.*)", text)
         if m:
-            text = " ".join(m.group(1).split())[:90] or ln.split("#", 1)[0].strip()[:90]
-            if text and text not in found:
-                found.append(text)
+            said = " ".join((m.group(1) or m.group(2) or "").split())[:90] \
+                or src.split("#", 1)[0].strip()[:90]
+            if said and said not in found:
+                found.append(said)
     if found:
         res["measure"] = found
 

@@ -46,7 +46,7 @@ class Traps(unittest.TestCase):
         self.assertTrue(sec, "no R1280 section in TRAPS.md")
         for needle in ("3.4 / 2.9", "has no key", "0.25 mm under its drawn size",
                        "ONE side only", "slivers", "largest\n    flat side",
-                       "shell with ribs", "0.3 mm per side", "MEASURE:"):
+                       "shell with ribs", "0.3 mm\n    per side", "MEASURE:"):
             self.assertIn(needle, sec, needle)
         self.assertEqual(re.findall(r"(?m)^R(\d+)\. ", sec),
                          [str(n) for n in range(33, 43)])
@@ -56,16 +56,27 @@ class Traps(unittest.TestCase):
         sec = " ".join(_section().split())
         for gone in ("each of these cost a print", "does not drive", "0.3 mm wide",
                      "0.3 mm per side did", "it still does not turn",
-                     "Thin strokes left hairline gaps"):
+                     "Thin strokes left hairline gaps",
+                     # the second review: on no record either
+                     "snug by hand", "A sleeve or pocket", "smaller and without tread",
+                     's["axis"] * -1'):
             self.assertNotIn(gone, sec, gone)
+        self.assertIn("worked out from how the motor bores fitted, not measured on a hole", sec)
+        self.assertIn("the size the motor's D-bore shipped with", sec)
+        self.assertIn("A sleeve drawn at exactly its hardware's size did not go on.", sec)
+        # the bore goes in from the gearbox side, the way the shaft points
+        self.assertIn('cad.d_bore(hub, mouth, s["axis"], flat=s["flat"])', sec)
+        self.assertIn("never from the far side", sec)
         # the material the fits were proven in, and what is only assumed
         self.assertIn("PETG and PETG-CF; no PLA print on record", sec)
         self.assertIn("the running size is assumed", sec)
         self.assertIn("that size is assumed, its print is not on record", sec)
         # the wheel plate's numbers, each with the step that gave it
         self.assertIn("14 h 36 and 334 g", sec)
-        self.assertIn("7 h 08 and 171 g", sec)
-        self.assertIn("smaller and without tread, 4 h 13 and 135 g", sec)
+        self.assertIn("as cups with six ribs each 10 h 27 and 206 g", sec)
+        self.assertIn("with 0.24 mm layers, fewer chevrons and a thinner rim and face "
+                      "7 h 08 and 171 g", sec)
+        self.assertIn("smaller and slick (no tread, no groove) about 4 h 13 and 135 g", sec)
         self.assertIn("0.6 mm lead-in on both sides of a 1.2 mm rim", sec)
 
     def test_every_kit_call_a_trap_names_exists(self):
@@ -86,7 +97,7 @@ class Traps(unittest.TestCase):
         self.assertIn('"push")`\n    draws %g' % atech_fit.hole_for(3.0, "push"), sec)
         self.assertIn('`"press"` %g' % atech_fit.hole_for(3.0, "press"), sec)
         self.assertIn('`"running"` %g' % atech_fit.hole_for(3.0, "running"), sec)
-        self.assertIn("%g mm per side" % atech_fit.value("slide"), sec)
+        self.assertIn("%g mm per side" % atech_fit.value("slide"), " ".join(sec.split()))
 
     def test_the_starter_it_points_at_is_there(self):
         self.assertIn("starters/starter_wheels.py", _section())

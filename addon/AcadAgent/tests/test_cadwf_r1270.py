@@ -179,11 +179,11 @@ class WholePresets(unittest.TestCase):
 
 class BedType(unittest.TestCase):
     """R1295 review (high): the process written for the command line had
-    no "curr_bed_type". Gustav's note of 2026-11-08: the command line then
-    slices for the Cool Plate, and PETG and PETG-CF (bed temperature 0 on
-    that plate) fail with "Filaments are not compatible with the plate
-    type". All 16 of his process files that printed set "Textured PEI
-    Plate"."""
+    no "curr_bed_type". Gustav's note of 2026-11-08 (PETG-CF): the command
+    line then slices for the Cool Plate and fails with "Filaments are not
+    compatible with the plate type". PETG has bed temperature 0 on that
+    plate too. Every process file in cad-workflow's builds sets "Textured
+    PEI Plate"."""
 
     def setUp(self):
         self.d = support()
@@ -303,9 +303,70 @@ class MissingGcode(unittest.TestCase):
         res = {"ok": True, "whole_presets": True, "bed_type": "Textured PEI Plate",
                "missing_templates": files["missing_templates"], "model_id": "O1S"}
         text = " ".join(pp.slice_cautions(res))
-        self.assertIn("start and filament-change G-code was not found", text)
-        self.assertIn("change_filament_gcode", text)
+        # second review: the sentence said "start and filament-change"
+        # whatever was missing; it names the keys now
+        self.assertIn("Some of the printer's own G-code was not found "
+                      "(change_filament_gcode, layer_change_gcode).", text)
+        self.assertNotIn("start", text.split("Slice it again")[0])
         self.assertIn("Slice it again in Bambu Studio", text)
+        one = pp.slice_cautions(dict(res, missing_templates=[
+            MACHINE + " template wrapping_detection_gcode"]))
+        self.assertIn("(wrapping_detection_gcode).", one[0])
+
+    def test_only_the_generic_start_gcode_is_named(self):
+        """Second review: with no include list and no template found, the
+        chain's root gives its generic start block ("G28 ; generic") and
+        nothing was said - the test below could only pass with the root
+        deleted, a state no install has."""
+        for f in os.listdir(self.mdir):
+            if " template " in f:
+                os.unlink(os.path.join(self.mdir, f))
+        self.assertEqual(pp.flat_preset(self.d, "machine", MACHINE)["machine_start_gcode"],
+                         "G28 ; generic")
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(pp.bambu_profile(self.d), out)
+        self.assertEqual(files["missing_templates"],
+                         ["machine_start_gcode (only the generic one of fdm_machine_common)"])
+        text = " ".join(pp.slice_cautions({"ok": True, "whole_presets": True, "bed_type": "",
+                                           "missing_templates": files["missing_templates"]}))
+        self.assertIn("only the generic one of fdm_machine_common", text)
+        self.assertIn("Slice it again in Bambu Studio", text)
+        # a start block the printer's OWN preset sets is not generic
+        p = os.path.join(self.mdir, MACHINE + ".json")
+        with open(p) as fh:
+            d = json.load(fh)
+        d["machine_start_gcode"] = "; my own start\n"
+        with open(p, "w") as fh:
+            json.dump(d, fh)
+        with tempfile.TemporaryDirectory() as out:
+            files = pp.write_flat_presets(pp.bambu_profile(self.d), out)
+        self.assertEqual(files["missing_templates"], [])
+
+    def test_the_printers_model_file_in_the_apps_own_folder(self):
+        """Second review: the plate and the model id were read from the
+        user's copy of the system presets only; the templates are also
+        looked for in the app's own folder."""
+        app = tempfile.mkdtemp(prefix="atech-app-")
+        self.addCleanup(shutil.rmtree, app, True)
+        res = os.path.join(app, "BambuStudio.app", "Contents", "Resources", "profiles", "BBL",
+                           "machine")
+        os.makedirs(res)
+        shutil.move(os.path.join(self.mdir, "Bambu Lab H2S.json"), res)
+        m = pp.flat_preset(self.d, "machine", MACHINE)
+        f = dict(pp.flat_preset(self.d, "filament", FILAMENT), cool_plate_temp=["35"])
+        self.assertEqual(pp.bed_type(self.d, m, f), "")               # not found: nothing known
+        keep = pp.APP_ROOTS
+        pp.APP_ROOTS = (app,)
+        try:
+            real = pp.machine_dirs
+            pp.machine_dirs = lambda sd, roots=None, linux=(): real(sd, (app,), ())
+            try:
+                self.assertEqual(pp.bed_type(self.d, m, f), "Textured PEI Plate")
+                self.assertEqual(pp.model_id(self.d, m), "O1S")
+            finally:
+                pp.machine_dirs = real
+        finally:
+            pp.APP_ROOTS = keep
 
     def test_no_start_gcode_at_all_is_named(self):
         for f in os.listdir(self.mdir):
@@ -326,9 +387,13 @@ class MissingGcode(unittest.TestCase):
               "missing_templates": [], "model_id": "O1S"}
         self.assertEqual(pp.slice_cautions(ok), ["Sliced for the Textured PEI Plate: use "
                                                  "that plate."])
-        self.assertEqual(pp.slice_cautions(dict(ok, bed_type="")), [])
-        text = " ".join(pp.slice_cautions(dict(ok, whole_presets=False)))
+        # no plate named: said, and no "slice again" for that alone
+        got = pp.slice_cautions(dict(ok, bed_type=""))
+        self.assertEqual(len(got), 1)
+        self.assertIn("The build plate was not set", got[0])
+        text = " ".join(pp.slice_cautions(dict(ok, whole_presets=False, bed_type="")))
         self.assertIn("could not be read in full", text)
+        self.assertIn("the build plate may be defaults", text)
         self.assertIn("Slice it again in Bambu Studio", text)
         # the file still has an empty model id (no id known for this printer)
         text = " ".join(pp.slice_cautions(dict(ok, model_id="")))
@@ -720,6 +785,91 @@ class OnTheBed(unittest.TestCase):
         import p2p_print
         self.assertEqual(p2p_print.bed_markdown([{"label": "A"}, {"label": "B", "bed": None}]), "")
         self.assertEqual(p2p_print.bed_markdown(None), "")
+
+
+SHARE_SCRIPT = r'''
+import json, os, sys
+sys.path.insert(0, %(addon)r)
+import FreeCAD as App, Part
+from acadagent import share
+doc = App.newDocument("Robot")
+a = doc.addObject("Part::Feature", "Body"); a.Shape = Part.makeBox(30, 20, 25)
+doc.recompute()
+project = os.path.join(%(root)r, "sliced.3mf")
+open(project, "w").write("x")
+cautions = %(cautions)r
+
+
+def plates(doc, profile, app, tick=None):
+    return {"ok": True, "project": project, "plates": [{"id": 1}], "seconds": 600.0,
+            "grams": 7.5, "cautions": cautions, "profile": profile}
+
+
+share._plates = plates
+prof = {"machine": "Bambu Lab H2S 0.4 nozzle", "model": "Bambu Lab H2S", "bed": (340, 320, 340)}
+res = share.make_share(doc, text="Test", root=%(root)r, slice_plates=True, picture=False,
+                       app="/Applications/BambuStudio.app", profile=prof,
+                       colours={"Body": ((0.9, 0.85, 0.7), 0)})
+print("SHARE=" + json.dumps({"notes": res["notes"], "summary": share.summary(res),
+                             "files": [f for f, _ in res["files"]]}))
+'''
+
+
+class ShareSaysIt(unittest.TestCase):
+    """Second review: the cautions reached Print and print.json but not
+    the Share window, which slices too and calls the file "open in Bambu
+    Studio and print"."""
+
+    def _share(self, cautions):
+        from acadagent import sandbox
+        fc = sandbox.find_freecadcmd()
+        if fc is None:
+            if os.environ.get("ATECH_REQUIRE_FREECADCMD") == "1":
+                self.fail("no freecadcmd")
+            self.skipTest("bundled freecadcmd not found")
+        import subprocess
+        root = tempfile.mkdtemp(prefix="p2p-share-r1295-")
+        self.addCleanup(shutil.rmtree, root, True)
+        script = os.path.join(root, "share.py")
+        with open(script, "w") as fh:
+            fh.write(SHARE_SCRIPT % {"addon": ADDON, "root": root, "cautions": cautions})
+        p = subprocess.run([fc, script], capture_output=True, text=True, timeout=300, cwd=root,
+                           env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
+        out = p.stdout + p.stderr
+        line = [ln for ln in out.splitlines() if ln.startswith("SHARE=")]
+        self.assertTrue(line, out[-3000:])
+        return json.loads(line[0][6:])
+
+    def test_the_share_folder_says_what_print_says(self):
+        cautions = ["Some of the printer's own G-code was not found (change_filament_gcode).",
+                    "Slice it again in Bambu Studio (Slice all) before you send it to the "
+                    "printer.", "Sliced for the Textured PEI Plate: use that plate."]
+        got = self._share(cautions)
+        self.assertTrue(any("print-ready" in f for f in got["files"]), got["files"])
+        for c in cautions:
+            self.assertIn(c, got["notes"])
+            self.assertIn(c, got["summary"])
+        self.assertEqual([n for n in self._share([])["notes"] if "Slice" in n], [])
+
+    def test_show_folder_and_reveal_use_the_systems_opener(self):
+        from acadagent import share
+        ran = []
+        plat = sys.platform
+        with tempfile.TemporaryDirectory() as d:
+            f = os.path.join(d, "x.zip")
+            with open(f, "w") as fh:
+                fh.write("x")
+            try:
+                sys.platform = "linux"
+                share._reveal(f, runner=ran.append)
+                share._reveal(d, runner=ran.append)
+                sys.platform = "darwin"
+                share._reveal(f, runner=ran.append)
+            finally:
+                sys.platform = plat
+            self.assertEqual(ran, [["xdg-open", d], ["xdg-open", d], ["open", "-R", f]])
+        with open(share.__file__, encoding="utf-8") as fh:
+            self.assertNotIn('Popen)(["open"', fh.read())
 
 
 if __name__ == "__main__":

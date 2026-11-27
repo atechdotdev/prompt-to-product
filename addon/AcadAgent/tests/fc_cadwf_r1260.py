@@ -172,6 +172,37 @@ def t_the_bores_flat_against_the_shafts():
           and "flat_off_deg" not in r, repr(r))
 
 
+def t_a_bore_with_two_flats():
+    """Second review: a double-D bore read as "the push fit that printed"
+    or as "turned 180 degrees", whichever face came first; the shaft, a D
+    with one flat, does not go in."""
+    _, hub = _hub()
+    hub = cad.d_bore(hub, (-10, 0, 0), "+X", flat="+Z", lead_in=0)
+    # fill the round side opposite the flat: a second flat at z = -1.2
+    hub = hub.fuse(Part.makeBox(12, 4, 0.6, V(-10, -2, -1.8)).common(
+        Part.makeCylinder(1.7, 12, V(-10, 0, 0), V(1, 0, 0)))).removeSplitter()
+    for shaft_flat in ((0.0, 0.0, 1.0), (0.0, 0.0, -1.0)):
+        motor = [dict(MOTOR[0], flat=shaft_flat)]
+        r = (fc.motor_fits([{"label": "Hub", "shape": hub}], motor) or [{}])[0]
+        check("two flats, shaft flat %+g: a note, whichever way" % shaft_flat[2],
+              r.get("level") == "note" and r.get("kind") == "flats" and r.get("flats") == 2
+              and r.get("between") == 2.4 and "2 flats, 2.4 mm between two of them"
+              in r.get("text", "") and "push fit that printed" not in r.get("text", ""),
+              repr(r))
+
+
+def t_only_a_bore_that_prints_under_the_shaft_needs_drilling():
+    """Second review: a round 3.4 bore was told it "may not go on without
+    drilling"; the 3.4 D-bore, smaller everywhere, went on and shipped."""
+    for d, drill in ((3.0, True), (3.2, True), (3.3, False), (3.4, False)):
+        _, hub = _hub()
+        hub = hub.cut(Part.makeCylinder(d / 2, 14, V(-11, 0, 0), V(1, 0, 0)))
+        r = (fc.motor_fits([{"label": "Hub", "shape": hub}], MOTOR) or [{}])[0]
+        check("round %g: a warning, drilling %s" % (d, "named" if drill else "not named"),
+              r.get("level") == "warning" and "has no key" in r.get("text", "")
+              and ("without drilling" in r.get("text", "")) == drill, repr(r.get("text")))
+
+
 def t_motor_elsewhere():
     _, hub = _hub()
     hub = hub.cut(Part.makeCylinder(1.65, 14, V(-11, 0, 0), V(1, 0, 0)))
@@ -186,7 +217,8 @@ def t_motor_elsewhere():
 
 for fn in (t_pins_in_holes, t_what_is_not_a_fit, t_motor_d_bore, t_motor_old_d_bore_is_a_note,
            t_motor_round_bores, t_a_deep_d_bore_the_shaft_only_half_enters,
-           t_the_bores_flat_against_the_shafts,
+           t_the_bores_flat_against_the_shafts, t_a_bore_with_two_flats,
+           t_only_a_bore_that_prints_under_the_shaft_needs_drilling,
            t_motor_elsewhere):
     try:
         fn()

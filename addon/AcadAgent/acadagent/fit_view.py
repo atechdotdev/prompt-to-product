@@ -57,6 +57,17 @@ def default_profile():
     return str(prof.get("model") or ""), material_of(prof.get("filament"))
 
 
+def loaded_filament():
+    """(printer, filament kind) Bambu Studio has selected, or ("", ""):
+    what decides whose results the next design uses (build.loaded_filament)."""
+    try:
+        from . import build
+        return build.loaded_filament()
+    except Exception as exc:                              # noqa: BLE001
+        _log("loaded filament: %r" % (exc,))
+        return "", ""
+
+
 def make_coupon():
     """A new document holding the fit test's parts, bed side down. Returns
     the document."""
@@ -175,22 +186,40 @@ class FitDialog(QtWidgets.QDialog):
 
     # ------------------------------------------------------------ state
     def _profile(self):
-        return self.L.profile_name(self.printer.text(), self.material.currentText())
+        """The profile of the two fields: the stored one, whatever the
+        capitals it was typed with, else the name a new one would get."""
+        printer, material = self.printer.text(), self.material.currentText()
+        return self.L.match(self.data, printer, material) \
+            or self.L.profile_name(printer, material)
+
+    def next_use(self):
+        """One sentence: whose results the next design is drawn with. It
+        is the filament selected in Bambu Studio that decides, when one
+        is; else the profile saved last."""
+        printer, material = loaded_filament()
+        name = self.L.pick(self.data, printer, material)
+        chosen = (" (Bambu Studio has %s selected)" % material) if material else ""
+        if name:
+            return "The next design uses %s%s." % (name, chosen)
+        if material and self.data["profiles"]:
+            return ("The next design uses the app's own values: none of your results "
+                    "is for %s, the filament selected in Bambu Studio." % material)
+        return "The next design uses the app's own values."
 
     def _show(self):
-        """What is stored for the printer and filament in the two fields."""
+        """What is stored for the printer and filament in the two fields,
+        and whose results the next design uses."""
         name = self._profile()
         view = dict(self.data, active=name if name in self.data["profiles"] else None)
         rows = self.L.rows(view)
-        if not rows:
-            self.now.setText("<b>%s</b><br>No results yet: the app's own values are used."
-                             % name)
-            return
         lines = ["<b>%s</b>" % name]
+        if not rows:
+            lines.append("No results yet: the app's own values are used.")
         for r in rows:
             lines.append("%s: <b>%s</b> (the app's value: %s)%s" % (
                 r["what"], self.L._fmt(r["value"]), self.L._fmt(r["table"]),
                 (" - " + r["note"]) if r["note"] else ""))
+        lines.append("<i>%s</i>" % self.next_use())
         self.now.setText("<br>".join(lines))
 
     def set(self, printer=None, material=None, puck=None, window=None, what=None,
@@ -239,16 +268,20 @@ class FitDialog(QtWidgets.QDialog):
             self.error.setText("Not saved: %s" % exc)
             return None
         self.data = data
-        self.how.setCurrentIndex(0)           # a verdict is said once, not on every Save
+        # each result is said once: left selected, the puck would be worked
+        # out again on the next Save and undo a verdict given since
+        for box in (self.how, self.puck, self.window):
+            box.setCurrentIndex(0)
         line = self.L.summary(self.data)
         self._show()
         self.saved.emit(line)
         return line
 
     def forget(self):
-        """Drop the results of the printer and filament in the fields. No
-        other printer's results take their place: with none chosen, the
-        app's own values are used until results are saved again."""
+        """Drop the results of the printer and filament in the fields.
+        None is put in its place as "the one saved last"; the window then
+        says whose results the next design uses (another printer's for the
+        same filament may, when it is the only one)."""
         self.error.setText("")
         name = self._profile()
         if name in self.data["profiles"]:
@@ -257,9 +290,11 @@ class FitDialog(QtWidgets.QDialog):
                 self.data["active"] = None
             try:
                 self.L.save(self.data, self.home)
-                self.error.setText("Forgotten. The app's own values are used for %s." % name)
+                self.error.setText("Forgotten: %s. %s" % (name, self.next_use()))
             except OSError as exc:
                 self.error.setText("Not saved: %s" % exc)
+        else:
+            self.error.setText("Nothing is stored for %s." % name)
         self._show()
 
     def _make(self):

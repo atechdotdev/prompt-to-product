@@ -5267,7 +5267,15 @@ class AgentPanel(QtWidgets.QWidget):
         # "Built a pinion" bubble must not stand above a failed build.
         files = build.changed(self._ws, getattr(self, "_applied", self._before))
         h = self._script_hash(self._ws)
-        if build.SCRIPT in files and \
+        # R1295: print results saved in the Fit test window during the turn.
+        # The live preview was built with the turn's first copy, so its
+        # result does not stand in for the final build then.
+        try:
+            fit_changed = bool(build.fit_to_workspace(self._ws))
+        except Exception as exc:                       # noqa: BLE001
+            _log("fit results not refreshed: %r" % (exc,))
+            fit_changed = False
+        if build.SCRIPT in files and not fit_changed and \
                 getattr(self, "_previewed_ok", None) is not None and \
                 h == self._previewed_ok and \
                 not getattr(self, "_preview_error", ""):

@@ -54,7 +54,7 @@ TOP = mb.ZMax + TOP_AIR + WALL
 def wheel_on(motor):
     """A wheel pushed straight onto a motor's D-shaft, as (tyre, rim): the
     hub's keyed D-bore is the size that printed and fitted (3.4 / 2.9; a
-    round bore would not drive) and takes the shaft's OWN flat, measured
+    round bore has no key) and takes the shaft's OWN flat, measured
     from the module, so bore and shaft line up. The wheel's centre is 1.33 mm
     past the shaft's tip (as the toy car's): 4.5 mm of the shaft in the hub."""
     s = cad.motor_shaft(motor)

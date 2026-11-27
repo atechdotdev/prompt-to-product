@@ -186,7 +186,12 @@ FIT = {
     "preload_max": (0.30, "A", "most preload overlap ./check allows"),
     "layer": (0.2, "A", "Z gaps are 0 or at least this"),
     "hole_z": (0.2, "A", "added in Z to round holes with a horizontal axis"),
-    "press": (0.00, "A", "printed pin in printed hole, as modelled"),
+    # R1295: was 0.00 "as modelled". With the hole shrink a pin drawn at
+    # its hole's size prints as an interference of 0.25, the bore that had
+    # to be drilled. 0.15 per side is the press class of the fit bands
+    # (hole_for(3.0, "press") = 3.3); no printed pin is on record: assumed.
+    "press": (0.15, "A", "per side as drawn, a printed pin pressed in a "
+                         "printed hole (3 mm pin: hole drawn 3.3)"),
     "rotate": (0.25, "A", "radial, printed pin turning in a hole"),
     "lip_loose": (0.20, "A", "lid lip, loose"),
     "lip_friction": (0.15, "A", "lid lip, friction"),
@@ -202,9 +207,10 @@ FIT = {
     "dbore_depth": (12.0, "P",
                     "blind D-bore depth (the shaft is 8.8 long), 0.5 "
                     "lead-in at its mouth"),
-    "hole_shrink": (0.25, "P",
+    "hole_shrink": (0.25, "P/A",
                     "a printed round hole comes out about this much under "
-                    "its drawn diameter (0.4 nozzle)"),
+                    "its drawn diameter (0.4 nozzle): worked out from how "
+                    "the motor bores fitted, not measured on a hole"),
     # R1295 (review): these bands are anchored on what printed, not on
     # partsmith's FIT_BANDS (those are judged on the modelled part and were
     # never calibrated; read as as-printed they called the 3.1 bore that
@@ -215,8 +221,9 @@ FIT = {
     "fit_bands": ({"press": (0.00, 0.10), "push": (0.10, 0.20),
                    "running": (0.20, 0.40), "clearance": (0.40, 1.00)}, "P/A",
                   "fit classes, AS PRINTED hole minus shaft (diametral): "
-                  "press goes on hot or with force, push is snug by hand "
-                  "(both from the motor-shaft prints, PETG / PETG-CF); "
+                  "press went on hot or with force, push is the bore the "
+                  "wheels shipped with (both from the motor shaft's "
+                  "D-bores, PETG / PETG-CF, carried over to round holes); "
                   "running a shaft that turns and clearance a bolt are "
                   "assumed. Under 0 it has to be drilled"),
     "fit_targets": ({"press": 0.05, "push": 0.15, "running": 0.25,
@@ -332,8 +339,12 @@ SOURCES = {
     "hole_shrink": {
         "by": _GUSTAV, "date": "2026-10-20", "printer": _BAMBU,
         "material": "PETG",
-        "ref": "builds/wheels/README.md; testfit.py prints bores 3.2-3.6",
-        "result": "printed holes come out about 0.25 smaller than drawn"},
+        "ref": "builds/wheels/README.md (the rule Gustav set after the "
+               "first wheel)",
+        "result": "not measured on a hole: worked out from the D-bore "
+                  "verdicts (drawn 3.1 drilled open, 3.3 tight until "
+                  "warm, 3.4 shipped). The testfit pucks were printed; "
+                  "their result is not on record"},
     "fit_bands": {
         "by": _GUSTAV, "date": "2026-10-26", "printer": _BAMBU,
         "material": "PETG, PETG-CF",

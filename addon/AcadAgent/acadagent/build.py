@@ -1658,7 +1658,7 @@ as "test on the first print".
 - SHAFTS: a wheel or hub on a dc_motor shaft takes the printed D-bore
   with the shaft's own flat: s = cad.motor_shaft(motor), then
   cad.wheel(..., flat=s["flat"], axis=s["axis"]) or cad.d_bore(...,
-  flat=s["flat"]); a round bore spins. A hole a shaft turns in:
+  flat=s["flat"]); a round bore has no key. A hole a shaft turns in:
   cad.shaft_hole (holes print {hole_shrink} mm small).
 - WORKING FACES OPEN: the opening table B gives, centred on ap.bbox(module),
   through the wall in front only (cad.opening_for(..., axis=...)); lenses,
@@ -1702,13 +1702,33 @@ def _fit_log():
 
 
 def loaded_filament():
-    """(printer, filament kind) Bambu Studio has selected, ("", "") when
-    it is not set up: which of the person's print results a build uses
-    (R1295: results from PLA do not fit a PETG-CF print)."""
+    """(printer, filament) Bambu Studio has SELECTED: which of the person's
+    print results a build uses (R1295: results from PLA do not fit a
+    PETG-CF print). ("", "") when nothing is selected there - never the
+    printer's default filament, which nobody chose. The filament is its
+    kind ("PETG-CF"), read from the preset's name or the presets it
+    inherits from; a filament whose kind cannot be told is given by its
+    own name, so results for another kind are not used for it."""
     try:
         from . import print_plates
-        prof = print_plates.bambu_profile() or {}
-        return str(prof.get("model") or ""), _fit_log().material_of(prof.get("filament"))
+        got = print_plates.selected()
+        log = _fit_log()
+        material = ""
+        for name in got["filament"]:
+            material = log.material_of(name)
+            if material:
+                break
+        if not material and got["filament"]:
+            material = got["filament"][0].split(" @")[0].strip()
+        printer = ""
+        for name in got["machine"]:
+            d = print_plates.resolve_preset(print_plates.SUPPORT_DIR, "machine", name)
+            if d.get("printer_model"):
+                printer = str(d["printer_model"])
+                break
+        if not printer and got["machine"]:
+            printer = got["machine"][0]
+        return printer, material
     except Exception as exc:                           # noqa: BLE001
         _log("loaded filament: %r" % (exc,))
         return "", ""
@@ -1716,10 +1736,11 @@ def loaded_filament():
 
 def fit_to_workspace(workspace):
     """Write the person's print results into a chat's folder as the next
-    build should read them (p2p_fitlog.to_workspace). Called every turn
-    and before every build that has no turn (Dimensions, "go back to this
-    build"), so a result saved in the Fit test window is never one build
-    late. Returns the file's name when it changed."""
+    build should read them (p2p_fitlog.to_workspace). Called when a turn
+    starts, when it ends (a change then makes the final build run even
+    when the live preview built the same script) and before every final
+    build that has no turn (Dimensions, "go back to this build"). Returns
+    the file's name when it changed."""
     printer, material = loaded_filament()
     return _fit_log().to_workspace(workspace, printer=printer, material=material)
 

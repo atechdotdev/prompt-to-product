@@ -230,8 +230,9 @@ def resolve_preset(support_dir, kind, name):
 #   - a process without "curr_bed_type" is sliced for the Cool Plate:
 #     "Filaments are not compatible with the plate type" for PETG and
 #     PETG-CF (bed temperature 0 on that plate), and PLA at the cool
-#     plate's temperature. All 16 of his process files that printed set
-#     "Textured PEI Plate" (R1295)
+#     plate's temperature. His note of 8 Nov names PETG-CF; PETG and PLA
+#     follow from the filaments' cool-plate temperatures (0 and 35). Every
+#     process file in cad-workflow's builds sets "Textured PEI Plate" (R1295)
 #   - Metadata/slice_info.config has an EMPTY printer_model_id in a
 #     command-line slice (the printer is said to check it)
 # So the three presets are written out whole (flat_preset), the process
@@ -409,15 +410,19 @@ def _model_file(support_dir, machine):
     """The printer's machine_model file as a dict ({} when not found) -
     `machine` is a resolved machine preset."""
     model = (machine or {}).get("printer_model")
-    p = _preset_path(support_dir, "machine", model) if model else None
-    if not p:
+    if not model:
         return {}
-    try:
-        with open(p, encoding="utf-8") as fh:
-            got = json.load(fh)
-        return got if isinstance(got, dict) else {}
-    except (OSError, ValueError):
-        return {}
+    # the user's copy of the system presets, then the app's own folders:
+    # where the template files are looked for too (R1295)
+    for d in machine_dirs(support_dir):
+        try:
+            with open(os.path.join(d, model + ".json"), encoding="utf-8") as fh:
+                got = json.load(fh)
+            if isinstance(got, dict):
+                return got
+        except (OSError, ValueError):
+            continue
+    return {}
 
 
 def bed_type(support_dir, machine, filament=None):
@@ -490,9 +495,26 @@ def write_flat_presets(profile, folder, supports=False):
         out["%s_file" % kind] = p
     # what the printer's own G-code is missing, for the person to be told
     missing = []
-    machine_templates(sd, preset_names(sd, "machine", profile["machine"]), missing=missing)
-    if not str(_first(machine.get("machine_start_gcode")) or "").strip():
+    chain = preset_names(sd, "machine", profile["machine"])
+    found = machine_templates(sd, chain, missing=missing)
+    start = str(_first(machine.get("machine_start_gcode")) or "").strip()
+    if not start:
         missing.append("machine_start_gcode")
+    elif "machine_start_gcode" not in found and not any(
+            "machine_start_gcode" in m for m in missing):
+        # no template gave it: whose is it? When only a generic root preset
+        # (fdm_machine_common) sets one, it is the block Gustav's print
+        # started with - "the entire choose-filament step is gone"
+        for name in chain:
+            try:
+                with open(_preset_path(sd, "machine", name), encoding="utf-8") as fh:
+                    own = json.load(fh)
+            except (OSError, ValueError, TypeError):
+                continue
+            if str(_first(own.get("machine_start_gcode")) or "").strip():
+                if name.startswith("fdm_"):
+                    missing.append("machine_start_gcode (only the generic one of %s)" % name)
+                break
     if missing:
         _log("printer G-code not found: %s" % ", ".join(missing))
     out["bed_type"] = plate
@@ -575,6 +597,62 @@ def _first(v):
     if isinstance(v, list):
         return v[0] if v else None
     return v
+
+
+def _user_preset(support_dir, kind, name):
+    """A preset the person made themselves (user/<account>/<kind>/, or one
+    folder deeper), as a dict, or None."""
+    import glob
+    base = glob.escape(os.path.join(support_dir, "user"))
+    for pat in (os.path.join(base, "*", kind, glob.escape(name) + ".json"),
+                os.path.join(base, "*", kind, "*", glob.escape(name) + ".json")):
+        for p in sorted(glob.glob(pat)):
+            try:
+                with open(p, encoding="utf-8") as fh:
+                    got = json.load(fh)
+                if isinstance(got, dict):
+                    return got
+            except (OSError, ValueError):
+                continue
+    return None
+
+
+def selected(support_dir=None):
+    """What BambuStudio.conf has SELECTED, each as the preset's name and
+    the names it inherits from, leaf first: {"machine": [...], "filament":
+    [...]}. An empty list when nothing is selected there: no default is
+    put in its place (bambu_profile does that, to have something to slice
+    with). A preset of the person's own is followed to the system preset
+    it inherits (R1295: it was read as the printer's default PLA)."""
+    support_dir = SUPPORT_DIR if support_dir is None else support_dir
+    picked = {}
+    try:
+        with open(os.path.join(support_dir, "BambuStudio.conf"), encoding="utf-8") as fh:
+            picked = json.load(fh).get("presets") or {}
+    except (OSError, ValueError, AttributeError):
+        picked = {}
+    if not isinstance(picked, dict):
+        picked = {}
+
+    def chain(kind, name):
+        out = []
+        while isinstance(name, str) and name and name not in out and len(out) < 12:
+            out.append(name)
+            p = _preset_path(support_dir, kind, name)
+            d = None
+            if p:
+                try:
+                    with open(p, encoding="utf-8") as fh:
+                        d = json.load(fh)
+                except (OSError, ValueError):
+                    d = None
+            else:
+                d = _user_preset(support_dir, kind, name)
+            name = d.get("inherits") if isinstance(d, dict) else None
+        return out
+    return {"machine": chain("machine", picked.get("machine")),
+            "filament": chain("filament", _first(picked.get("filaments"))
+                              or picked.get("filament"))}
 
 
 def bambu_profile(support_dir=SUPPORT_DIR):
@@ -828,12 +906,17 @@ def slice_cautions(res, profile=None):
     out = []
     if not res.get("whole_presets"):
         out.append("Your Bambu Studio presets could not be read in full, so this was sliced "
-                   "from the preset files alone: bed temperature and flow may be defaults.")
+                   "from the preset files alone: bed temperature, flow and the build plate "
+                   "may be defaults.")
     if res.get("missing_templates"):
-        out.append("The printer's own start and filament-change G-code was not found (%s)."
-                   % ", ".join(res["missing_templates"][:3])
-                   + ("" if len(res["missing_templates"]) <= 3 else " and more"))
-    if out:
+        # the key each missing file holds ("... template change_filament_gcode")
+        keys = [m.split(" template ", 1)[-1] for m in res["missing_templates"]]
+        out.append("Some of the printer's own G-code was not found (%s%s)."
+                   % (", ".join(keys[:4]), "" if len(keys) <= 4 else " and more"))
+    elif res.get("whole_presets") and not res.get("bed_type"):
+        out.append("The build plate was not set (the printer's file names none): check "
+                   "the plate in Bambu Studio before you print.")
+    if out and (not res.get("whole_presets") or res.get("missing_templates")):
         out.append("Slice it again in Bambu Studio (Slice all) before you send it to the "
                    "printer.")
     if res.get("model_id") == "":

@@ -113,9 +113,90 @@ class Record(_Home):
         base = atech_fit.table_value("preload")
         self.assertEqual(fl.verdict(data, "preload", "tight", 0.05), round(base - 0.05, 2))
         self.assertEqual(fl.verdict(data, "preload", "loose", 0.1), round(base + 0.05, 2))
-        # and nothing goes below zero
+        # and nothing goes below zero: it stops there and the note says so
+        # (second review: it was refused outright, and the whole Save with it)
+        self.assertEqual(fl.verdict(data, "preload", "tight", 0.5), 0.0)
+        note = data["profiles"]["X1C | PLA"]["values"]["preload"]["note"]
+        self.assertIn("kept at 0", note)
+        self.assertEqual(fl.verdict(data, "stop", "loose", 0.25), 0.0)
+        # the press fit is a clearance as drawn (0.15 a side), so "too
+        # loose" has somewhere to go
+        self.assertEqual(atech_fit.table_value("press"), 0.15)
+        self.assertEqual(fl.verdict(data, "press", "loose", 0.05), 0.1)
+        self.assertNotIn("kept at 0",
+                         data["profiles"]["X1C | PLA"]["values"]["press"]["note"])
         with self.assertRaises(ValueError):
-            fl.verdict(data, "preload", "tight", 0.5)
+            fl.record(data, "slide", -0.1)              # a value given directly is refused
+
+    def test_what_the_person_said_is_not_worked_out_again(self):
+        """Second review: a later puck result removed or replaced a verdict
+        the person had given on the turning hole."""
+        data = fl.load(self.home)
+        fl.use_profile(data, "X1C", "PLA")
+        fl.coupon_result(data, "35")
+        vals = data["profiles"]["X1C | PLA"]["values"]
+        self.assertTrue(vals["bearing_d3"]["derived"])
+        self.assertEqual(fl.verdict(data, "bearing_d3", "tight", 0.1), 3.7)
+        self.assertNotIn("derived", vals["bearing_d3"])
+        self.assertEqual(fl.coupon_result(data, "35"), {"dbore_d3": (3.5, 3.0),
+                                                        "hole_shrink": 0.35})
+        self.assertEqual(vals["bearing_d3"]["value"], 3.7)          # theirs, kept
+        self.assertEqual(sorted(fl.coupon_result(data, "34")), ["dbore_d3"])
+        self.assertEqual(vals["bearing_d3"]["value"], 3.7)          # still theirs
+        self.assertNotIn("hole_shrink", vals)                       # the derived one went
+        # a record written before the flag: its note marks it as derived
+        vals["hole_shrink"] = {"value": 0.35, "note": "fit test: puck 35 was snug on the "
+                               "motor shaft (follows the D-bore)", "date": "2026-11-27"}
+        fl.coupon_result(data, "34")
+        self.assertNotIn("hole_shrink", vals)
+
+    def test_filament_kinds(self):
+        """Second review: PLA-CF was read as PLA; PC, PA and PET-CF as
+        nothing; "PLA Basic" typed in the window never matched a build."""
+        for name, want in (("Bambu PLA-CF @BBL X1C", "PLA-CF"), ("Bambu PLA Basic @BBL X1C", "PLA"),
+                           ("Bambu PETG-CF @BBL H2S", "PETG-CF"), ("Bambu PETG HF @BBL H2S", "PETG"),
+                           ("Bambu PC @BBL X1C", "PC"), ("Bambu PAHT-CF @BBL X1C", "PAHT-CF"),
+                           ("Bambu PET-CF @BBL X1C", "PET-CF"), ("Generic PA", "PA"),
+                           ("Generic PCTG", "PCTG"), ("Bambu TPU 95A @BBL A1", "TPU"),
+                           ("pla silk", "PLA"), ("My favourite", ""), ("Bambu Lab X1 Carbon", ""),
+                           ("SPACE grey", ""), (None, "")):
+            self.assertEqual(fl.material_of(name), want, name)
+        self.assertEqual(fl.kind("PLA Basic"), "PLA")
+        self.assertEqual(fl.kind(" my blend "), "MY BLEND")
+        data = fl.load(self.home)
+        self.assertEqual(fl.use_profile(data, "Bambu Lab H2S", "PLA Basic"), "Bambu Lab H2S | PLA")
+        fl.coupon_result(data, "35")
+        self.assertEqual(fl.pick(data, "Bambu Lab H2S", "PLA"), "Bambu Lab H2S | PLA")
+        fl.use_profile(data, "X1C", "PLA-CF")
+        fl.gauge_result(data, "4")
+        self.assertEqual(fl.pick(data, "X1C", "PLA-CF"), "X1C | PLA-CF")
+        self.assertEqual(fl.pick(data, "X1C", "PLA"), "Bambu Lab H2S | PLA")
+        self.assertIsNone(fl.pick(data, "X1C", "PC"))
+        # a record from before: the material as it was typed then
+        data["profiles"]["Old | PETG HF"] = {"printer": "Old", "material": "PETG HF",
+                                             "values": {"slide": {"value": 0.2}}}
+        self.assertEqual(fl.pick(data, "Old", "PETG"), "Old | PETG HF")
+
+    def test_a_profile_is_found_whatever_the_capitals(self):
+        data = fl.load(self.home)
+        fl.use_profile(data, "X1C", "PLA")
+        fl.gauge_result(data, "4")
+        self.assertEqual(fl.match(data, "x1c", "pla"), "X1C | PLA")
+        self.assertEqual(fl.use_profile(data, " x1c ", "pla"), "X1C | PLA")
+        self.assertEqual(sorted(data["profiles"]), ["X1C | PLA"])
+        self.assertIsNone(fl.match(data, "x1c", "petg"))
+
+    def test_two_printers_one_filament_says_so(self):
+        data = fl.load(self.home)
+        for printer in ("A1", "X1C"):
+            fl.use_profile(data, printer, "PLA")
+            fl.gauge_result(data, "4")
+        data["active"] = None
+        fl.save(data, self.home)
+        eff = fl.effective(self.home, "P1S", "PLA")
+        self.assertIsNone(eff["active"])
+        self.assertIn("from more than one printer (A1 | PLA, X1C | PLA)", eff["unused"])
+        self.assertNotIn("none of your print results is for", eff["unused"])
 
     def test_hardware_ports_and_wild_values_are_refused(self):
         data = fl.load(self.home)
@@ -221,6 +302,29 @@ class File(_Home):
             self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
             with open(dst) as fh:
                 self.assertEqual(json.load(fh), data)
+            # second review: a link or a folder planted at the name is not
+            # followed - nothing outside the chat folder is written
+            victim = os.path.join(self.home, "victim.txt")
+            with open(victim, "w") as fh:
+                fh.write("mine")
+            os.unlink(dst)
+            os.symlink(victim, dst)
+            self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
+            self.assertFalse(os.path.islink(dst))
+            with open(victim) as fh:
+                self.assertEqual(fh.read(), "mine")
+            self.assertTrue(os.stat(victim).st_mode & stat.S_IWUSR)
+            with open(dst) as fh:
+                self.assertEqual(json.load(fh), data)
+            os.unlink(dst)
+            os.mkdir(dst)
+            self.assertEqual(fl.to_workspace(ws, self.home), "fit_user.json")
+            self.assertTrue(os.path.isfile(dst))
+            # the right content with the wrong mode: the mode is put right
+            os.chmod(dst, 0o644)
+            self.assertIsNone(fl.to_workspace(ws, self.home))
+            self.assertFalse(os.stat(dst).st_mode & stat.S_IWUSR)
+            self.assertFalse(os.path.exists(dst + ".tmp"))
             os.unlink(fl.path(self.home))
             fl.to_workspace(ws, self.home)                          # results gone: empty again
             with open(dst) as fh:
@@ -340,6 +444,118 @@ class Studio(_Home):
         run = src[src.index("    def _run_build("):]
         run = run[:run.index("\n    def ", 10)]
         self.assertIn("build.fit_to_workspace(state.ws)", run)
+
+    def test_the_panel_refreshes_before_a_final_build_only(self):
+        """Second review: the test above only searched panel.py for a
+        string. Here _run_build itself runs, on a stand-in panel: the
+        record is refreshed before a final build starts, not for a
+        preview."""
+        import types
+        from acadagent import build, panel
+        order = []
+        keep = build.fit_to_workspace, build.start
+        build.fit_to_workspace = lambda ws: order.append(("fit", ws))
+
+        class Stop(Exception):
+            pass
+
+        def start(*a, **k):
+            order.append(("start",))
+            raise Stop()
+        build.start = start
+        cls = [c for c in vars(panel).values() if isinstance(c, type)
+               and "_run_build" in vars(c)][0]
+
+        class Stand(object):
+            _pending = None
+            stats = {"previews": 0}
+            _cur = types.SimpleNamespace(ws="/tmp/ws-x", doc=None)
+
+            def _doc_was_closed(self, state):
+                return False
+
+            def __getattr__(self, name):                # whatever else it reaches for
+                def anything(*a, **k):
+                    order.append(("other", name))
+                    raise Stop()
+                return anything
+        try:
+            for preview in (False, True):
+                del order[:]
+                try:
+                    cls._run_build(Stand(), ["model.py"], preview=preview)
+                except Stop:
+                    pass
+                fits = [o for o in order if o[0] == "fit"]
+                if preview:
+                    self.assertEqual(fits, [], order)
+                else:
+                    self.assertEqual(order[0], ("fit", "/tmp/ws-x"), order)
+        finally:
+            build.fit_to_workspace, build.start = keep
+
+    def test_the_filament_selected_in_bambu_studio(self):
+        """Second review: with the person's OWN filament preset selected
+        (or nothing selected) the printer's default PLA was taken as the
+        loaded filament, and their results were dropped."""
+        from acadagent import build, print_plates as pp
+        build.loaded_filament = self._loaded            # the real one
+        d = tempfile.mkdtemp(prefix="atech-bambu-sel-")
+        self.addCleanup(__import__("shutil").rmtree, d, True)
+        sysd = os.path.join(d, "system", "BBL")
+        for kind in ("machine", "process", "filament"):
+            os.makedirs(os.path.join(sysd, kind))
+
+        def put(path, data):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as fh:
+                json.dump(data, fh)
+        machine = "Bambu Lab X1 Carbon 0.4 nozzle"
+        put(os.path.join(sysd, "machine", machine + ".json"),
+            {"name": machine, "printer_model": "Bambu Lab X1 Carbon",
+             "default_filament_profile": ["Bambu PLA Basic @BBL X1C"],
+             "default_print_profile": "0.20mm Standard @BBL X1C"})
+        for name in ("Bambu PLA Basic @BBL X1C", "Bambu PETG-CF @BBL X1C"):
+            put(os.path.join(sysd, "filament", name + ".json"), {"name": name})
+        put(os.path.join(d, "user", "1234", "filament", "My favourite.json"),
+            {"name": "My favourite", "inherits": "Bambu PETG-CF @BBL X1C"})
+        put(os.path.join(d, "user", "1234", "filament", "base", "Mystery.json"),
+            {"name": "Mystery"})
+        keep = pp.SUPPORT_DIR
+        pp.SUPPORT_DIR = d
+        try:
+            def conf(presets):
+                put(os.path.join(d, "BambuStudio.conf"), {"presets": presets})
+                return build.loaded_filament()
+            self.assertEqual(conf({}), ("", ""))                     # nothing selected
+            self.assertEqual(conf({"machine": machine}), ("Bambu Lab X1 Carbon", ""))
+            self.assertEqual(conf({"machine": machine, "filaments": ["My favourite"]}),
+                             ("Bambu Lab X1 Carbon", "PETG-CF"))     # their own preset
+            self.assertEqual(conf({"machine": machine,
+                                   "filaments": ["Bambu PLA Basic @BBL X1C"]}),
+                             ("Bambu Lab X1 Carbon", "PLA"))
+            # a kind that cannot be told is given by its name: no other
+            # filament's results are used for it
+            self.assertEqual(conf({"machine": machine, "filaments": ["Mystery"]}),
+                             ("Bambu Lab X1 Carbon", "Mystery"))
+            self.assertEqual(pp.selected()["filament"], ["Mystery"])
+            os.unlink(os.path.join(d, "BambuStudio.conf"))
+            self.assertEqual(build.loaded_filament(), ("", ""))      # not set up
+            # and their PETG-CF results are used with their own preset selected
+            self._record_as("X1C", "PETG-CF")
+            conf({"machine": machine, "filaments": ["My favourite"]})
+            self.assertIn("slide 0.4 (U)", build.atech_fit_tables())
+            conf({"machine": machine})                               # nothing selected: saved last
+            self.assertIn("slide 0.4 (U)", build.atech_fit_tables())
+        finally:
+            pp.SUPPORT_DIR = keep
+
+    def _record_as(self, printer, material):
+        os.environ["ATECH_FIT_USER"] = os.path.join(self.home, "fit_user.json")
+        data = fl.load()
+        fl.use_profile(data, printer, material)
+        fl.gauge_result(data, "4")
+        fl.save(data)
 
     def _record(self):
         os.environ["ATECH_FIT_USER"] = os.path.join(self.home, "fit_user.json")

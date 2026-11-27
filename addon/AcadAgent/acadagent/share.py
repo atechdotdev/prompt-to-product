@@ -833,6 +833,10 @@ def make_share(doc, title=None, text="", licence=None, root=None, slice_plates=T
                                            _plural(len(plates["plates"]), "plate"),
                                            duration(plates["seconds"]), plates["grams"],
                                            print_plates.printer_name(profile))))
+                # R1295: what the command-line slice was not given (the
+                # plate to use, G-code that was not found) - Print says it,
+                # and somebody printing from the share folder must read it too
+                notes.extend(plates.get("cautions") or [])
             else:
                 notes.append("No print-ready file: %s" % (plates.get("error") or "slicing failed"))
 
@@ -983,7 +987,12 @@ def post_text(res):
 # the window
 # ===================================================================
 def _reveal(path, runner=None):
-    cmd = ["open", "-R", path] if os.path.isfile(path) else ["open", path]
+    if sys.platform == "darwin":
+        cmd = ["open", "-R", path] if os.path.isfile(path) else ["open", path]
+    else:
+        from . import print_plates
+        # no "reveal" elsewhere: open the folder the file is in
+        cmd = [print_plates._opener(), os.path.dirname(path) if os.path.isfile(path) else path]
     (runner or subprocess.Popen)(cmd)
     return cmd
 
@@ -1192,7 +1201,8 @@ def ShareDialog(parent=None, doc_fn=None, opener=None, runner=None, maker=None):
 
     def folder():
         if d.result:
-            (runner or subprocess.Popen)(["open", d.result["folder"]])
+            from . import print_plates as _pp
+            (runner or subprocess.Popen)([_pp._opener(), d.result["folder"]])
 
     d.btn_make.clicked.connect(lambda _=False: et._guard(make))
     d.buttons["page"].clicked.connect(lambda _=False: et._guard(page))

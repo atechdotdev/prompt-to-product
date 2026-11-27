@@ -356,50 +356,79 @@ def line(row):
     return "PRINT %s: %s" % (row["label"], "; ".join(bits))
 
 
-#: a shape with more faces than this is read from its mesh, not face by
-#: face (R1295: a solid sewn from a mesh has thousands of planar faces, and
-#: testing each against every point grew with the square of the count: one
-#: part stalled ./check for tens of seconds)
-MAX_BREP_FACES = 1500
+#: a shape with more faces than this is not judged (a note says so). Under
+#: it every planar face is read: R1295 first read a many-faced shape from
+#: its mesh instead, which lost small flat sides (a false "no flat side"
+#: on a mesh-made part with a 36 mm2 base). What made it slow is gone: the
+#: part's reach is worked out for all directions at once, and coplanar
+#: faces are grouped by direction, so the time grows with the face count,
+#: not its square.
+MAX_BREP_FACES = 20000
+#: products of directions x points worked out in one piece
+_REACH_CHUNK = 4000000
 
 
-def brep_planes(shape, points, tol=PLANE_TOL):
+class _Late(Exception):
+    """The time budget ran out inside one part."""
+
+
+def brep_planes(shape, points, tol=PLANE_TOL, deadline=None):
     """[(area mm2, outward unit normal)] of the PLANAR faces of a FreeCAD
     shape that it can rest on (no point of `points`, an (n, 3) array of
     the part's surface, lies beyond the plane), coplanar faces added up,
     largest first. The rule of export_tools.flat_faces. None for a shape
-    with more than MAX_BREP_FACES faces: the caller reads the mesh instead
-    (supporting_planes)."""
+    with more than MAX_BREP_FACES faces; raises _Late when `deadline` (a
+    time.time() value) passes on the way."""
+    import time
     faces = shape.Faces
     if len(faces) > MAX_BREP_FACES:
         return None
-    reach = {}                 # rounded direction -> how far the part reaches along it
-    groups = []
-    for f in faces:
+    recs = []
+    for i, f in enumerate(faces):
+        if deadline is not None and i % 200 == 199 and time.time() > deadline:
+            raise _Late()
         try:
             if f.Surface.__class__.__name__ != "Plane":
                 continue
             u0, u1, v0, v1 = f.ParameterRange
             nv = f.normalAt((u0 + u1) / 2, (v0 + v1) / 2)
             p0 = f.Vertexes[0].Point if f.Vertexes else f.CenterOfMass
+            recs.append((nv.x, nv.y, nv.z, nv.x * p0.x + nv.y * p0.y + nv.z * p0.z, f.Area))
         except Exception:                               # noqa: BLE001
             continue
-        for sgn in (1.0, -1.0):
-            n = np.array([nv.x, nv.y, nv.z]) * sgn
-            d = float(n @ np.array([p0.x, p0.y, p0.z]))
-            key = tuple(np.round(n, 6) + 0.0)
-            if key not in reach:
-                reach[key] = float((points @ n).max())
-            if reach[key] <= d + tol:
-                for g in groups:
-                    if float(g[1] @ n) > 1 - 1e-6 and abs(g[2] - d) < tol:
-                        g[0] += f.Area
-                        break
-                else:
-                    groups.append([f.Area, n, d])
+    if not recs:
+        return []
+    R = np.asarray(recs, dtype=float)
+    N, D, A = R[:, :3], R[:, 3], R[:, 4]
+    pts = np.asarray(points, dtype=float)
+    # how far the part reaches along each direction, and against it
+    uniq, inv = np.unique(np.round(N, 6) + 0.0, axis=0, return_inverse=True)
+    inv = inv.reshape(-1)
+    hi, lo = np.empty(len(uniq)), np.empty(len(uniq))
+    step = max(1, _REACH_CHUNK // max(1, len(pts)))
+    for s in range(0, len(uniq), step):
+        if deadline is not None and time.time() > deadline:
+            raise _Late()
+        H = uniq[s:s + step] @ pts.T
+        hi[s:s + step], lo[s:s + step] = H.max(axis=1), H.min(axis=1)
+    buckets = {}               # rounded outward normal -> [[area, normal, d], ...]
+    for i in range(len(R)):
+        if hi[inv[i]] <= D[i] + tol:
+            n, d = N[i], float(D[i])
+        elif -lo[inv[i]] <= -D[i] + tol:        # the face is stored inside out
+            n, d = -N[i], -float(D[i])
+        else:
+            continue
+        groups = buckets.setdefault(tuple(np.round(n, 5) + 0.0), [])
+        for g in groups:
+            if float(g[1] @ n) > 1 - 1e-6 and abs(g[2] - d) < tol:
+                g[0] += A[i]
                 break
-    groups.sort(key=lambda g: -g[0])
-    return [(float(a), tuple(float(x) for x in n)) for a, n, _d in groups
+        else:
+            groups.append([float(A[i]), n, d])
+    out = [g for groups in buckets.values() for g in groups]
+    out.sort(key=lambda g: -g[0])
+    return [(float(a), tuple(float(x) for x in n)) for a, n, _d in out
             if a >= FLAT_MIN_MM2]
 
 
@@ -416,12 +445,18 @@ def shape_report(shape, label="", deflection=DEFLECTION_MM, deadline=None):
         return {"label": label, "skipped": "no surface", "flags": []}
     if len(tris) > MAX_TRIANGLES:
         return {"label": label, "skipped": "%d facets" % len(tris), "flags": []}
+    late = {"label": label, "skipped": "time budget", "flags": []}
     if deadline is not None and time.time() > deadline:
-        return {"label": label, "skipped": "time budget", "flags": []}
+        return late
     P = [(p.x, p.y, p.z) for p in pts]
-    planes = brep_planes(shape, np.asarray(P, dtype=float))
+    try:
+        planes = brep_planes(shape, np.asarray(P, dtype=float), deadline=deadline)
+    except _Late:
+        return late
+    if planes is None:
+        return {"label": label, "skipped": "%d faces" % len(shape.Faces), "flags": []}
     if deadline is not None and time.time() > deadline:
-        return {"label": label, "skipped": "time budget", "flags": []}
+        return late
     return report(P, tris, label, planes=planes)
 
 
