@@ -363,10 +363,12 @@ are skipped in a worktree run:
 | | modules | tests | failing tests |
 |---|---|---|---|
 | before the fixes | 127 | 2556 | 71 |
-| after | 127 | 2574 | 72 |
+| after the first review's fixes (the working tree before they were committed) | 127 | 2574 | 72 |
+| at the final commit, after the second check | 128 | 2600 | 72 |
 
-`test_cadwf_r1295` (9 tests, written during that run) is not in the count;
-it passes. No failure comes from the fixes:
+The last row has the same 72 failing tests as the row above it: none new, none gone.
+In the middle row `test_cadwf_r1295` (written during that run) is not counted. No
+failure comes from the fixes:
 
 - Five tests that failed before pass now (`test_port_rules`,
   `test_agent_integration_r500`): they needed the built app's FreeCAD.
