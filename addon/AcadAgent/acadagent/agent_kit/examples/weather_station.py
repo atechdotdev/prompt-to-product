@@ -8,10 +8,14 @@ ARCHETYPE: weather station
 How it is built (R412, resculpted R610):
   * STAGE A - hardware, shell, every working-face opening, fasteners: the
     board LANDSCAPE_UP in the body (modules facing the front, -Y): the
-    screen (11, 12) behind a smoked lens in a recessed black bezel tray
-    (its back is the mask with the screen window), MODE / NEXT keys (3, 4)
-    under it, an alert LED (9) behind a clear lens, USB-C (7) in a pocket
-    in the left side; temp_humidity CABLED from port 13 straight up out of
+    screen (10, 11) left of centre behind a smoked lens in a recessed
+    black bezel tray (its back is the mask with the screen window), MODE /
+    NEXT keys (2, 3) under its two ends, an alert LED (14) behind a clear
+    lens at the top right, USB-C (8: the USB-C port takes the USB-C module
+    only, and that module no other port) in a pocket in the right side;
+    port 12 (the reset port) is left empty, and the screen cannot take
+    the middle pair (11, 12) for it; temp_humidity CABLED from port 13
+    straight up out of
     the body, through a hollow post (the mast) into a louvred hut (stacked
     slats on three sides, a pitched roof with an overhang and drip edges)
     - away from the board's heat, a wall (the body's top) between them.
@@ -35,7 +39,7 @@ with a front lip and a backrest; 4 the body seated in its pocket;
 the screen window; 8 sun shade over the display; 9 MODE key cap; 10 NEXT
 key cap; 11 "MODE" / "NEXT" over the keys; 12 "TEMP" / "RH" gauge words by
 the screen; 13 clear alert-LED lens with a flange; 14 USB-C pocket with
-liner in the left side; 15 "ATECH" on the foot; 16 louvred hut, stacked
+liner in the right side; 15 "ATECH" on the foot; 16 louvred hut, stacked
 slats on the front; 17-18 slats on both sides; 19 pitched hut roof with
 an overhang; 20-21 drip edges under the eaves; 22 hollow post (the mast)
 carrying the sensor's ribbon; 23 hex vents on the back; 24 wall-hang
@@ -60,7 +64,7 @@ T0 = time.time()
 INTENT = {"board": "upright", "fitted_after": [
     "Front", "Bezel", "Lens", "Alert_Lens", "Key_Mode", "Key_Next", "Hut", "Hut_Roof", "Foot",
     "Rubber_1", "Rubber_2", "Rubber_3", "Rubber_4", "Screw_1", "Screw_2", "Screw_3", "Screw_4"],
-    "covers": {"Key_Mode": "button_p3", "Key_Next": "button_p4"}}
+    "covers": {"Key_Mode": "button_p2", "Key_Next": "button_p3"}}
 REVIEW_CLOSEUPS = ["Hut", "Lens", "Key_Mode"]
 
 
@@ -86,10 +90,10 @@ PLAN = [("line", (SX0, YF)), ("line", (SX1, YF)), ("line", (SX1, 8.0)), (126.0, 
 WEDGE = (16.5, 6.8)
 TOP_FALL, BULLNOSE = 3.5, 4.0    # R610: the top falls toward the front; its front edge rolls over
 BOARD_Z0 = 22.0                  # board box min z (the keys' row above the foot)
-LENS = (24.0, 100.0, 57.6, 87.6)  # smoked lens x0, x1, z0, z1 (the screen at z 63..82)
+LENS = (8.0, 72.0, 57.6, 87.6)   # smoked lens x0, x1, z0, z1 (the screen at x 20..60, z 63..82)
 LENS_R, BEZEL, RECESS = 4.0, 4.0, 1.0
 SCREEN_WIN = (36.0, 18.0)        # mask window over the screen (active area 25.6 x 13.5)
-TH_Z = 116.0                     # the sensor's centre, in the hut
+TH_X, TH_Z = 90.0, 116.0         # the sensor's centre, in the hut, straight over port 13
 HUT = (76.0, 104.0, -15.0, 5.0, 104.0, 134.0)    # hut x0, x1, y0, y1, z0, z1
 ROOF_OVER, RIDGE = 4.0, 8.0      # roof overhang, ridge height over the eaves
 SLAT_PITCH, SLAT_TILT = 5.0, 20.0
@@ -113,6 +117,9 @@ COLOURS = {"Front": "matte_white", "Back": "matte_white", "Bezel": "matte_black"
 
 
 # === STAGE A: hardware, shell, every working-face opening, fasteners ===
+# landscape, modules to the front (-Y): ports 9-14 along the top (9 at
+# the left), 1-6 along the bottom, 7 the left end, 8 - the USB-C port -
+# the right end
 LANDSCAPE_UP = Rotation(Vector(0, 0, 1), 180).multiply(Rotation(Vector(0, 1, 0), -90))
 PIVOT = V(0, 10.0, ZS)
 TP = Placement(V(), Rotation(V(1, 0, 0), -TILT), PIVOT)     # upright body frame -> world
@@ -123,15 +130,15 @@ upright = Placement(V(-_b.XMin, 0, BOARD_Z0 - _b.ZMin), LANDSCAPE_UP)   # x 0..1
 board.Placement = upright
 BB = ap.bbox(board)                             # in the body frame
 board.Placement = TP.multiply(upright)          # R610: the board leans; the modules seat on it
-scr = ap.seat(doc, "screen", (11, 12))          # top row centre
-alert = ap.seat(doc, "light", 9)                # top row, left
-key_m = ap.seat(doc, "button", 3)               # bottom row, under the screen
-key_n = ap.seat(doc, "button", 4)
-usb = ap.seat(doc, "usbc", 7)                   # left end, mouth -X
+scr = ap.seat(doc, "screen", (10, 11))          # top row, left of centre (x 20..60)
+alert = ap.seat(doc, "light", 14)               # top row, right
+key_m = ap.seat(doc, "button", 2)               # bottom row, under the screen's left end
+key_n = ap.seat(doc, "button", 3)               # and its right end
+usb = ap.seat(doc, "usbc", 8)                   # right end, mouth +X (port 8: the USB-C port)
 # the sensor: CABLED from port 13 straight up (a straight rise: the
 # cleanest ribbon) into the hut, facing the front louvres
 th, th_rib = ap.cable(doc, "temp_humidity", 13, TP.multiply(ap.module_placement(
-    "temp_humidity", (90, -4.84, TH_Z), face="-Y", cable="-Z")))
+    "temp_humidity", (TH_X, -4.84, TH_Z), face="-Y", cable="-Z")))
 
 
 def ibox(m):
@@ -328,12 +335,12 @@ ab = ibox(alert)
 pipe = cad.lens(17.0, (ab.YMin - 0.4) - (YF - 0.8), dome=0.8, at=(ax_, ab.YMin - 0.4, az_), axis="-Y")
 front = cad.opening_for(front, pipe, clearance=0.2, chamfer=0.0, axis="-Y")
 pipe = cad.fuse_one(pipe, cyl(10.0, (ax_, YF + WALL + 0.9, az_), (0, -1, 0), 0.8))
-# USB-C on the left side: a pocket brings the wall to 0.25 mm off the
+# USB-C on the right side: a pocket brings the wall to 0.25 mm off the
 # socket mouth, then the measured opening
 ub = ibox(usb)
 uy, uz = -5.9, (ub.ZMin + ub.ZMax) / 2
-pocket = xprism(uy - 5.5, uy + 5.5, uz - 6.5, uz + 6.5, SX0 - 5, ub.XMin - 1.3, 3)
-liner = cad.cut(xprism(YF + 1.0, min(uy + 7.0, SPLIT_Y - 0.6), uz - 8.0, uz + 8.0, ub.XMin - 0.25, SX0 + 1.0, 3.5),
+pocket = xprism(uy - 5.5, uy + 5.5, uz - 6.5, uz + 6.5, ub.XMax + 1.3, SX1 + 5, 3)
+liner = cad.cut(xprism(YF + 1.0, min(uy + 7.0, SPLIT_Y - 0.6), uz - 8.0, uz + 8.0, ub.XMax + 0.25, SX1 - 1.0, 3.5),
                 pocket)
 front = cad.fuse_one(cad.cut(front, pocket), liner)
 # the plug opening through that wall: the mouth (10 x 3.5 mm, its long
@@ -341,7 +348,7 @@ front = cad.fuse_one(cad.cut(front, pocket), liner)
 # the upright build. R610: cut by hand in the body frame - socket_opening
 # on the leaning shell turned the pocket inside out (the socket sealed,
 # MEASURED), and on the body frame it measures the leaning module
-front = cad.cut(front, xprism(uy - 3.25, uy + 3.25, uz - 6.5, uz + 6.5, ub.XMin - 2.0, ub.XMin - 0.1, 1.5))
+front = cad.cut(front, xprism(uy - 3.25, uy + 3.25, uz - 6.5, uz + 6.5, ub.XMax + 0.1, ub.XMax + 2.0, 1.5))
 tick("face")
 
 # ------------------------------------------------------------ the hut
@@ -463,7 +470,7 @@ for m, t in ((key_m, "MODE"), (key_n, "NEXT")):
     kx, _ky, kz = centre(m)
     at = W_((kx, YF, kz + 10.5))
     front = on_piece(front, at, lambda s_: cad.text(s_, t, at, Wn((0, -1, 0)), 3.2, depth=0.4, mode="deboss", up=UP))
-for t, at, sz in (("TEMP", W_((ax_, YF, lz0 - 2.0)), 4), ("RH", W_((114.0, YF, 72.0)), 5)):
+for t, at, sz in (("TEMP", W_((ax_, YF, lz0 - 2.0)), 4), ("RH", W_((90.0, YF, 72.0)), 5)):
     front = on_piece(front, at, lambda s_: cad.text(s_, t, at, Wn((0, -1, 0)), sz, depth=0.4, mode="deboss", up=UP))
 yf_foot = min(p.y for p in ray(foot, (60, -60, 9.0), (60, 0, 9.0)))
 foot = on_piece(foot, (60.0, yf_foot, 9.0),

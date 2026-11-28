@@ -74,10 +74,10 @@ gates. MEASURED times: ./check of the example with the review sheet off
 | robot / character / pet | `examples/desk_robot.py` | LANDSCAPE_UP in the torso, modules face -Y | speaker 1-2 (belly), button 3, microphone 4-5, usbc 7 (side) | screen 11-12 up the neck into the head | torso depth / width >= 0.6 with a crowned belly; head >= 40 % of the height, wider than deep | the head: a visor >= 35 mm wide with a raised bezel (the example: 100 x 60) and a neck collar |
 | speaker / radio / round gadget | `examples/smart_speaker.py` (TALL = True for a column) | FLAT on the puck's axis | speaker 11-12, microphone 4-5, buttons 2 + 3, usbc 7, lights 1/6/8/9/14 | - | puck: height >= 0.4 x the diameter (the example 0.44); column: height >= 1.2 x the diameter | the top: grille + frosted light ring over every light, 100 mm across |
 | handheld / game pad / remote | `examples/handheld_console.py` | FLAT, turned so its long side runs across | screen 11-12 (centre), usbc 4 (bottom edge), light 3 (power LED) | D-pad 9, B 14, A 8 (straight out of the end port), shoulders 10 + 13 | 200 x 94 face, <= 30 mm thick where held, grip bellies under the thumbs | the cover glass: >= 40 % of the face, a control under each thumb |
-| lamp / night light / tall product | `examples/bedside_lamp.py` | UPRIGHT_FRONT in the column | usbc 2 (side), lights 5 + 13 behind a frosted window | light 8 straight up the neck into the globe, button 7 down into the foot | height >= 2 x the foot diameter, foot >= 1.6 x the column | the diffuser globe, the largest part (100 mm across) |
+| lamp / night light / tall product | `examples/bedside_lamp.py` | UPRIGHT_FRONT in the column, port 8 at the bottom | lights 2 + 10 behind a frosted window | usbc 8 down into the foot (right side), light 7 straight up the neck into the globe, button 6 down into the foot | height >= 2 x the foot diameter, foot >= 1.6 x the column | the diffuser globe, the largest part (100 mm across) |
 | clock / alarm clock / timer | `examples/alarm_clock.py` (R410, CHECK PASS, ./check 28 s MEASURED) | LANDSCAPE_FRONT, everything tilted back 12 deg as one Placement | speaker 13-14 (grille), screen 9-10 + light 3 behind the lens, keys 6 + 5, usbc 8 (left side) | snooze button from 2 up behind the board to the top, in a bracket | face tilted back 10-15 deg on its foot, a back that swells in one curve, width 1.7 x the height | the smoked lens in a recessed bezel, >= 50 % of the front (MEASURED 53 %) |
 | fan | `examples/desk_fan.py` (R411, ./check 17 s MEASURED; CHECK PASS waits on the R440 fan gate's shaft-direction fix) | FLAT in the long foot | button 6, light 14 (glow lens), usbc 1 (left side) | dc_motor from 7 up the hollow stem, collar and neck into the pod, held by ribs | guard >= 60 % of the front, on a stem over a long foot | the guard: ring, radial bars, two rings over six wide blades |
-| weather station / thermometer / barometer | `examples/weather_station.py` (R412, CHECK PASS, ./check 25 s MEASURED) | LANDSCAPE_UP in a body leaning back 12 deg (one Placement, as the clock) on a sculpted foot | screen 11-12 behind a lens, keys 3 + 4, light 9 (alert), usbc 7 (left side) | temp_humidity 13 straight up a hollow post into the louvred hut | a wedged display body 144 x 31 x 86 (curved back, rolled top edge) + hut 28 x 20 x 30 on top, away from the board's heat | the display and the louvred hut (slats, pitched roof, drip edges) |
+| weather station / thermometer / barometer | `examples/weather_station.py` (R412, CHECK PASS, ./check 25 s MEASURED) | LANDSCAPE_UP in a body leaning back 12 deg (one Placement, as the clock) on a sculpted foot | screen 10-11 behind a lens, keys 2 + 3, light 14 (alert), usbc 8 (right side) | temp_humidity 13 straight up a hollow post into the louvred hut | a wedged display body 144 x 31 x 86 (curved back, rolled top edge) + hut 28 x 20 x 30 on top, away from the board's heat | the display and the louvred hut (slats, pitched roof, drip edges) |
 | planter / smart pot / herb garden | `examples/smart_planter.py` (R700, CHECK PASS, ./check 19 s MEASURED) | LANDSCAPE_UP in a shallow bay behind the flat face (board x 0..120, z 30..90) | screen 10-11 behind a smoked lens, light 14 (frosted glow pipe), temp_humidity 6 (round-hole vent + slot vent under it), usbc 7 (left side) | - | 160 x 135 x 120: a crisp flat face, CORNER-rounded back, a partition closing the bay from the soil cavity open at the top | the instrument face and the terracotta inner pot (drainage holes, rolled rim) standing in a drip tray, soil in it |
 | pet feeder / dispenser | `examples/pet_feeder.py` (R700, CHECK PASS, ./check 27 s MEASURED) | LANDSCAPE_UP high in the base unit's face (board x 0..120, z 180..240), split front / back behind it | screen 10-11 behind a smoked lens, button 13 (FEED key cap), light 3 (status pipe), usbc 7 (left side) | dc_motor 4 straight down (pins up, shaft down: twist-free) into cradle cheeks on the dispenser drum | a 160 x 150 x 250 base unit on a base plate with a 110 mm tongue for the bowl, a 110 mm hopper bin pinned on top, its lid on a pin hinge | the hopper window and the curved spout over the bowl; inside, a six-pocket rotor in a closed drum fed by a duct |
 | doorbell / intercom / wall sensor | `examples/video_doorbell.py` (R500, CHECK PASS, ./check 36 s MEASURED) | UPRIGHT_FRONT behind the face; LIFT stands the wall plate's foot on z = 0 | button 7 (the big press, bottom centre), light 9 (glow ring), distance_sensor 6 + microphone 13-14 behind a smoked visor (the ToF gets an open aperture), usbc 3 (right side) | speaker 1-2 over the board's top edge: the ribbons fold back round the right edge, run flat behind the board and loop over the speaker into its top, held by posts and side ribs | a tall rounded slab 84 x 196 x 36 (crowned face, rolled edge) on a wall plate 6 mm proud at the sides, 15 at the ends with two countersunk wall screws | the big round brushed press in a frosted glow ring, low on the centre line |
@@ -675,13 +675,16 @@ sh_l, _ = ap.cable(doc, "button", 10, ap.module_placement("button", (-70, 50, 12
 ### 7.6 "a weather station" - LANDSCAPE_UP with a sensor hut
 
 **Example (R412): `examples/weather_station.py`, CHECK PASS (./check 25 s MEASURED).** The board
-at z 22 (not 30), the keys on 3 + 4, the alert light on 9; the sensor's ribbon rises
-straight from port 13 up a hollow post (bore >= 0.75 mm round it) into the hut.
+at z 22 (not 30), the screen on 10 + 11 (not 11 + 12: port 12 is the reset port; and
+not 3 + 4: those two are 20.2 mm apart, the screen's connectors 20.0, so it does not
+seat there), the keys on 2 + 3 under it, the alert light on 14, USB-C on 8 (the right
+end); the sensor's ribbon rises straight from port 13 up a hollow post (bore >= 0.75
+mm round it) into the hut.
 
 ```python
 place_board(LANDSCAPE_UP, 0, None, 30)
-scr = ap.seat(doc, "screen", (11, 12)); alert = ap.seat(doc, "light", 9)
-mode = ap.seat(doc, "button", 3); nxt = ap.seat(doc, "button", 4); usb = ap.seat(doc, "usbc", 7)
+scr = ap.seat(doc, "screen", (10, 11)); alert = ap.seat(doc, "light", 14)
+mode = ap.seat(doc, "button", 2); nxt = ap.seat(doc, "button", 3); usb = ap.seat(doc, "usbc", 8)
 th, rib = ap.cable(doc, "temp_humidity", 13, ap.module_placement(
     "temp_humidity", (90, -4.84, 120), face="-Y", cable="-Z"))   # straight rise into the hut
 ```
@@ -743,17 +746,22 @@ snz, rib = ap.cable(doc, "button", 4, ap.module_placement(
 
 ### 7.8 "a bedside lamp" - UPRIGHT_FRONT column with a globe (examples/bedside_lamp.py, CHECK PASS)
 ```python
+UPRIGHT_FRONT = Rotation(Vector(1, 0, 0), 180)                    # port 8 at the BOTTOM, 7 at the top
 place_board(UPRIGHT_FRONT, 0, None, 20)                           # x 0..60, z 20..140, face -Y
-usb = ap.seat(doc, "usbc", 2)                                     # right side, mouth +X
-glow_r = ap.seat(doc, "light", 5); glow_l = ap.seat(doc, "light", 13)   # behind the light bar
-top_light, _ = ap.cable(doc, "light", 8, ap.module_placement(
+glow_l = ap.seat(doc, "light", 2); glow_r = ap.seat(doc, "light", 10)   # behind the light bar
+top_light, _ = ap.cable(doc, "light", 7, ap.module_placement(
     "light", (30, -4.8, 185), face="-Y", cable="-Z"))             # straight up the neck into the globe
-btn, _ = ap.cable(doc, "button", 7, ap.module_placement(
-    "button", (30, -50, 9.5), face="+Z", cable="+Y"))             # down into the foot, facing up
+usb, _ = ap.cable(doc, "usbc", 8, ap.module_placement(
+    "usbc", (80, -10, 10), face="+Z", cable="-X"),                # down into the foot, mouth +X
+    via=[(34, -11, 15), (48, -12, 10), (59, -10, 8)], smooth=True)
+btn, _ = ap.cable(doc, "button", 6, ap.module_placement(
+    "button", (30, -55, 9.5), face="+Z", cable="+Y"),             # down into the foot, facing up
+    via=[(-3.5, -4, 23), (16, -28, 12)], smooth=True)             # port 6's ribbon leaves the board's edge sideways
 ```
-- **Product:** 120 x 120 x 277: a foot r 60 x 19, a cove into a column r
-  35 (the board stands in it), a rolled shoulder, a neck r 13 carrying
-  the ribbon, a frosted globe r 52 on a brass gallery.
+- **Product:** 130 x 130 x 277: a foot r 65 x 19, a cove into a column r
+  40 (the board stands in it, 8 mm beside it for port 6's ribbon to turn
+  down), a rolled shoulder, a neck r 13 carrying the ribbon, a frosted
+  globe r 52 on a brass gallery.
 - **Body:** ONE closed (radius, height) section of lines and concentric
   arcs - foot, cove, column, shoulder, neck, with the reveal and the
   column bands notched into it - revolved, split low in the foot.

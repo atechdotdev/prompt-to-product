@@ -7,6 +7,26 @@ release may change behaviour.
 
 ## [Unreleased]
 
+### The two projects the app ships with build again (port 8 and 12)
+
+"Bedside lamp" had its USB-C module on port 2 and its globe light on
+port 8; "Weather station" had its screen on 11 + 12 and its USB-C on 7.
+Port 8 takes the USB-C module only and port 12 a button only, so neither
+built. Both are laid out again and pass `./check`.
+
+- **Weather station:** USB-C on 8 (the right side now), the screen on
+  10 + 11 with the lens over it, the keys on 2 + 3 under it, the alert
+  light on 14. Port 12 stays empty. The screen cannot go on 3 + 4 either:
+  those two ports are 20.2 mm apart and the screen's connectors 20.0, so
+  it does not seat there.
+- **Bedside lamp:** the board is turned so port 8 is at its bottom; the
+  USB-C module is cabled from it into the foot, its socket in the foot's
+  right side. The globe light rises from port 7, the window lights are on
+  2 and 10, the touch button is cabled from port 6. The column is 10 mm
+  wider (80 mm) so port 6's ribbon, which leaves the board's edge
+  sideways, has room to turn down into the foot; the lamp is 130 mm across
+  instead of 120.
+
 ### Parts that fit and print: what Gustav's printed parts taught (R1200-R1295)
 
 Gustav's cad-workflow makes parts that fit because every print result goes

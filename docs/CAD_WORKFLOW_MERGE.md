@@ -163,12 +163,18 @@ R1250, R1230-R1240, R1270, the rest.
   `cad.motor_shaft` and the D-bore, as `starters/starter_wheels.py` now has.
   The examples that use the `n20_wheel` hub in a socket (rover, balance bot)
   are not affected.
-- **The two projects the app ships with break the port rules** and do not
-  build: "Bedside lamp" has its USB-C module on port 2, "Weather station"
-  has a module on port 12 (`test_default_projects`, which is skipped unless
-  the built app's FreeCAD is named). They are the first projects a new user
-  sees, so they come before the examples.
+- ~~The two projects the app ships with break the port rules~~ Done on
+  28 Nov 2026: see "The two default projects, rebuilt" below.
 - The examples' port placements (52 of 64, from the port rules commit).
+  The user asked to fix only the two default projects for now.
+- **`./check` can miss a ribbon that runs through a wall.** Its overlap
+  test is a boolean common, and on a ribbon against a revolved shell that
+  common came back empty while points of the ribbon were inside the wall
+  (the lamp, while it was being rebuilt: port 6's ribbon went out through
+  the column, CHECK PASS). Separately, `ap.cable(..., smooth=True)` once
+  made a ribbon with a negative volume (inside out), which a boolean test
+  also cannot judge. A point-sampled test of each ribbon against each part
+  would catch both.
 - Turn the R1250 / R1260 lines into gates. Measured so far: the first-layer
   warning fires on 5 of the 873 parts that were judged in the examples, all
   parts with no flat side (a ball, two grilles, a caster ball, a glow ring).
@@ -417,3 +423,60 @@ The others, by area:
 Two things this check could not settle are under Later: what Bambu
 Studio's command line does with PLA on a plate the printer rules out, and
 whether a real install keeps a leaf preset without its model file.
+
+## The two default projects, rebuilt (28 Nov 2026)
+
+"Bedside lamp" and "Weather station" are the two projects the default
+projects generator test builds, and the first a new user sees. Both broke
+the port rules (port 8 takes the USB-C module only, and the USB-C module
+no other port; port 12 takes a button only, the board's reset button), so
+neither built. Each is now laid out again within the rules. Built with the
+rules switched off, the old layouts fail on the port rules only (and the
+SDK's warnings that the firmware cannot drive a module on 8 or 12), so the
+comparison below is against those builds.
+
+**Weather station.** The screen was on 11 + 12 and the USB-C on 7.
+
+- The screen cannot take the middle pair of the top row (11, 12) without
+  using port 12. The middle pair of the other row (3, 4) does not seat a
+  screen either: those two ports are 20.2 mm apart, the screen's two
+  connectors 20.0, so one header stops 0.05 mm short and its pins press
+  0.1 mm into the board's socket (`seated FAIL`, `interference FAIL`).
+  Measured on this board, a screen seats on 1+2, 4+5, 9+10, 10+11 and
+  13+14, and not on 2+3, 3+4 or 5+6.
+- So the screen moved to 10 + 11, 20 mm left of centre, with the lens
+  re-centred over it, the keys on 2 + 3 under its two ends, the alert
+  light on 14 (top right), and the USB-C on 8 at the right end, its pocket
+  and liner mirrored to the right side. The sensor stays on 13 and the hut
+  where it was.
+- `./check`: CHECK PASS, 0 electrical errors (2 before). The 0.70 mm wall
+  warning of the old layout is gone. Every opening's ray count is the
+  same, the sensor's ribbon keeps the same gaps (1.31 mm to the hut), the
+  print is the same (3 plates, about 201 g, 14.4 h).
+
+**Bedside lamp.** The globe light was cabled from port 8, the USB-C on 2.
+
+- The board stands upright in a round column, so port 8 is at its top or
+  its bottom edge. It is now turned so port 8 is at the bottom: the USB-C
+  module is cabled from 8 down into the foot, lying flat, its mouth in a
+  pocket in the foot's right side, held by pads under it and ribs over it.
+  Port 7 is now at the top, so the globe light still rises straight up the
+  neck. The two window lights are on 2 and 10, behind the window as before.
+  The seam between base and shell moved down to 4 mm, under the USB-C
+  pocket.
+- The touch button in the foot had been on 7, the only bottom port whose
+  ribbon goes straight down. On the turned board that is port 8, so the
+  button is cabled from port 6, a side port, and a side port's ribbon
+  leaves the board's edge sideways. With the column at its old 35 mm
+  radius there were 3 mm for it to turn in, and it went out through the
+  column wall. The column is now 40 mm in radius and the foot 65 (the
+  foot stays over 1.6 times the column); the key, the screws and the ring
+  foot moved out with it, and the screws turned to 30 / 150 / 300 degrees,
+  clear of the button's ribbon.
+- `./check`: CHECK PASS, 0 electrical errors (2 before), the same openings
+  (every light and the USB-C mouth 100 %). Every ribbon was also tested
+  point by point against every part (see Later: `./check`'s own overlap
+  test missed the ribbon through the wall): all clear, the least gap
+  0.30 mm (as the old button ribbon's). The price is size: 130 x 130 x 277
+  mm instead of 120 x 120 x 277, about 322 g and 20.1 h on 3 plates
+  instead of 293 g and 18.3 h on 2.

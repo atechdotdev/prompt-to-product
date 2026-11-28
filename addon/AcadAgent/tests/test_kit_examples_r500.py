@@ -162,7 +162,7 @@ class R500Builds(unittest.TestCase):
         self._fails("bedside_lamp.py", (
             "\n_s = doc.getObject('Shell')\n"
             "_s.Shape = _s.Shape.cut(Part.makeBox(tl.XLength + 6, tl.YLength + 6, 30, "
-            "V(tl.XMin - 3, tl.YMin - 3, Z_NECK - 1)))\n"), "holder", "light_8")
+            "V(tl.XMin - 3, tl.YMin - 3, Z_NECK - 1)))\n"), "holder", "light_7")
 
     def test_car_hardtop_without_its_pegs_fails(self):
         # SABOTAGE: the four pegs under the hardtop's lip cut off - the lip

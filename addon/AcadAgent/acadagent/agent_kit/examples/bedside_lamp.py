@@ -7,18 +7,22 @@ ARCHETYPE: lamp
 
 How it is built (R270):
   * STAGE A - hardware, shell, every working-face opening, fasteners: the
-    board UPRIGHT in the column (portrait, modules facing the front -Y);
-    the top light CABLED from port 8 straight up the neck into the globe
-    (a straight rise: the cleanest ribbon); the touch button CABLED from
-    port 7 down into the foot, facing up under a key cap in the foot's top
-    (a seated module would face the front wall, 45 mm away); two lights
-    seated behind a frosted window in the column; USB-C seated on port 2
-    behind a pocket in the right side. The body is ONE closed (radius,
-    height) section of lines and tangent arcs (foot, cove, column,
-    shoulder, neck) revolved - hollow, fair, no boolean - split low in the
-    foot into the fixed Base (it carries a plate behind the board, posts
-    under it) and the Shell; three M2.5 screws from below into bosses with
-    heat-set insert pockets.
+    board UPRIGHT in the column (portrait, modules facing the front -Y),
+    turned so port 8 (the USB-C port) is at the BOTTOM and port 7 at the
+    top; the top light CABLED from port 7 straight up the neck into the
+    globe (a straight rise: the cleanest ribbon); the USB-C module CABLED
+    from port 8 down into the foot, lying flat, its mouth behind a pocket
+    in the foot's right side (port 8 takes the USB-C module only, and the
+    USB-C module no other port); the touch button CABLED from port 6 down
+    into the foot, facing up under a key cap in the foot's top (a seated
+    module would face the front wall, 45 mm away); two lights seated on
+    ports 2 and 10 behind a frosted window in the column; port 12 (the
+    reset port) is left empty. The body is ONE closed (radius, height)
+    section of lines and tangent arcs (foot, cove, column, shoulder, neck)
+    revolved - hollow, fair, no boolean - split just above the floor into
+    the fixed Base (it carries a plate behind the board, posts under it,
+    pads under the cabled modules) and the Shell; three M2.5 screws from
+    below into bosses with heat-set insert pockets.
   * STAGE B - details: the parting-line reveal and column bands (in the
     section), a brass gallery ring, vents, lettering, a rubber ring foot.
 DETAILS (visible, 27): 1 flared foot; 2 rolled foot edges; 3 cove into the
@@ -26,7 +30,7 @@ column; 4 column; 5 rolled shoulder; 6 neck cove; 7 frosted globe; 8 globe
 collar; 9 brass gallery ring; 10 frosted light window; 11 parting-line
 reveal on the foot; 12-13 two bands round the column; 14 touch key cap in
 the foot; 15 raised ring round it; 16 plunger to the button; 17 USB-C
-pocket with liner; 18 back vent slots; 19 "ATECH" on the foot; 20 rib onto
+pocket with liner in the foot; 18 back vent slots; 19 "ATECH" on the foot; 20 rib onto
 the board's spine; 21 a plate with standoffs behind the board; 22 posts
 under the board; 23 three countersunk screws from below; 24 heat-set
 insert bosses; 25 lip keying shell to base; 26 rubber ring foot in a
@@ -47,7 +51,7 @@ T0 = time.time()
 INTENT = {"board": "upright", "fitted_after": [
     "Shell", "Globe", "Light_Window", "Gallery", "Badge", "Finial", "Button_Cap", "Ring_Foot",
     "Screw_1", "Screw_2", "Screw_3"],
-    "covers": {"Button_Cap": "button_7"}}
+    "covers": {"Button_Cap": "button_6"}}
 REVIEW_CLOSEUPS = ["Globe", "Button_Cap", "Light_Window"]
 
 
@@ -62,27 +66,32 @@ def tick(what, t=[time.time()]):
 WALL = 2.0
 FOOT = 1.5                     # the rubber ring foot under the base
 Z0 = 20.0                      # board bottom (the button and its ribbon fit under it)
-R_FOOT, H_FOOT = 60.0, 19.0    # foot radius and top
+R_FOOT, H_FOOT = 65.0, 19.0    # foot radius and top (>= 1.6 x the column)
 RF_BOT, RF_EDGE = 2.5, 4.0     # foot bottom / top edge rolls
 COVE = 8.0                     # concave cove from the foot into the column
-R_COL = 35.0                   # column radius (board corners need >= 33 inside)
+R_COL = 40.0                   # column radius: board corners need >= 33 inside, and the
+                               # port 6 ribbon leaves the board's left edge sideways (8 mm to turn)
 Z_SH, R_SH = 150.0, 10.0       # shoulder height, shoulder roll
 R_NECK, Z_NECK = 13.0, 172.0   # neck radius and its top (the ribbon rises inside)
 GAL = (160.0, 162.0, 17.5)     # brass gallery ring: z0, z1, outer radius
 ZG, RG, WG = 215.0, 52.0, 1.8  # globe centre, radius, wall
-SPLIT = 8.0                    # base / shell seam in the foot's side
-REVEAL_Z = SPLIT + 2.0         # parting-line reveal groove just above it
+SPLIT = 4.0                    # base / shell seam, where the foot's bottom roll ends
+REVEAL_Z = SPLIT + 2.0         # parting-line reveal groove just above it (under the USB-C pocket)
 BANDS = (40.0, 136.0)          # decorative grooves round the column
 WINDOW = (92.0, 128.0)         # frosted light window, z range (lights at 100..120)
 TOP_LIGHT_Z = 185.0            # the cabled light's centre (inside the globe)
-BUTTON_R = 46.0                # touch key distance from the axis, at the front
+BUTTON_R = 51.0                # touch key distance from the axis, at the front
+USB_R = 50.0                   # the USB-C module's centre from the axis, in the foot's right side
+SCREW_R = 52.0                 # the three screws' circle
 SCREW = "M2.5"
 COLOURS = {"Base": "graphite", "Shell": "cream", "Globe": "frosted", "Light_Window": "frosted",
            "Gallery": "brass", "Button_Cap": "brass", "Ring_Foot": "rubber", "Screw": "chrome"}
 
 
 # === STAGE A: hardware, shell, every working-face opening, fasteners ===
-UPRIGHT_FRONT = Rotation(Vector(0, 0, 1), 180)
+# upright, modules to the front (-Y), port 8 at the BOTTOM edge: the
+# USB-C port's ribbon drops straight into the foot, port 7 rises to the neck
+UPRIGHT_FRONT = Rotation(Vector(1, 0, 0), 180)
 board = ap.board_object(doc)
 
 
@@ -96,13 +105,19 @@ def place_board(rot, x0=0.0, y0=None, z0=0.0):
 place_board(UPRIGHT_FRONT, 0, None, Z0)          # x 0..60, z 20..140, modules face -Y
 BB = ap.bbox(board)
 AX, AY = 30.0, -4.0                             # the lamp's axis: the stack's middle
-usb = ap.seat(doc, "usbc", 2)                    # right side, mouth +X
-glow_r = ap.seat(doc, "light", 5)                # behind the window
-glow_l = ap.seat(doc, "light", 13)
-top_light, top_rib = ap.cable(doc, "light", 8, ap.module_placement(
+glow_l = ap.seat(doc, "light", 2)                # behind the window
+glow_r = ap.seat(doc, "light", 10)
+top_light, top_rib = ap.cable(doc, "light", 7, ap.module_placement(
     "light", (AX, -4.8, TOP_LIGHT_Z), face="-Y", cable="-Z"))      # straight up the neck
-btn, btn_rib = ap.cable(doc, "button", 7, ap.module_placement(
-    "button", (AX, AY - BUTTON_R, 9.5), face="+Z", cable="+Y"))    # in the foot, facing up
+# USB-C: port 8 only. CABLED down into the foot, lying flat (face +Z), its
+# pins to the axis and its mouth +X; the ribbon runs in front of the posts,
+# under the board, clear of the floor
+usb, usb_rib = ap.cable(doc, "usbc", 8, ap.module_placement(
+    "usbc", (AX + USB_R, AY - 6.0, 10.0), face="+Z", cable="-X"),
+    via=[(AX + 4.0, -11.0, 15.0), (AX + 18.0, -12.0, 10.0), (AX + 29.0, -10.0, 8.0)], smooth=True)
+btn, btn_rib = ap.cable(doc, "button", 6, ap.module_placement(
+    "button", (AX, AY - BUTTON_R, 9.5), face="+Z", cable="+Y"),    # in the foot, facing up
+    via=[(-3.5, -4.0, 23.0), (AX - 14.0, -28.0, 12.0)], smooth=True)   # off the board's left edge, down, forward
 tick("hardware")
 
 
@@ -160,7 +175,7 @@ base, shell = cad.split(body, "Z", at=SPLIT, lip=1.2)
 tick("split")
 
 # the fixed base holds the board: a plate behind it (standoffs 0.1 mm off
-# its back) and two posts under its bottom edge, clear of port 7's ribbon
+# its back) and two posts under its bottom edge, clear of port 8's ribbon
 PLATE_Y = BB.YMax + 0.1
 plate = box(8, 52, PLATE_Y + 1.0, PLATE_Y + 6.0, FOOT + 1.5, BB.ZMax - 4)
 pads = [box(x, x + 6, PLATE_Y, PLATE_Y + 1.5, z, z + 8) for x in (9, 45) for z in (40, 80, 120)]
@@ -173,19 +188,26 @@ base = cad.fuse_one(base, plate, *pads, *posts)
 bk = ap.bbox(btn)
 base = cad.fuse_one(base, *[box(x, x + 4, bk.YMin + 4, bk.YMax - 4, FOOT + WALL - 0.5, bk.ZMin - 0.2)
                             for x in (bk.XMin + 3, bk.XMax - 7)])
+# the USB-C module: two pads on the floor 0.2 mm under it and two ribs down
+# from the foot's top 0.2 mm over it (its pins and ribbon, -X, stay clear)
+ub = ap.bbox(usb)
+base = cad.fuse_one(base, *[box(ub.XMin + 7, ub.XMax - 2, y, y + 4, FOOT + WALL - 0.5, ub.ZMin - 0.2)
+                            for y in (ub.YMin + 2, ub.YMax - 6)])
+usb_ribs = [box(ub.XMin + 7, ub.XMax - 2, y, y + 2, ub.ZMax + 0.2, H_FOOT - WALL + 0.5)
+            for y in (ub.YMin + 2, ub.YMax - 4)]
 tl = ap.bbox(top_light)
 light_ribs = [box(x0, x1, tl.YMin + 2, tl.YMax - 2, Z_NECK - 3.0, tl.ZMax - 4)
               for x0, x1 in ((tl.XMin - 1.7, tl.XMin - 0.2), (tl.XMax + 0.2, tl.XMax + 1.7))]
 # board retention rib from the front wall onto the spine (0.2 mm off it)
 SPINE_Y = BB.YMin                                 # the spine's face (-4.5)
 shell = cad.fuse_one(shell, box(AX - 1, AX + 1, AY - R_COL + 1.0, SPINE_Y - 0.2, 44, 66))   # under the badge
-shell = cad.fuse_one(shell, *light_ribs)
+shell = cad.fuse_one(shell, *light_ribs, *usb_ribs)
 # three M2.5 screws up through the floor into bosses hanging from the foot
 # top, each with a heat-set insert pocket (1.4 d + 0.1) in a sleeve
 INSERT_D = {"M2": 3.2, "M2.5": 3.6, "M3": 4.3}[SCREW]
 screws = []
-for ang in (90, 210, 330):
-    x, y = AX + 47 * math.cos(math.radians(ang)), AY + 47 * math.sin(math.radians(ang))
+for ang in (30, 150, 300):        # clear of the key (270), the USB-C (0) and port 6's ribbon
+    x, y = AX + SCREW_R * math.cos(math.radians(ang)), AY + SCREW_R * math.sin(math.radians(ang))
     shell = cad.screw_boss(shell, (x, y, FOOT + 2.1), axis="+Z", size=SCREW, ribs=0)
     shell = cad.fuse_one(shell, cyl(INSERT_D / 2 + 1.2, (x, y, FOOT + 2.1), 10.0))
     shell = cad.cut(shell, cyl(INSERT_D / 2, (x, y, FOOT + 2.0), 9.0))
@@ -221,9 +243,9 @@ base_z = H_FOOT - WALL - 0.9
 cap = cad.button_cap(14, (H_FOOT + 1.6) - base_z, dome=0.8, flange=1.5, at=(bx, by, base_z), axis="+Z")
 shell = cad.opening_for(shell, cap, clearance=0.25, chamfer=0.4, axis="+Z")
 cap = cad.fuse_one(cap, cyl(3.0, (bx, by, bb_.ZMax + 0.16), base_z - (bb_.ZMax + 0.16) + 0.5))
-# USB-C on the right: a pocket brings the wall to 0.25 mm off the mouth
-ub = ap.bbox(usb)
-uy, uz = -5.9, (ub.ZMin + ub.ZMax) / 2
+# USB-C in the foot's right side: a pocket brings the wall to 0.25 mm off
+# the mouth (the mouth's centre, measured: 0.78 mm above the module's middle)
+uy, uz = (ub.YMin + ub.YMax) / 2, (ub.ZMin + ub.ZMax) / 2 + 0.78
 
 
 def xprism(y0, y1, z0, z1, x0, x1, r):
@@ -231,8 +253,8 @@ def xprism(y0, y1, z0, z1, x0, x1, r):
     return Part.Face(w).extrude(V(x1 - x0, 0, 0))
 
 
-pocket = xprism(uy - 6.0, uy + 6.0, uz - 5.0, uz + 5.0, ub.XMax + 1.3, AX + R_COL + 5, 3)
-liner = cad.cut(xprism(uy - 8.0, uy + 8.0, uz - 7.0, uz + 7.0, ub.XMax + 0.25, AX + R_COL - 1.0, 4), pocket)
+pocket = xprism(uy - 6.5, uy + 6.5, uz - 4.0, uz + 4.0, ub.XMax + 1.3, AX + R_FOOT + 5, 3)
+liner = cad.cut(xprism(uy - 8.0, uy + 8.0, uz - 5.0, uz + 5.0, ub.XMax + 0.25, AX + R_FOOT - 1.0, 4), pocket)
 shell = cad.fuse_one(cad.cut(shell, pocket), liner)
 shell = cad.socket_opening(shell, usb, margin=1.5)
 # the globe: one revolved section (collar + sphere), resting on the gallery
@@ -270,8 +292,8 @@ finial = cad.fuse_one(Part.makeSphere(5.0, V(AX, AY, ZG + RG + 4.5)),
                       cyl(4.0, (AX, AY, ZG + RG - 0.6), 2.5),
                       cyl(2.05, (AX, AY, ZG + RG - WG - 1.5), WG + 2.0))
 # a rubber ring foot in a 1 mm recess under the base
-base = cad.cut(base, annulus(51.0, 55.5, FOOT - 1, FOOT + 1.0))
-ring_foot = annulus(51.15, 55.35, 0.0, FOOT + 1.0)
+base = cad.cut(base, annulus(R_FOOT - 9.0, R_FOOT - 4.5, FOOT - 1, FOOT + 1.0))
+ring_foot = annulus(R_FOOT - 8.85, R_FOOT - 4.65, 0.0, FOOT + 1.0)
 tick("stage B")
 
 
