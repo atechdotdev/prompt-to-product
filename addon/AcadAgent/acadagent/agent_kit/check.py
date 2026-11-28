@@ -1201,6 +1201,19 @@ def main():
             res["warnings"].append("%s: shape is INVALID" % o.Label)
             if not f.get("imported"):
                 problems.append("%s: shape is INVALID" % o.Label)
+        elif (f.get("solids") or 0) and (f.get("volume_mm3") or 0) < 0 \
+                and not f.get("imported"):
+            # R1300: isValid() passes a solid that runs through itself; its
+            # volume does not (a ribbon lofted through itself: -272 mm3)
+            problems.append(
+                "%s: shape is INSIDE OUT (volume %s mm3): its faces cross or "
+                "face inward, so its booleans, walls and overlaps cannot be "
+                "measured - %s" % (
+                    o.Label, f["volume_mm3"],
+                    "make it again with ap.cable (an older cable was lofted "
+                    "through itself)" if getattr(o, "AtechCableModule", None) else
+                    "a loft or sweep through itself, or a face list in the "
+                    "wrong order: build it so its volume is positive"))
         if f.get("solids") == 0:
             res["warnings"].append("%s: no solid (a surface or wire only)" % o.Label)
             if not f.get("imported"):

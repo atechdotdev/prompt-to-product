@@ -2421,8 +2421,12 @@ try:
     out["valid"] = all(c.Shape.isValid() for c in cs)
     res = ap.check(doc)[m.Name]
     out["verdicts"] = {k: v["verdict"] for k, v in res.items()}
+    # R1300: over the top, side by side - via (90, 20, 60) turned both
+    # ribbons back down about 1 mm round, and they ran through themselves
+    # (now refused; their boolean "apart" meant nothing); one via for both
+    # lays them over each other
     spk, ribs = ap.cable(doc, "speaker", (9, 10), Placement(Vector(100, 0, 60), App.Rotation()),
-                         via=[(90, 20, 60)])
+                         via={9: [(90, 12, 100)], 10: [(90, 28, 100)]})
     out["speaker_cables"] = sorted(c.AtechCablePort for c in ribs)
     common = ribs[0].Shape.common(ribs[1].Shape).Volume
     out["speaker_ribbons_apart"] = common < 1e-6

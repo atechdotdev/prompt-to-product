@@ -115,9 +115,13 @@ top_light, top_rib = ap.cable(doc, "light", 7, ap.module_placement(
 usb, usb_rib = ap.cable(doc, "usbc", 8, ap.module_placement(
     "usbc", (AX + USB_R, AY - 6.0, 10.0), face="+Z", cable="-X"),
     via=[(AX + 4.0, -11.0, 15.0), (AX + 18.0, -12.0, 10.0), (AX + 29.0, -10.0, 8.0)], smooth=True)
+# The key's ribbon leaves port 6 sideways, its width UP: a ribbon bends
+# over its flat side, never across its width (R1300), so it turns forward
+# first, runs level while it twists flat, and only then drops to the key
 btn, btn_rib = ap.cable(doc, "button", 6, ap.module_placement(
     "button", (AX, AY - BUTTON_R, 9.5), face="+Z", cable="+Y"),    # in the foot, facing up
-    via=[(-3.5, -4.0, 23.0), (AX - 14.0, -28.0, 12.0)], smooth=True)   # off the board's left edge, down, forward
+    via=[(-4.0, -7.5, 29.5), (5.0, -18.5, 28.5), (17.0, -28.0, 26.0),
+         (27.0, -34.0, 17.0), (AX, -36.5, 9.0)], smooth=True)
 tick("hardware")
 
 

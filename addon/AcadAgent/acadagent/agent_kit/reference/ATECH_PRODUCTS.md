@@ -756,7 +756,8 @@ usb, _ = ap.cable(doc, "usbc", 8, ap.module_placement(
     via=[(34, -11, 15), (48, -12, 10), (59, -10, 8)], smooth=True)
 btn, _ = ap.cable(doc, "button", 6, ap.module_placement(
     "button", (30, -55, 9.5), face="+Z", cable="+Y"),             # down into the foot, facing up
-    via=[(-3.5, -4, 23), (16, -28, 12)], smooth=True)             # port 6's ribbon leaves the board's edge sideways
+    via=[(-4, -7.5, 29.5), (5, -18.5, 28.5), (17, -28, 26),       # port 6's ribbon leaves the board's edge sideways:
+         (27, -34, 17), (30, -36.5, 9)], smooth=True)             # forward, level while it twists flat, then down
 ```
 - **Product:** 130 x 130 x 277: a foot r 65 x 19, a cove into a column r
   40 (the board stands in it, 8 mm beside it for port 6's ribbon to turn

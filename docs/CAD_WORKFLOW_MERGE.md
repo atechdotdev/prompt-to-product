@@ -167,14 +167,8 @@ R1250, R1230-R1240, R1270, the rest.
   28 Nov 2026: see "The two default projects, rebuilt" below.
 - The examples' port placements (52 of 64, from the port rules commit).
   The user asked to fix only the two default projects for now.
-- **`./check` can miss a ribbon that runs through a wall.** Its overlap
-  test is a boolean common, and on a ribbon against a revolved shell that
-  common came back empty while points of the ribbon were inside the wall
-  (the lamp, while it was being rebuilt: port 6's ribbon went out through
-  the column, CHECK PASS). Separately, `ap.cable(..., smooth=True)` once
-  made a ribbon with a negative volume (inside out), which a boolean test
-  also cannot judge. A point-sampled test of each ribbon against each part
-  would catch both.
+- ~~`./check` can miss a ribbon that runs through a wall~~ Done on
+  28 Nov 2026: see "Cables that ran through walls" below.
 - Turn the R1250 / R1260 lines into gates. Measured so far: the first-layer
   warning fires on 5 of the 873 parts that were judged in the examples, all
   parts with no flat side (a ball, two grilles, a caster ball, a glow ring).
@@ -475,8 +469,100 @@ comparison below is against those builds.
   clear of the button's ribbon.
 - `./check`: CHECK PASS, 0 electrical errors (2 before), the same openings
   (every light and the USB-C mouth 100 %). Every ribbon was also tested
-  point by point against every part (see Later: `./check`'s own overlap
-  test missed the ribbon through the wall): all clear, the least gap
-  0.30 mm (as the old button ribbon's). The price is size: 130 x 130 x 277
-  mm instead of 120 x 120 x 277, about 322 g and 20.1 h on 3 plates
-  instead of 293 g and 18.3 h on 2.
+  point by point against every part (see "Cables that ran through walls"
+  below: `./check`'s own overlap test missed the ribbon through the wall):
+  all clear, the least gap 0.30 mm (as the old button ribbon's). The price
+  is size: 130 x 130 x 277 mm instead of 120 x 120 x 277, about 322 g and
+  20.1 h on 3 plates instead of 293 g and 18.3 h on 2.
+
+## Cables that ran through walls (28 Nov 2026)
+
+`./check` passed the lamp with its old 35 mm column while 667 of the 895
+surface points of the button's ribbon were inside the Shell. Why:
+
+- **The ribbon ran through itself.** Port 6's ribbon leaves the board's
+  edge with its 14 mm width upright and turned down, a bend across its
+  width. A bend tighter than half the width makes the inner edge run
+  backwards. The loft stays "valid", but its volume is wrong (-272 mm3 for
+  a +636 mm3 ribbon there), and a boolean with it returns nothing, so the
+  overlap test found no overlap.
+- **It was common.** The 34 examples with cables have 84 ribbons, and
+  OCCT's full check found 34 of them running through themselves: in 26
+  the inner edge ran backwards, and 4 had a negative volume. 7 ribbons had
+  surface points inside another part or another ribbon, and `./check`'s
+  verdict named none of them as an overlap.
+
+What changed (`projects/atech_ports.py` `_ribbon`, `atech_geom.overlaps`,
+`check.py`):
+
+- **The ribbon twists so it bends over its flat side,** as a real one
+  does: wherever the curve bends, the width is turned until
+  |K . w| W/2 + |K| T/2 <= 1/2, and between bends the twist runs evenly as
+  before. Near its connectors a lead stays untwisted; only the part of it
+  clear of the connector may twist. The first version let the lamp's
+  plug-end lead twist, and it swept into the board, because the plug's
+  back is 2.8 mm inside the board's outline. Sections are kept every
+  2.5 mm, or wherever the ribbon has turned 8 degrees.
+- **A ribbon that still runs through itself is caught by its volume.**
+  OCCT's full check costs 0.3-5 s a ribbon, too slow for every one (it
+  made drawing_bot run out of time). The loft's volume against length x
+  width x thickness costs nothing. On the 111 ribbons of the examples:
+  every one OCCT found clean was within 0.6 %, and 34 of the 43 it
+  rejected were 4-182 % short. The other 9 are creases under 1 %, where
+  the volume, and so the booleans, are right. A ribbon more than 2 % off,
+  or one bending tighter than its own 0.6 mm thickness, is refused, with
+  where it is and what to move: "the cable bends 0.3 mm round near
+  (...)", or "twists 180 degrees in 1.0 mm" (dice_tower's sensor ribbon,
+  which had no bend at all). A repair was tried first, the union of the
+  ribbon's pieces (what a creased ribbon is), and dropped: it took 152 s
+  on one handheld_console ribbon and crashed FreeCAD on sesame_atech's.
+- **`./check` no longer trusts a boolean with an inside-out part.** A
+  part with a negative volume is a PROBLEM ("INSIDE OUT"), and its
+  overlaps are judged on sampled points of it inside the other part.
+- **The bedside lamp's button ribbon** turns forward first, runs level
+  while it twists flat, then drops to the key. On the old route the new
+  ribbon was first found through the Base, the Shell and the board, and
+  with the volume test that route is refused (its loft is 4 % short). The
+  same lamp with a 35 mm column now fails on that ribbon (Shell, 87.6
+  mm3).
+- **Time:** the ribbons have more sections (the lamp's button ribbon 284
+  faces, 122 before). The lamp's hardware stage takes 0.7 s (0.5 before),
+  its overlap test 7.3 s (about 6). On drawing_bot (port rules off, seven
+  ribbons) the overlap test first took 80 s, against 36 before: 46 s were
+  OCCT's inside test, 10 ms a point on a twisted ribbon, while confirming
+  a sampled overlap with a module's mesh. Those points are now judged by
+  parity against the ribbon's tessellation, and only those within twice
+  its deflection by OCCT. That gives 33.5 s, and the old ribbons now
+  take 27.3 s.
+- **What it finds in the other examples:** a route turning hard right
+  beside a module now shows the ribbon twisting into it, where the old
+  sections cut across the corner (drawing_bot: the GO key's ribbon in
+  its own button, from a bend 1 mm round at the module).
+
+**The examples, before and after.** Port rules off, every ribbon in the
+34 examples with cables checked by OCCT and by its surface points
+against every part:
+
+| | old ribbon | new |
+| --- | --- | --- |
+| ribbons built | 84 | 40 |
+| running through themselves | 34 | 1 (plant_pal's key, a crease 0.5 % short) |
+| inside a part or another ribbon | 7, none reported | 0 |
+| examples refused with where to move | - | 15 |
+
+14 of the 15 refused examples had ribbons running through themselves
+before. The 15th, hype_button, was clean only because its 2.5 mm sections
+cut across a bend 0.6 mm round. drawing_bot ran out of time in the
+survey, whose own per-ribbon OCCT check is slow; built normally, its
+model takes 17 s. None of these examples was reworked: they also break
+the port rules (see Later).
+
+Tests: `test_cables_r1300`:
+- the lamp's old port-6 route is built clean, of the ribbon's volume, or
+  refused (it is now refused: its loft was 4 % short);
+- a hairpin and a half turn in 1 mm are refused;
+- an inside-out part's overlap is found, and `./check` names the part;
+- SABOTAGE: the lamp with a 35 mm column fails on its ribbon.
+
+`test_agent_kit` R222's speaker cable had a route whose ribbons ran
+through themselves; its two ribbons now go over the top, side by side.

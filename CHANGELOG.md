@@ -7,6 +7,32 @@ release may change behaviour.
 
 ## [Unreleased]
 
+### Ribbon cables no longer run through parts unseen (R1300)
+
+A ribbon bent across its width (in the direction of its 14 mm side)
+tighter than half that width folded inside out: its inner edge ran
+backwards. The solid still counted as valid, but its volume was wrong
+or negative, and the overlap test, a boolean, found nothing. `./check`
+therefore passed cables that ran through walls. In the lamp with its old
+35 mm column, 667 of 895 points of the button's ribbon were inside the
+shell.
+
+- **The ribbon itself:** its twist is now worked out along the curve,
+  so that wherever the curve bends hard, the ribbon bends over its flat
+  side. A ribbon whose volume shows it still runs through itself is
+  refused, with where the problem is and what to move: a bend too
+  tight, or a twist too fast (half a turn in 1 mm).
+- **Faster overlap checks against module meshes:** most points are
+  judged against the ribbon's tessellation, and only those near its
+  surface by OCCT.
+- **`./check`:** a part with a negative volume is reported as INSIDE OUT.
+  Its overlaps are judged on sampled points, not on a boolean that
+  cannot see them.
+- **Bedside lamp:** the button's ribbon from port 6 now turns forward
+  first and runs level while it twists flat, and only then drops to the
+  key. It passes `./check`, and the same lamp with a 35 mm column now
+  fails on that ribbon.
+
 ### The two projects the app ships with build again (port 8 and 12)
 
 "Bedside lamp" had its USB-C module on port 2 and its globe light on

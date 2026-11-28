@@ -968,11 +968,22 @@ def confirm_mesh_overlap(solid, mesh, tol=0.01):
     if not len(MF):
         return 0.0
     MT = MP[MF]
+    SP, SF = _fresh_tess(solid)
+    ST = SP[SF] if len(SF) else None
+    near = 2.0 * (_deflection(solid) + tol)
 
     def in_solid(Q):
-        return np.array([bool(solid.isInside(App.Vector(*q), tol, False)) for q in Q])
+        # R1300: the solid's tessellation lies within its deflection of the
+        # true surface, so parity against it is exact for a point further
+        # than that; OCCT's classification (MEASURED: 10 ms a point on a
+        # twisted ribbon - 45 s of drawing_bot's ./check) only near it
+        if ST is None:
+            return np.array([bool(solid.isInside(App.Vector(*q), tol, False)) for q in Q])
+        out = _parity_inside(Q, ST)
+        for i in np.nonzero(np.isfinite(_pt_tri_dist(Q, ST, limit=near)))[0]:
+            out[i] = bool(solid.isInside(App.Vector(*Q[i]), tol, False))
+        return out
     v1 = _side_volume(MP, MF, lo, hi, in_solid, lambda Q: _exact_depths(solid, Q))
-    SP, SF = _fresh_tess(solid)
     v2 = 0.0
     if len(SF):
         def in_mesh(Q):
@@ -1028,6 +1039,14 @@ def overlaps(items, intended=(), min_volume=MIN_OVERLAP_MM3,
         return boxes[k]
     hits = []
     fps = {}
+    ios = {}
+
+    def _io(it):
+        # once a body: a volume costs 16 ms on a ribbon (MEASURED, 280 pairs)
+        k = id(it)
+        if k not in ios:
+            ios[k] = inside_out(it["shape"])
+        return ios[k]
     store = _pair_store()                               # R270: {} without a workspace
 
     def fp(it):
@@ -1068,6 +1087,31 @@ def overlaps(items, intended=(), min_volume=MIN_OVERLAP_MM3,
             try:
                 if a.get("shape") is not None and b.get("shape") is not None:
                     if not a["shape"].Solids or not b["shape"].Solids:
+                        continue
+                    sus = [it for it in (a, b) if _io(it)]
+                    if sus:
+                        # R1300: a boolean with an inside-out solid says
+                        # nothing (MEASURED: common() = 0 mm3 for a ribbon
+                        # with 17 of its points inside the wall it ran
+                        # through) - its own surface points against the
+                        # other decide; the other's points against it would
+                        # be judged by a classifier that is inside out too
+                        hit = None
+                        if len(sus) == 1:
+                            bad, good = (a, b) if sus[0] is a else (b, a)
+                            n_in, n_t, at = suspect_points_inside(bad["shape"], good["shape"])
+                            if n_in:
+                                hit = {"a": a["label"], "b": b["label"],
+                                       "mesh_points_inside": n_in, "mesh_points_tested": n_t,
+                                       "inside_out": bad["label"]}
+                                if at is not None:
+                                    hit["at"] = at
+                        if hit:
+                            hits.append(hit)
+                        if key is not None:
+                            store["data"][key] = hits[-1] if len(hits) > n0 else None
+                            store["dirty"] = True
+                            store["miss"] = store.get("miss", 0) + 1
                         continue
                     if heavy(a["shape"]) or heavy(b["shape"]):
                         n_in, n_t = _shape_points_inside(a["shape"], b["shape"])
@@ -1147,7 +1191,9 @@ def overlaps(items, intended=(), min_volume=MIN_OVERLAP_MM3,
 # stale entry is never read; the file is capped and rewritten whole.
 CHECK_CACHE = ".atech_check_cache.json"
 CHECK_CACHE_MAX = 4000              # entries kept, at most
-CHECK_CACHE_VERSION = 2              # R443: 2 - sampled overlaps confirmed
+CHECK_CACHE_VERSION = 3              # R443: 2 - sampled overlaps confirmed;
+                                    # R1300: 3 - an inside-out solid on points,
+                                    # mesh confirms by parity off the surface
 _CACHE = [None]                     # {"path", "data", "dirty", "hits"} or None
 
 
@@ -1275,6 +1321,35 @@ def _sample_cap(solid):
     return MESH_SAMPLES
 
 
+def inside_out(shape):
+    """R1300: True for a solid whose volume is not positive - its faces
+    turned inward or running through each other (a ribbon lofted through
+    itself measured -272 mm3). Its booleans, volume and inside tests are
+    meaningless: overlaps() judges it on its own surface points, and
+    check.py refuses it."""
+    try:
+        return bool(shape.Solids) and float(shape.Volume) <= 0.0
+    except Exception:                                   # noqa: BLE001
+        return False
+
+
+def suspect_points_inside(bad, good, limit=HEAVY_SAMPLES):
+    """R1300: (inside, tested, first point inside or None): surface samples
+    of the inside-out solid `bad` strictly inside the sound solid `good`
+    (exact OCCT queries; only the samples in good's box)."""
+    import FreeCAD as App
+    P = _samples(bad)
+    bb = tight(good)
+    P = [p for p in P if bb.isInside(App.Vector(*p))]
+    if not P:
+        return 0, 0, None
+    cap = min(limit, _sample_cap(good))
+    P = P[::max(1, -(-len(P) // cap))]
+    ins = points_inside(good, P, 0.01)
+    at = next(([round(float(c), 1) for c in p] for p, i in zip(P, ins) if i), None)
+    return sum(ins), len(P), at
+
+
 def _shape_points_inside(a, b, limit=HEAVY_SAMPLES):
     """(inside, tested): surface samples of each shape strictly inside the
     other, only those in the other's box. For a pair with a heavy shape,
@@ -1302,6 +1377,11 @@ def overlap_text(hit):
             "; around (%s)" % ", ".join("%.1f" % c for c in hit["at"]) if hit.get("at") else "")
     if "volume_mm3" in hit:
         return "%s and %s overlap by %s mm3" % (hit["a"], hit["b"], hit["volume_mm3"])
+    if hit.get("inside_out"):
+        return "%s and %s intersect (%d of %d sampled points of %s inside the other%s)" % (
+            hit["a"], hit["b"], hit["mesh_points_inside"], hit["mesh_points_tested"],
+            hit["inside_out"], "; around (%s)" % ", ".join("%.1f" % c for c in hit["at"])
+            if hit.get("at") else "")
     return "%s and %s intersect (%d of %d sampled mesh points inside%s)" % (
         hit["a"], hit["b"], hit["mesh_points_inside"], hit["mesh_points_tested"],
         "; around (%s)" % ", ".join("%.1f" % c for c in hit["at"])

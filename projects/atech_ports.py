@@ -1838,12 +1838,36 @@ def _socket_shape(feat, g, p, Mseat_rel):
     return housing.cut(holes), lo, hi
 
 
-def _ribbon(points, t0, t1, w0, w1, width=CABLE_W, thick=CABLE_T, smooth=False):
+CABLE_FINE = 0.1        # the ribbon's frame is worked out every 0.1 mm of its curve
+CABLE_TURN = 8.0        # a section turns at most this (deg) from the last one
+CABLE_VOL_TOL = 0.02    # a ribbon's loft this far off length x width x thickness runs through itself
+CABLE_TWIST_ROOM = 1.0  # mm: a lead with less room than this to twist in does not twist
+
+
+def ribbon_selfint(shape):
+    """None when OCCT finds the solid clean, else the first problem it
+    names (a self-intersecting solid: its volume, booleans and inside
+    tests are all wrong - R1300)."""
+    try:
+        shape.check(True)
+        return None
+    except Exception as exc:                            # noqa: BLE001
+        lines = [ln for ln in str(exc).strip().splitlines() if ln.strip()]
+        return (lines[-1] if lines else "invalid")[:120]
+
+
+def _ribbon(points, t0, t1, w0, w1, width=CABLE_W, thick=CABLE_T, smooth=False,
+            free=(None, None)):
     """A flat ribbon from points[0] to points[-1] (world). The first and
-    last legs are STRAIGHT and untwisted - the ribbon leaves each connector
-    the way a real one does, through the opening the housing came in by
-    (MEASURED: a ribbon bending and twisting from the socket face clipped
-    the light's case beside that opening). Between them a smooth curve
+    last legs are STRAIGHT and untwisted where they are near their
+    connector - the ribbon leaves each connector the way a real one does,
+    through the opening the housing came in by (MEASURED: a ribbon bending
+    and twisting from the socket face clipped the light's case beside that
+    opening; R1300 MEASURED: port 6's lead twisting from the plug swept
+    into the board the plug sits on). free = (mm of the first leg, mm of
+    the last leg) at their CURVE end that are clear of the connector and
+    may twist when a bend right there needs the ribbon turned (below);
+    None: half the leg. Between them a smooth curve
     through the inner points, leaving along t0 and arriving along t1, its
     width w0 at the start and w1 at the end: parallel transport, plus a
     twist spread evenly over the curve for whatever turn is left.
@@ -1852,52 +1876,175 @@ def _ribbon(points, t0, t1, w0, w1, width=CABLE_W, thick=CABLE_T, smooth=False):
     chord length. Scaled, a route with waypoints overshoots near its ends
     (MEASURED: a 60 mm ribbon with three waypoints swung 20 mm above the
     socket it came down onto); unscaled, the curve leaves and arrives
-    along t0 / t1 and follows the waypoints."""
+    along t0 / t1 and follows the waypoints.
+
+    R1300 - a ribbon bends over its flat side, never across its width.
+    MEASURED (the bedside lamp, port 6's ribbon turning from out of the
+    board's edge down into the foot, toward its own width): the old loft
+    let the inner edge run backwards, a solid that passed through itself
+    with a NEGATIVE volume (-272 mm3 for a +636 mm3 ribbon), and ./check's
+    boolean then found no overlap with the wall it went through. Now:
+      * where the curve bends tighter than its width allows, the ribbon is
+        twisted (as a real one twists) so the bend goes over its flat
+        side: |K . w| (W / 2) + |K| T / 2 <= 1/2 for curvature K and
+        width direction w - every edge and face inside half the bend
+        radius. Between those bends the twist runs evenly, as before;
+      * a section every CABLE_STEP, and wherever the ribbon has turned
+        more than CABLE_TURN since the last (MEASURED: a 75 degree turn in
+        one 2.5 mm step made the usbc ribbon's faces cross);
+      * a ribbon that runs through itself loses volume: one whose loft is
+        more than CABLE_VOL_TOL off length x width x thickness is not
+        handed on. MEASURED on the 111 ribbons of the examples: every one
+        OCCT's full check (0.3-5 s a ribbon, too slow to run on all) found
+        clean was within 0.6 % (the 8 degree steps cut bends and twists a
+        little short); 34 of the 43 it did not were 4-182 % short, the
+        other 9 creases under 1 % (volume, and so booleans, right).
+        Also caught: a 180 degree twist in 1 mm (dice_tower, 8 % short)
+        with no tight bend at all. Such a ribbon, and one bending tighter
+        than its own thickness, is refused (AtechPortError kind
+        "cable_fold") with where and what to move."""
     import Part
     first, last = np.array(points[0], float), np.array(points[-1], float)
-    points = points[1:-1]
-    pts = [App.Vector(*[float(c) for c in q]) for q in points]
+    inner = points[1:-1]
+    pts = [App.Vector(*[float(c) for c in q]) for q in inner]
     bs = Part.BSplineCurve()
     bs.interpolate(Points=pts, InitialTangent=App.Vector(*t0.tolist()),
                    FinalTangent=App.Vector(*t1.tolist()), Scale=not smooth)
     edge = bs.toShape()
-    n = max(4, int(math.ceil(edge.Length / CABLE_STEP)))
+    L = edge.Length
+    m = max(8, int(math.ceil(L / CABLE_FINE)))
     # the ends by their own parameters: Length * n / n can land past the
     # end and getParameterByLength raises (MEASURED, port 11)
-    us = [edge.FirstParameter] + [edge.getParameterByLength(edge.Length * i / n)
-                                  for i in range(1, n)] + [edge.LastParameter]
-    P = [np.array(tuple(edge.valueAt(q))) for q in us]
-    T = []
-    for q in us:
-        t = np.array(tuple(edge.tangentAt(q)))
-        T.append(t / np.linalg.norm(t))
-    W = [w0 - (w0 @ T[0]) * T[0]]
-    for t in T[1:]:
-        w = W[-1] - (W[-1] @ t) * t
+    us = [edge.FirstParameter] + [edge.getParameterByLength(L * i / m)
+                                  for i in range(1, m)] + [edge.LastParameter]
+    s = np.array([L * i / m for i in range(m + 1)])
+    P = np.array([tuple(edge.valueAt(q)) for q in us])
+    T = np.array([tuple(edge.tangentAt(q)) for q in us])
+    T /= np.linalg.norm(T, axis=1)[:, None]
+    W = np.zeros_like(T)                                # parallel transport
+    W[0] = w0 - (w0 @ T[0]) * T[0]
+    W[0] /= np.linalg.norm(W[0])
+    for i in range(1, m + 1):
+        w = W[i - 1] - (W[i - 1] @ T[i]) * T[i]
         nw = np.linalg.norm(w)
         if nw < 1e-6:
             raise AtechPortError("the cable folds back on itself: give it a "
                                  "waypoint (via=...) round the bend",
                                  kind="cable_fold")
-        W.append(w / nw)
+        W[i] = w / nw
+    N = np.cross(T, W)
     tgt = w1 - (w1 @ T[-1]) * T[-1]
     tgt = tgt / np.linalg.norm(tgt)
     phi = math.atan2(float(np.cross(W[-1], tgt) @ T[-1]), float(W[-1] @ tgt))
+    # the curvature in the transported frame, K = kx W + ky N; with the
+    # width at angle a from W, K . w = kap cos(a - beta)
+    K = np.gradient(T, s, axis=0)
+    kx, ky = np.einsum("ij,ij->i", K, W), np.einsum("ij,ij->i", K, N)
+    kap = np.hypot(kx, ky)
+    beta = np.arctan2(ky, kx)
+    kw = np.maximum(0.0, (0.5 - kap * thick / 2) / (width / 2))   # most |K . w|
+    tight = kap > kw
+    half = np.where(tight, np.arcsin(np.clip(kw / np.maximum(kap, 1e-12), 0, 1)), math.pi)
+    centre = beta + math.pi / 2
+    # how much of each lead may twist; a lead with under CABLE_TWIST_ROOM
+    # cannot, and the curve's end then keeps the lead's width
+    rooms = []
+    for k, (p_con, p_cur) in enumerate(((first, P[0]), (last, P[-1]))):
+        ln = float(np.linalg.norm(p_cur - p_con))
+        rooms.append(ln / 2 if free[k] is None else max(0.0, min(float(free[k]), ln)))
+    pin0, pin1 = (r < CABLE_TWIST_ROOM for r in rooms)
+    a = phi * s / L                                     # the even twist
+    fixed = np.zeros(m + 1, bool)
+    for _ in range(3):
+        fixed[:] = False
+        prev = None
+        for i in range(m + 1):
+            if not tight[i]:
+                prev = None
+                continue
+            ref = a[i] if prev is None else prev
+            c = centre[i] + math.pi * round((ref - centre[i]) / math.pi)
+            a[i] = c + max(-half[i], min(half[i], a[i] - c))
+            prev = a[i]
+            fixed[i] = True
+        if pin0:
+            a[0], fixed[0] = 0.0, True
+        if pin1:
+            a[-1], fixed[-1] = phi, True
+        # between the bends the twist runs evenly; at the curve's ends it
+        # is 0 and phi unless a bend there fixed it (then the lead twists)
+        xs, ys = list(s[fixed]), list(a[fixed])
+        if not fixed[0]:
+            xs, ys = [0.0] + xs, [0.0] + ys
+        if not fixed[-1]:
+            xs, ys = xs + [L], ys + [phi]
+        a[~fixed] = np.interp(s[~fixed], xs, ys)
+    Wt = W * np.cos(a)[:, None] + N * np.sin(a)[:, None]
+    cos_lim = math.cos(math.radians(CABLE_TURN))
+    keep = [0]
+    for i in range(1, m):
+        j = keep[-1]
+        if (s[i + 1] - s[j] > CABLE_STEP or T[i + 1] @ T[j] < cos_lim
+                or Wt[i + 1] @ Wt[j] < cos_lim):
+            keep.append(i)
+    keep.append(m)
+
     def section(c, t, w):
         nrm = np.cross(t, w)
         cs = [c + sw * w * width / 2 + sn * nrm * thick / 2
               for sw, sn in ((1, 1), (-1, 1), (-1, -1), (1, -1))]
         vs = [App.Vector(*q.tolist()) for q in cs]
         return Part.makePolygon(vs + [vs[0]])
+
+    def lead(p_con, p_cur, t, w_con, ang, room):
+        """the sections inside a straight lead, in order from its connector
+        end p_con to its curve end p_cur: the width w_con as it leaves the
+        connector, turned by ang about t over the `room` mm at the curve end
+        only (the part clear of the connector)"""
+        ln = float(np.linalg.norm(p_cur - p_con))
+        k = int(math.ceil(abs(ang) / math.radians(CABLE_TURN)))
+        if k == 0 or ln <= 0 or room < CABLE_TWIST_ROOM:
+            return []
+        f0 = 1.0 - room / ln                            # where the twist starts
+        out = [section(p_con + (p_cur - p_con) * f0, t, w_con)] if 0 < f0 < 1 else []
+        for j in range(1, k):
+            g = j / k
+            w = w_con * math.cos(ang * g) + np.cross(t, w_con) * math.sin(ang * g)
+            out.append(section(p_con + (p_cur - p_con) * (f0 + (1 - f0) * g), t, w))
+        return out
     wires = [section(first, T[0], W[0])]
-    for i, (c, t, w) in enumerate(zip(P, T, W)):
-        a = phi * i / n
-        w = w * math.cos(a) + np.cross(t, w) * math.sin(a)
-        wires.append(section(c, t, w))
+    wires += lead(first, P[0], T[0], W[0], float(a[0]), rooms[0])
+    wires += [section(P[i], T[i], Wt[i]) for i in keep]
+    # the last leg from the socket back to the curve: its width at the
+    # socket is tgt, turned by -(phi - a[-1]) to meet the curve's
+    wires += lead(last, P[-1], T[-1], tgt, float(a[-1] - phi), rooms[1])[::-1]
     wires.append(section(last, T[-1], tgt))
     sh = Part.makeLoft(wires, True, True)
-    length = edge.Length + float(np.linalg.norm(P[0] - first)
-                                 + np.linalg.norm(P[-1] - last))
+    length = L + float(np.linalg.norm(P[0] - first) + np.linalg.norm(P[-1] - last))
+    expect = length * width * thick
+    if (sh.Volume <= 0 or abs(sh.Volume - expect) > CABLE_VOL_TOL * expect
+            or kap.max() > 1.0 / thick):
+        # it runs through itself somewhere (or bends tighter than its own
+        # thickness, where no twist helps and the fold barely shows in the
+        # volume): refused. MEASURED: the union of its pieces (a crease)
+        # took 152 s on one handheld_console ribbon and crashed FreeCAD on
+        # sesame_atech's, so it is not tried
+        i = int(np.argmax(kap))
+        if kap[i] > 1.0 / 3.0:                      # a bend under 3 mm round
+            msg = ("the cable bends %.1f mm round near (%s), tighter than a "
+                   "ribbon can without running through itself: move the "
+                   "waypoint there further out, or add one, so it turns more "
+                   "gently" % (1.0 / kap[i], ", ".join("%.1f" % c for c in P[i])))
+        else:
+            j = int(np.argmax(np.abs(np.gradient(a, s))))
+            msg = ("the cable runs through itself near (%s), where it twists "
+                   "fastest (it twists %.0f degrees in %.1f mm, and bends at "
+                   "most %.1f mm round): give it more length there (the module "
+                   "further from the port, or a waypoint), or turn the module "
+                   "so the ribbon twists less"
+                   % (", ".join("%.1f" % c for c in P[j]), abs(math.degrees(phi)), L,
+                      1.0 / max(kap[i], 1e-9)))
+        raise AtechPortError(msg, kind="cable_fold")
     return sh, length, math.degrees(phi)
 
 
@@ -2097,8 +2244,12 @@ def _make_cable(doc, mod, feat, g, p, v, Ms, Ms_rel, Mm, b, smooth=False):
     lead1 = max(CABLE_LEAD, past + 2.0)
     pts = [S0, S0 + out0 * CABLE_LEAD] + [np.array(q, float) for q in v] + \
           [E0 + out1 * lead1, E0]
+    # R1300: the last leg may twist only where it is past the module's
+    # outline (1 mm clear); the first leg over its outer half (the plug's
+    # back is up to 2.8 mm inside the board's outline, MEASURED port 6)
     rib, length, twist = _ribbon(pts, out0, -out1, Ms[:3, :3] @ r,
-                                 Mm[:3, :3] @ r, smooth=smooth)
+                                 Mm[:3, :3] @ r, smooth=smooth,
+                                 free=(CABLE_LEAD / 2, max(0.0, lead1 - max(past, 0.0) - 1.0)))
     sh = plug.fuse([rib, sock]).removeSplitter()
     if len(sh.Solids) != 1 or not sh.isValid():
         raise AtechPortError("cable to port %d is not one valid solid "
